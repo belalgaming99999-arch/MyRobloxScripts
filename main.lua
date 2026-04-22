@@ -1,16 +1,15 @@
--- [[ Crystal Hub - Professional Nova Hub Clone ]]
+-- [[ Crystal Hub - Final Adjusted Dimensions ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
 local Player = Players.LocalPlayer
 
--- الألوان الدقيقة من الفيديو (سواد كحلي وأزرق كهربائي غامق)
+-- الألوان المعتمدة (سواد عميق وأزرق نوفا)
 local DeepNovaBlue = Color3.fromRGB(0, 130, 255)
 local TextColor = Color3.fromRGB(0, 150, 255) 
-local DeepDarkBg = Color3.fromRGB(2, 2, 2) -- سواد أعمق كما في الفيديو
+local DeepDarkBg = Color3.fromRGB(2, 2, 2)
 
--- تنظيف النسخ القديمة فوراً لضمان السرعة
 local function Clean()
     local pGui = Player:FindFirstChild("PlayerGui")
     if pGui and pGui:FindFirstChild("Crystal_Final_UI") then pGui.Crystal_Final_UI:Destroy() end
@@ -28,33 +27,33 @@ ScreenGui.Name = "Crystal_Final_UI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = Target
 
--- [[ 1. القائمة العلوية - الارتفاع 0.04 (النسخة الكوبي بيست) ]]
+-- [[ 1. القائمة العلوية - نزلت درجة لـ 0.05 ]]
 local MainBar = Instance.new("Frame")
 MainBar.Size = UDim2.new(0, 240, 0, 32)
-MainBar.Position = UDim2.new(0.5, -120, 0.04, 0) 
-MainBar.BackgroundColor3 = DeepDarkBg -- الخلفية السوداء العميقة
-MainBar.BackgroundTransparency = 0.08 -- تقليل الشفافية لتكون أثقل
+MainBar.Position = UDim2.new(0.5, -120, 0.05, 0) -- تعديل الموقع هنا
+MainBar.BackgroundColor3 = DeepDarkBg
+MainBar.BackgroundTransparency = 0.08
 MainBar.BorderSizePixel = 0
 MainBar.Parent = ScreenGui
 
 Instance.new("UICorner", MainBar).CornerRadius = UDim.new(0, 8)
 local Stroke = Instance.new("UIStroke", MainBar)
-Stroke.Color = DeepNovaBlue -- لون الحواف الأزرق الكهربائي الغامق
+Stroke.Color = DeepNovaBlue
 Stroke.Thickness = 1.3
 
 local InfoLabel = Instance.new("TextLabel")
 InfoLabel.Size = UDim2.new(1, 0, 1, 0)
 InfoLabel.BackgroundTransparency = 1
-InfoLabel.TextColor3 = TextColor -- الخط الأزرق الغامق الواضح من الفيديو
+InfoLabel.TextColor3 = TextColor
 InfoLabel.TextSize = 13
 InfoLabel.Font = Enum.Font.GothamBold
 InfoLabel.Text = "Crystal Hub | Fps -- | Ms --"
 InfoLabel.Parent = MainBar
 
--- [[ 2. الشريط السفلي (الملتحم - بدون حواف - نص رمادي فاتح) ]]
+-- [[ 2. الشريط السفلي - ملتحم مع الموقع الجديد ]]
 local BottomBar = Instance.new("Frame")
 BottomBar.Size = UDim2.new(0, 240, 0, 10)
-BottomBar.Position = UDim2.new(0.5, -120, 0.04, 34)
+BottomBar.Position = UDim2.new(0.5, -120, 0.05, 34)
 BottomBar.BackgroundTransparency = 1
 BottomBar.Parent = ScreenGui
 
@@ -70,7 +69,7 @@ local function CreatePart(pos, color, txt)
     t.Size = UDim2.new(1, 0, 1, 0)
     t.BackgroundTransparency = 1
     t.Text = txt
-    t.TextColor3 = Color3.fromRGB(200, 200, 200) -- لون نص رمادي فاتح जैसे الفيديو
+    t.TextColor3 = Color3.fromRGB(200, 200, 200)
     t.TextSize = 9
     t.Font = Enum.Font.GothamBold
     t.Parent = f
@@ -79,7 +78,7 @@ end
 CreatePart(UDim2.new(0,0,0,0), Color3.fromRGB(30, 30, 30), "0%")
 CreatePart(UDim2.new(0.5,0,0,0), Color3.fromRGB(10, 10, 10), "7.4")
 
--- [[ 3. نظام السرعة فوق الرأس (تحديث فوري - مرفوع لـ 4.0 Studs) ]]
+-- [[ 3. نظام السرعة - مرفوع لـ 4.0 ومصغر لـ 16 ]]
 local function SetupTag(p)
     local function addTag(char)
         local head = char:WaitForChild("Head", 10)
@@ -89,18 +88,17 @@ local function SetupTag(p)
         local bill = Instance.new("BillboardGui", head)
         bill.Name = "CrystalTag"
         bill.Size = UDim2.new(0, 200, 0, 50)
-        bill.StudsOffset = Vector3.new(0, 4.0, 0) -- رفعناه قليلاً عن الرأس
+        bill.StudsOffset = Vector3.new(0, 4.0, 0) -- مرفوعة درجة
         bill.AlwaysOnTop = true
 
         local label = Instance.new("TextLabel", bill)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
         label.TextColor3 = Color3.fromRGB(255, 255, 255)
-        label.TextSize = 18
+        label.TextSize = 16 -- مصغرة درجتين
         label.Font = Enum.Font.GothamBold
         Instance.new("UIStroke", label).Thickness = 1.5
 
-        -- تحديث السرعة لحظياً وبدون أي تأخير
         RunService.RenderStepped:Connect(function()
             if char:IsDescendantOf(workspace) and root then
                 local speed = root.Velocity.Magnitude
@@ -117,43 +115,18 @@ local function SetupTag(p)
     p.CharacterAdded:Connect(addTag)
 end
 
--- [[ نظام التحديث الذكي: Ms سريع و Fps مريح للعين ]]
-local lastFps = 0
+-- [[ تحديث العدادات: Fps هادئ و Ms لحظي ]]
+local curFps = 0
 task.spawn(function()
     while true do
-        -- تحديث الـ Fps كل 0.3 ثانية عشان تلحق تقراه بوضوح
-        lastFps = math.floor(1 / (RunService.RenderStepped:Wait() + 0.0001))
-        task.wait(0.3)
+        curFps = math.floor(1 / (RunService.RenderStepped:Wait() + 0.0001))
+        task.wait(0.5) -- رجعت السرعة القديمة للهدوء
     end
 end)
 
 RunService.RenderStepped:Connect(function()
-    -- تحديث الـ Ms في كل فريم (أقصى سرعة)
     local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-    InfoLabel.Text = "Crystal Hub | Fps " .. lastFps .. " | Ms " .. ping -- بدون : هنا
-end)
-
-for _, v in pairs(Players:GetPlayers()) do SetupTag(v) end
-Players.PlayerAdded:Connect(SetupTag)
-                    label.Text = "Speed: " .. string.format("%.1f", speed)
-                else
-                    label.Text = p.DisplayName
-                    label.TextColor3 = TextColor
-                end
-            else
-                conn:Disconnect()
-            end
-        end)
-    end
-    if p.Character then addTag(p.Character) end
-    p.CharacterAdded:Connect(addTag)
-end
-
--- [[ تحديث الـ Fps و الـ Ms لحظياً وبدون نقاط ]]
-RunService.RenderStepped:Connect(function()
-    local fps = math.floor(1 / (RunService.Heartbeat:Wait() + 0.001))
-    local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-    InfoLabel.Text = "Crystal Hub | Fps " .. fps .. " | Ms " .. ping
+    InfoLabel.Text = "Crystal Hub | Fps " .. curFps .. " | Ms " .. ping
 end)
 
 for _, v in pairs(Players:GetPlayers()) do SetupTag(v) end
