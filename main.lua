@@ -1,30 +1,38 @@
--- [[ Crystal Hub - Ultra Precision & Universal ]]
+-- [[ Crystal Hub - Final Universal Stable Version ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
 local Player = Players.LocalPlayer
 
-local function GetGuiParent()
+-- وظيفة ذكية للعثور على مكان وضع القائمة لضمان ظهورها في أي جهاز
+local function GetSafeParent()
     local success, coreGui = pcall(function() return game:GetService("CoreGui") end)
-    if success and coreGui:FindFirstChild("RobloxGui") then return coreGui end
+    if success and coreGui:FindFirstChild("RobloxGui") then
+        return coreGui
+    end
     return Player:WaitForChild("PlayerGui")
 end
 
-local TargetGui = GetGuiParent()
-if TargetGui:FindFirstChild("CrystalHub_Final") then TargetGui.CrystalHub_Final:Destroy() end
+local TargetGui = GetSafeParent()
 
+-- حذف أي نسخة قديمة لتجنب الأخطاء
+if TargetGui:FindFirstChild("CrystalHub_Final") then 
+    TargetGui.CrystalHub_Final:Destroy() 
+end
+
+-- [[ إنشاء الشاشة - تظهر فوراً حتى لو كنت وحدك ]]
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "CrystalHub_Final"
 ScreenGui.Parent = TargetGui
 ScreenGui.ResetOnSpawn = false
 ScreenGui.DisplayOrder = 999999
 
--- 1. تصغير عرض القائمة (من 260 لـ 230) وتخفيف الحواف (Thickness = 1.2)
+-- 1. القائمة العلوية (تصغير العرض وتخفيف الحواف)
 local MainBar = Instance.new("Frame")
 MainBar.Name = "MainBar"
-MainBar.Size = UDim2.new(0, 230, 0, 30) -- عرض أصغر وأكثر رشاقة
-MainBar.Position = UDim2.new(0.5, -115, 0.02, 0) 
+MainBar.Size = UDim2.new(0, 220, 0, 30) -- العرض الجديد الملموم (220)
+MainBar.Position = UDim2.new(0.5, -110, 0.02, 0) 
 MainBar.BackgroundColor3 = Color3.fromRGB(10, 10, 10) 
 MainBar.BackgroundTransparency = 0.45 
 MainBar.BorderSizePixel = 0
@@ -34,11 +42,13 @@ local Corner = Instance.new("UICorner")
 Corner.CornerRadius = UDim.new(0, 10)
 Corner.Parent = MainBar
 
+-- حواف أخف بدرجة (Thickness = 1.1)
 local MainStroke = Instance.new("UIStroke")
 MainStroke.Color = Color3.fromRGB(0, 175, 255)
-MainStroke.Thickness = 1.2 -- حواف أخف بدرجة
+MainStroke.Thickness = 1.1 
 MainStroke.Parent = MainBar
 
+-- نص المعلومات (Crystal Hub)
 local InfoLabel = Instance.new("TextLabel")
 InfoLabel.Size = UDim2.new(1, 0, 1, 0)
 InfoLabel.BackgroundTransparency = 1
@@ -48,16 +58,17 @@ InfoLabel.Font = Enum.Font.GothamBold
 InfoLabel.Text = "Crystal Hub | Loading..."
 InfoLabel.Parent = MainBar
 
+-- حواف سوداء خفيفة للكتابة
 local TextOutline = Instance.new("UIStroke")
-TextOutline.Thickness = 0.8 -- ظل أخف للكتابة
+TextOutline.Thickness = 0.8
 TextOutline.Color = Color3.fromRGB(0, 0, 0)
 TextOutline.Parent = InfoLabel
 
--- 2. نظام الـ Overhead (تكبير الخط + سرعة 0.0)
+-- [[ 2. نظام الـ Overhead (السرعة 0.0 وتكبير الخط) ]]
 local function CreateOverhead(targetPlayer)
     local function apply(char)
-        local head = char:WaitForChild("Head", 10)
-        local root = char:WaitForChild("HumanoidRootPart", 10)
+        local head = char:WaitForChild("Head", 15)
+        local root = char:WaitForChild("HumanoidRootPart", 15)
         if not head or not root then return end
         
         if head:FindFirstChild("CrystalTag") then head.CrystalTag:Destroy() end
@@ -73,9 +84,10 @@ local function CreateOverhead(targetPlayer)
         topLabel.Size = UDim2.new(1, 0, 0.5, 0)
         topLabel.BackgroundTransparency = 1
         topLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        topLabel.TextSize = 15 -- تكبير كلمة سبيد
+        topLabel.TextSize = 16 -- تكبير كلمة سبيد
         topLabel.Font = Enum.Font.GothamBold
-        Instance.new("UIStroke", topLabel).Thickness = 1
+        local ts1 = Instance.new("UIStroke", topLabel)
+        ts1.Thickness = 1.2
         topLabel.Parent = billboard
         
         local discordLabel = Instance.new("TextLabel")
@@ -86,14 +98,15 @@ local function CreateOverhead(targetPlayer)
         discordLabel.Text = "discord.gg/VHUSrhjq9u"
         discordLabel.TextSize = 12 -- تكبير رابط الديسكورد
         discordLabel.Font = Enum.Font.GothamBold
-        Instance.new("UIStroke", discordLabel).Thickness = 1
+        local ts2 = Instance.new("UIStroke", discordLabel)
+        ts2.Thickness = 1
         discordLabel.Parent = billboard
 
         task.spawn(function()
             while char:IsDescendantOf(workspace) and root do
                 local vel = root.Velocity
                 local speed = Vector3.new(vel.X, 0, vel.Z).Magnitude
-                -- إظهار السرعة بصيغة 0.0
+                -- عرض السرعة بصيغة 0.0
                 if targetPlayer == Player then
                     topLabel.Text = "Speed: " .. string.format("%.1f", speed)
                 else
@@ -107,9 +120,11 @@ local function CreateOverhead(targetPlayer)
     targetPlayer.CharacterAdded:Connect(apply)
 end
 
+-- تفعيل الـ Overhead لكل من يدخل (بما فيهم أنت)
 for _, p in pairs(Players:GetPlayers()) do CreateOverhead(p) end
 Players.PlayerAdded:Connect(CreateOverhead)
 
+-- [[ 3. تحديث العدادات (FPS / MS) ]]
 task.spawn(function()
     while task.wait(0.5) do
         local fps = math.floor(1 / (RunService.RenderStepped:Wait() + 0.0001))
@@ -117,3 +132,5 @@ task.spawn(function()
         InfoLabel.Text = "Crystal Hub | " .. fps .. " FPS | " .. ping .. " MS"
     end
 end)
+
+print("Crystal Hub v3 Loaded - Instant Show Enabled")
