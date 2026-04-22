@@ -1,28 +1,26 @@
--- [[ Crystal Hub - Custom UI Fix ]]
+-- [[ Crystal Hub - Final UI Fix ]]
 
-local Player = game.Players.LocalPlayer
-local CoreGui = game:GetService("CoreGui")
+local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
 
--- وظيفة لحذف أي واجهات قديمة لضمان عدم التداخل
-local function CleanOldUI()
-    if CoreGui:FindFirstChild("CrystalHub_Fixed") then CoreGui.CrystalHub_Fixed:Destroy() end
-    if CoreGui:FindFirstChild("Rayfield") then CoreGui.Rayfield:Destroy() end
-end
-CleanOldUI()
+-- تحديد مكان ظهور القائمة (بيجرب CoreGui ولو منفعش يروح لـ PlayerGui)
+local ParentUI = (game:GetService("CoreGui"):FindFirstChild("RobloxGui") and game:GetService("CoreGui")) or Player:WaitForChild("PlayerGui")
 
--- [[ إنشاء الواجهة ]]
+-- تنظيف أي نسخ قديمة
+if ParentUI:FindFirstChild("CrystalHub_Fixed") then ParentUI.CrystalHub_Fixed:Destroy() end
+
+-- [[ إنشاء الواجهة العلوية ]]
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "CrystalHub_Fixed"
-ScreenGui.Parent = CoreGui
+ScreenGui.Parent = ParentUI
 ScreenGui.ResetOnSpawn = false
 
--- المستطيل العلوي (التصميم اللي طلبته)
+-- المستطيل الأسود (نفس اللي في الصورة)
 local MainBar = Instance.new("Frame")
 MainBar.Name = "MainBar"
 MainBar.Size = UDim2.new(0, 320, 0, 40) 
-MainBar.Position = UDim2.new(0.5, -160, 0.05, 0) -- ثابت في الأعلى
+MainBar.Position = UDim2.new(0.5, -160, 0.03, 0) -- ثابت فوق في النص
 MainBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 MainBar.BackgroundTransparency = 0.4 
 MainBar.BorderSizePixel = 0
@@ -32,22 +30,24 @@ local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 15)
 UICorner.Parent = MainBar
 
--- النص (Crystal Hub | FPS | MS)
+-- عداد المعلومات (Crystal Hub | FPS | MS)
 local InfoLabel = Instance.new("TextLabel")
 InfoLabel.Size = UDim2.new(1, 0, 1, 0)
 InfoLabel.BackgroundTransparency = 1
 InfoLabel.TextColor3 = Color3.fromRGB(0, 180, 255) 
-InfoLabel.TextSize = 15
+InfoLabel.TextSize = 14
 InfoLabel.Font = Enum.Font.GothamBold
 InfoLabel.Text = "Crystal Hub | Loading..."
 InfoLabel.Parent = MainBar
 
--- [[ نظام الـ Overhead (السرعة والأسماء) ]]
+-- [[ نظام الـ Overhead (البيانات فوق الرأس) ]]
 local function CreateOverhead(targetPlayer)
     local function apply(char)
-        local head = char:WaitForChild("Head", 10)
+        local head = char:WaitForChild("Head", 15)
         if not head then return end
         
+        if head:FindFirstChild("CrystalTag") then head.CrystalTag:Destroy() end
+
         local billboard = Instance.new("BillboardGui")
         billboard.Name = "CrystalTag"
         billboard.Size = UDim2.new(0, 200, 0, 50)
@@ -91,10 +91,10 @@ local function CreateOverhead(targetPlayer)
     targetPlayer.CharacterAdded:Connect(apply)
 end
 
-for _, p in pairs(game.Players:GetPlayers()) do CreateOverhead(p) end
-game.Players.PlayerAdded:Connect(CreateOverhead)
+for _, p in game:GetService("Players"):GetPlayers() do CreateOverhead(p) end
+game:GetService("Players").PlayerAdded:Connect(CreateOverhead)
 
--- تحديث العدادات
+-- [[ تحديث العدادات ]]
 task.spawn(function()
     while task.wait(0.5) do
         local fps = math.floor(1 / (RunService.RenderStepped:Wait() + 0.0001))
