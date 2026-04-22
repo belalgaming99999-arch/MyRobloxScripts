@@ -1,46 +1,46 @@
--- [[ Crystal Hub - Final UI Fix ]]
+-- [[ Crystal Hub - Ultra Precision UI (Clone Nova Hub) ]]
 
 local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
 
--- تحديد مكان ظهور القائمة (بيجرب CoreGui ولو منفعش يروح لـ PlayerGui)
+-- تحديد مكان الظهور
 local ParentUI = (game:GetService("CoreGui"):FindFirstChild("RobloxGui") and game:GetService("CoreGui")) or Player:WaitForChild("PlayerGui")
 
 -- تنظيف أي نسخ قديمة
 if ParentUI:FindFirstChild("CrystalHub_Fixed") then ParentUI.CrystalHub_Fixed:Destroy() end
 
--- [[ إنشاء الواجهة العلوية ]]
+-- [[ إنشاء الواجهة ]]
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "CrystalHub_Fixed"
 ScreenGui.Parent = ParentUI
 ScreenGui.ResetOnSpawn = false
 
--- المستطيل الأسود (نفس اللي في الصورة)
+-- المستطيل الأسود (تصغير الحجم وتعديل الشفافية ليطابق الصورة)
 local MainBar = Instance.new("Frame")
 MainBar.Name = "MainBar"
-MainBar.Size = UDim2.new(0, 320, 0, 40) 
-MainBar.Position = UDim2.new(0.5, -160, 0.03, 0) -- ثابت فوق في النص
-MainBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-MainBar.BackgroundTransparency = 0.4 
+MainBar.Size = UDim2.new(0, 260, 0, 32) -- حجم أصغر وأكثر رشاقة زي الصورة
+MainBar.Position = UDim2.new(0.5, -130, 0.02, 0) -- في المنتصف العلوي تماماً
+MainBar.BackgroundColor3 = Color3.fromRGB(10, 10, 10) -- أسود عميق
+MainBar.BackgroundTransparency = 0.45 -- شفافية مطابقة للصورة
 MainBar.BorderSizePixel = 0
 MainBar.Parent = ScreenGui
 
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 15)
+UICorner.CornerRadius = UDim.new(0, 12) -- حواف دائرية ناعمة
 UICorner.Parent = MainBar
 
--- عداد المعلومات (Crystal Hub | FPS | MS)
+-- النص (Crystal Hub | FPS | MS) مع تعديل اللون للأزرق السماوي المطابق
 local InfoLabel = Instance.new("TextLabel")
 InfoLabel.Size = UDim2.new(1, 0, 1, 0)
 InfoLabel.BackgroundTransparency = 1
-InfoLabel.TextColor3 = Color3.fromRGB(0, 180, 255) 
-InfoLabel.TextSize = 14
+InfoLabel.TextColor3 = Color3.fromRGB(0, 175, 255) -- نفس درجة اللون الأزرق في Nova Hub
+InfoLabel.TextSize = 13 -- خط أصغر وأوضح
 InfoLabel.Font = Enum.Font.GothamBold
 InfoLabel.Text = "Crystal Hub | Loading..."
 InfoLabel.Parent = MainBar
 
--- [[ نظام الـ Overhead (البيانات فوق الرأس) ]]
+-- [[ نظام الـ Overhead (السرعة والأسماء بدقة عالية) ]]
 local function CreateOverhead(targetPlayer)
     local function apply(char)
         local head = char:WaitForChild("Head", 15)
@@ -50,26 +50,26 @@ local function CreateOverhead(targetPlayer)
 
         local billboard = Instance.new("BillboardGui")
         billboard.Name = "CrystalTag"
-        billboard.Size = UDim2.new(0, 200, 0, 50)
-        billboard.StudsOffset = Vector3.new(0, 3.5, 0)
+        billboard.Size = UDim2.new(0, 150, 0, 40)
+        billboard.StudsOffset = Vector3.new(0, 3.2, 0)
         billboard.AlwaysOnTop = true
         billboard.Parent = head
 
         local topLabel = Instance.new("TextLabel")
-        topLabel.Size = UDim2.new(1, 0, 0.4, 0)
+        topLabel.Size = UDim2.new(1, 0, 0.5, 0)
         topLabel.BackgroundTransparency = 1
-        topLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        topLabel.TextScaled = true
+        topLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- أبيض للسرعة/الاسم
+        topLabel.TextSize = 12
         topLabel.Font = Enum.Font.GothamBold
         topLabel.Parent = billboard
         
         local discordLabel = Instance.new("TextLabel")
         discordLabel.Position = UDim2.new(0, 0, 0.45, 0)
-        discordLabel.Size = UDim2.new(1, 0, 0.35, 0)
+        discordLabel.Size = UDim2.new(1, 0, 0.5, 0)
         discordLabel.BackgroundTransparency = 1
-        discordLabel.TextColor3 = Color3.fromRGB(0, 170, 255)
+        discordLabel.TextColor3 = Color3.fromRGB(0, 175, 255) -- أزرق سماوي
         discordLabel.Text = "discord.gg/VHUSrhjq9u"
-        discordLabel.TextScaled = true
+        discordLabel.TextSize = 10
         discordLabel.Font = Enum.Font.GothamBold
         discordLabel.Parent = billboard
 
