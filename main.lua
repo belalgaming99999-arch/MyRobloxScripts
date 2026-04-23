@@ -94,7 +94,7 @@ CreateStatPart(UDim2.new(0.51, 0, 0, 0), UDim2.new(0.49, 0, 1, 0), 0.15, "7.4")
 -- [ زر الأيقونة - الموقع المظبوط ]
 local SideButton = Instance.new("TextButton", ScreenGui)
 SideButton.Size = UDim2.new(0, 60, 0, 60)
-SideButton.Position = UDim2.new(1, -75, 0.24, 0) 
+SideButton.Position = UDim2.new(1, -75, 0.27, 0) 
 SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""
 Instance.new("UICorner", SideButton).CornerRadius = UDim.new(0, 15)
 MakeDraggable(SideButton)
@@ -106,6 +106,40 @@ for i=0,2 do
     l.Position = UDim2.new(0, 0, i * 0.4, 0); l.BackgroundColor3 = PureWhite; l.BorderSizePixel = 0
     Instance.new("UICorner", l).CornerRadius = UDim.new(0, 2)
 end
+
+-- [ المنيو الجانبي ]
+local SideMenu = Instance.new("Frame", ScreenGui)
+SideMenu.Size = UDim2.new(0, 160, 0, 220)
+SideMenu.Position = UDim2.new(-0.7, 0, 0.35, 0)
+SideMenu.BackgroundColor3 = PureBlack; SideMenu.BackgroundTransparency = 0.1
+Instance.new("UICorner", SideMenu).CornerRadius = UDim.new(0, 15)
+Instance.new("UIStroke", SideMenu).Color = CrystalPurple
+MakeDraggable(SideMenu)
+
+local menuOpen = false
+SideButton.MouseButton1Click:Connect(function()
+    if not isDraggingBtn then
+        menuOpen = not menuOpen
+        local targetX = menuOpen and 0.02 or -0.7
+        TweenService:Create(SideMenu, TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2.new(targetX, 0, 0.35, 0)}):Play()
+    end
+end)
+
+-- [ نظام الـ Speed والأسماء (تم تكبير الخط سنتين) ]
+local function CreateTag(p)
+    local function ApplyTag(char)
+        local head = char:WaitForChild("Head", 10)
+        if not head then return end
+        
+        local old = head:FindFirstChild("CrystalTag")
+        if old then old:Destroy() end
+
+        local bill = Instance.new("BillboardGui", head)
+        bill.Name = "CrystalTag"; bill.Size = UDim2.new(0, 120, 0, 40); bill.StudsOffset = Vector3.new(0, 3.5, 0); bill.AlwaysOnTop = true
+        
+        local label = Instance.new("TextLabel", bill)
+        label.Size = UDim2.new(1, 0, 1, 0); label.BackgroundTransparency = 1; label.TextColor3 = PureWhite
+        label.TextSize = 14; -- تم تكبير الخط من 12 إلى 14 (س
 
 -- [ المنيو الجانبي ]
 local SideMenu = Instance.new("Frame", ScreenGui)
