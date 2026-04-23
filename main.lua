@@ -1,13 +1,15 @@
--- [[ Crystal Hub - Heavy Font & Nova Rounded Edition ]]
+-- [[ Crystal Hub - Double 15 Rounded Edition ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
 local Player = Players.LocalPlayer
 
+-- إعدادات الألوان والشفافية
 local DeepNovaBlue = Color3.fromRGB(0, 130, 255)
 local TextColor = Color3.fromRGB(0, 150, 255) 
 local PureBlack = Color3.fromRGB(0, 0, 0)
+local DarkerTransparency = 0.15 
 
 local function Clean()
     local pGui = Player:FindFirstChild("PlayerGui")
@@ -26,47 +28,49 @@ ScreenGui.Name = "Crystal_Final_UI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = Target
 
--- [[ 1. القائمة العلوية - خط تقيل ومسنتر ]]
+-- [[ 1. القائمة العلوية - انحناء 15 ]]
 local MainBar = Instance.new("Frame")
-MainBar.Size = UDim2.new(0, 250, 0, 34) -- كبرت المساحة سنة للخط الجديد
+MainBar.Size = UDim2.new(0, 250, 0, 34)
 MainBar.Position = UDim2.new(0.5, -125, 0.04, 0) 
 MainBar.BackgroundColor3 = PureBlack
-MainBar.BackgroundTransparency = 0.3 
+MainBar.BackgroundTransparency = DarkerTransparency
 MainBar.BorderSizePixel = 0
 MainBar.Parent = ScreenGui
 
-Instance.new("UICorner", MainBar).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", MainBar).CornerRadius = UDim.new(0, 15) -- القيمة المطلوبة
 local MainStroke = Instance.new("UIStroke", MainBar)
 MainStroke.Color = DeepNovaBlue
 MainStroke.Thickness = 1.2
 
 local InfoLabel = Instance.new("TextLabel")
-InfoLabel.Size = UDim2.new(0.9, 0, 0.8, 0) -- مساحة النص
+InfoLabel.Size = UDim2.new(0.9, 0, 0.8, 0)
 InfoLabel.Position = UDim2.new(0.05, 0, 0.1, 0)
 InfoLabel.BackgroundTransparency = 1
 InfoLabel.TextColor3 = TextColor
-InfoLabel.TextScaled = true -- جعل الخط كبير وتقيل
+InfoLabel.TextScaled = true 
 InfoLabel.Font = Enum.Font.GothamBold
 InfoLabel.Text = "Crystal Hub | Fps -- | Ms --"
 InfoLabel.Parent = MainBar
 
--- حواف الكلام لزيادة السمك (السر بتاع نوفا)
 local TextStroke = Instance.new("UIStroke", InfoLabel)
 TextStroke.Thickness = 0.6 
-TextStroke.Color = Color3.fromRGB(0, 40, 80) -- حواف كحلية بتخلي الأزرق ينطق
+TextStroke.Color = Color3.fromRGB(0, 0, 0)
 
--- [[ 2. القائمة السفلى - بيضاوية 100% ]]
+-- [[ 2. القائمة السفلى - انحناء 15 ]]
 local BottomBar = Instance.new("Frame")
 BottomBar.Size = UDim2.new(0, 250, 0, 14)
 BottomBar.Position = UDim2.new(0.5, -125, 0.04, 40)
 BottomBar.BackgroundTransparency = 1
 BottomBar.Parent = ScreenGui
 
-local CornerClip = Instance.new("CanvasGroup", BottomBar)
-CornerClip.Size = UDim2.new(1, 0, 1, 0)
-CornerClip.BackgroundTransparency = 1
-CornerClip.Parent = BottomBar
-Instance.new("UICorner", CornerClip).CornerRadius = UDim.new(0, 12) 
+-- حاوية الشريط السفلية لضمان الانحناء
+local BarContainer = Instance.new("Frame")
+BarContainer.Size = UDim2.new(1, 0, 1, 0)
+BarContainer.BackgroundTransparency = 1
+BarContainer.ClipsDescendants = true 
+BarContainer.Parent = BottomBar
+
+Instance.new("UICorner", BarContainer).CornerRadius = UDim.new(0, 15) -- القيمة المطلوبة
 
 local function CreatePart(pos, size, color, trans, txt)
     local f = Instance.new("Frame")
@@ -75,7 +79,7 @@ local function CreatePart(pos, size, color, trans, txt)
     f.BackgroundColor3 = color
     f.BackgroundTransparency = trans
     f.BorderSizePixel = 0
-    f.Parent = CornerClip
+    f.Parent = BarContainer
     
     local t = Instance.new("TextLabel", f)
     t.Size = UDim2.new(1, 0, 0.8, 0)
@@ -83,7 +87,7 @@ local function CreatePart(pos, size, color, trans, txt)
     t.BackgroundTransparency = 1
     t.Text = txt
     t.TextColor3 = Color3.fromRGB(240, 240, 240)
-    t.TextScaled = true -- تكبير النص السفلي
+    t.TextScaled = true 
     t.Font = Enum.Font.GothamBold
     t.Parent = f
     
@@ -92,8 +96,8 @@ local function CreatePart(pos, size, color, trans, txt)
     tS.Color = PureBlack
 end
 
-CreatePart(UDim2.new(0,0,0,0), UDim2.new(0.5, 0, 1, 0), PureBlack, 0.55, "0%")
-CreatePart(UDim2.new(0.5,0,0,0), UDim2.new(0.5, 0, 1, 0), PureBlack, 0.2, "7.4")
+CreatePart(UDim2.new(0,0,0,0), UDim2.new(0.5, 0, 1, 0), PureBlack, 0.6, "0%")
+CreatePart(UDim2.new(0.5,0,0,0), UDim2.new(0.5, 0, 1, 0), PureBlack, DarkerTransparency, "7.4")
 
 -- [[ 3. نظام السرعة ]]
 local function SetupTag(p)
@@ -139,7 +143,7 @@ end
 local curFps = 0
 task.spawn(function()
     while true do
-        curFps = math.floor(1 / (RunService.RenderStepped:Wait() + 0.0001))
+        curFps = math.floor(1 / (RunService.Wait() + 0.0001))
         task.wait(0.5)
     end
 end)
