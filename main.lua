@@ -1,13 +1,13 @@
--- [[ Crystal Hub - Double 15 Rounded Edition ]]
+-- [[ Crystal Hub - Perfect 15 Rounded & Purple Theme ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
 local Player = Players.LocalPlayer
 
--- إعدادات الألوان والشفافية
-local DeepNovaBlue = Color3.fromRGB(0, 130, 255)
-local TextColor = Color3.fromRGB(0, 150, 255) 
+-- إعدادات الألوان (بنفسجي غامق)
+local DeepPurple = Color3.fromRGB(120, 0, 255)
+local TextColor = Color3.fromRGB(150, 50, 255) 
 local PureBlack = Color3.fromRGB(0, 0, 0)
 local DarkerTransparency = 0.15 
 
@@ -28,7 +28,7 @@ ScreenGui.Name = "Crystal_Final_UI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = Target
 
--- [[ 1. القائمة العلوية - انحناء 15 ]]
+-- [[ 1. القائمة العلوية - بيضاوية 15 ]]
 local MainBar = Instance.new("Frame")
 MainBar.Size = UDim2.new(0, 250, 0, 34)
 MainBar.Position = UDim2.new(0.5, -125, 0.04, 0) 
@@ -37,14 +37,14 @@ MainBar.BackgroundTransparency = DarkerTransparency
 MainBar.BorderSizePixel = 0
 MainBar.Parent = ScreenGui
 
-Instance.new("UICorner", MainBar).CornerRadius = UDim.new(0, 15) -- القيمة المطلوبة
+Instance.new("UICorner", MainBar).CornerRadius = UDim.new(0, 15)
 local MainStroke = Instance.new("UIStroke", MainBar)
-MainStroke.Color = DeepNovaBlue
+MainStroke.Color = DeepPurple
 MainStroke.Thickness = 1.2
 
 local InfoLabel = Instance.new("TextLabel")
-InfoLabel.Size = UDim2.new(0.9, 0, 0.8, 0)
-InfoLabel.Position = UDim2.new(0.05, 0, 0.1, 0)
+InfoLabel.Size = UDim2.new(0.9, 0, 0.6, 0)
+InfoLabel.Position = UDim2.new(0.05, 0, 0.2, 0)
 InfoLabel.BackgroundTransparency = 1
 InfoLabel.TextColor3 = TextColor
 InfoLabel.TextScaled = true 
@@ -53,24 +53,20 @@ InfoLabel.Text = "Crystal Hub | Fps -- | Ms --"
 InfoLabel.Parent = MainBar
 
 local TextStroke = Instance.new("UIStroke", InfoLabel)
-TextStroke.Thickness = 0.6 
+TextStroke.Thickness = 0.5 
 TextStroke.Color = Color3.fromRGB(0, 0, 0)
 
--- [[ 2. القائمة السفلى - انحناء 15 ]]
-local BottomBar = Instance.new("Frame")
+-- [[ 2. القائمة السفلى - تم استخدام CanvasGroup لضمان البيضاوية 15 ]]
+local BottomBar = Instance.new("CanvasGroup") -- استخدام CanvasGroup للقص المثالي
 BottomBar.Size = UDim2.new(0, 250, 0, 14)
 BottomBar.Position = UDim2.new(0.5, -125, 0.04, 40)
 BottomBar.BackgroundTransparency = 1
+BottomBar.BorderSizePixel = 0
 BottomBar.Parent = ScreenGui
 
--- حاوية الشريط السفلية لضمان الانحناء
-local BarContainer = Instance.new("Frame")
-BarContainer.Size = UDim2.new(1, 0, 1, 0)
-BarContainer.BackgroundTransparency = 1
-BarContainer.ClipsDescendants = true 
-BarContainer.Parent = BottomBar
-
-Instance.new("UICorner", BarContainer).CornerRadius = UDim.new(0, 15) -- القيمة المطلوبة
+-- إضافة الانحناء 15 للشريط السفلي
+local BottomCorner = Instance.new("UICorner", BottomBar)
+BottomCorner.CornerRadius = UDim.new(0, 15) 
 
 local function CreatePart(pos, size, color, trans, txt)
     local f = Instance.new("Frame")
@@ -79,14 +75,14 @@ local function CreatePart(pos, size, color, trans, txt)
     f.BackgroundColor3 = color
     f.BackgroundTransparency = trans
     f.BorderSizePixel = 0
-    f.Parent = BarContainer
+    f.Parent = BottomBar
     
     local t = Instance.new("TextLabel", f)
-    t.Size = UDim2.new(1, 0, 0.8, 0)
-    t.Position = UDim2.new(0, 0, 0.1, 0)
+    t.Size = UDim2.new(1, 0, 0.7, 0)
+    t.Position = UDim2.new(0, 0, 0.15, 0)
     t.BackgroundTransparency = 1
     t.Text = txt
-    t.TextColor3 = Color3.fromRGB(240, 240, 240)
+    t.TextColor3 = Color3.fromRGB(220, 200, 255)
     t.TextScaled = true 
     t.Font = Enum.Font.GothamBold
     t.Parent = f
@@ -96,6 +92,7 @@ local function CreatePart(pos, size, color, trans, txt)
     tS.Color = PureBlack
 end
 
+-- الأجزاء دلوقتى هتاخد شكل الحواف البيضاوية إجباري
 CreatePart(UDim2.new(0,0,0,0), UDim2.new(0.5, 0, 1, 0), PureBlack, 0.6, "0%")
 CreatePart(UDim2.new(0.5,0,0,0), UDim2.new(0.5, 0, 1, 0), PureBlack, DarkerTransparency, "7.4")
 
@@ -106,6 +103,55 @@ local function SetupTag(p)
         local root = char:WaitForChild("HumanoidRootPart", 10)
         if head:FindFirstChild("CrystalTag") then head.CrystalTag:Destroy() end
 
+        local bill = Instance.new("BillboardGui", head)
+        bill.Name = "CrystalTag"
+        bill.Size = UDim2.new(0, 200, 0, 50)
+        bill.StudsOffset = Vector3.new(0, 4.0, 0) 
+        bill.AlwaysOnTop = true
+
+        local label = Instance.new("TextLabel", bill)
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        label.TextSize = 13
+        label.Font = Enum.Font.GothamBold
+        
+        local sStroke = Instance.new("UIStroke", label)
+        sStroke.Thickness = 0.4
+        sStroke.Color = PureBlack
+
+        RunService.RenderStepped:Connect(function()
+            if char:IsDescendantOf(workspace) and root then
+                local speed = root.Velocity.Magnitude
+                if p == Player then
+                    label.Text = "Speed: " .. string.format("%.1f", speed)
+                else
+                    label.Text = p.DisplayName
+                    label.TextColor3 = TextColor
+                end
+            end
+        end)
+    end
+    if p.Character then addTag(p.Character) end
+    p.CharacterAdded:Connect(addTag)
+end
+
+-- العدادات
+local curFps = 0
+task.spawn(function()
+    while true do
+        curFps = math.floor(1 / (RunService.RenderStepped:Wait() + 0.0001))
+        task.wait(0.5)
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+    InfoLabel.Text = "Crystal Hub | Fps " .. curFps .. " | Ms " .. ping
+end)
+
+for _, v in pairs(Players:GetPlayers()) do SetupTag(v) end
+Players.PlayerAdded:Connect(SetupTag)
         local bill = Instance.new("BillboardGui", head)
         bill.Name = "CrystalTag"
         bill.Size = UDim2.new(0, 200, 0, 50)
