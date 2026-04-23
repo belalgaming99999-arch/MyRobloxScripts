@@ -1,4 +1,4 @@
--- [[ Crystal Hub - Definitive Edition 2026 ]] --
+-- [[ Crystal Hub - Save Config Integrated Edition ]] --
 
 if not game:IsLoaded() then game.Loaded:Wait() end
 
@@ -7,132 +7,135 @@ local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService") -- مكتبة التعامل مع البيانات
 local Player = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
 
 local CrystalPurple = Color3.fromRGB(120, 0, 255)
 local DarkColor = Color3.fromRGB(0, 0, 0)
-local CornerRadius15 = UDim.new(0, 15)
-local CornerRadius10 = UDim.new(0, 10)
+local GlobalRadius = UDim.new(0, 15) -- كل الزوايا بيضاوية 15
+local GlobalStroke = 10 -- كل الإطارات بنفسجية 10
 
--- تنظيف النسخ القديمة
+-- تنظيف الشاشة
 for _, child in pairs(CoreGui:GetChildren()) do
     if child:IsA("ScreenGui") and child.Name:find("Crystal") then child:Destroy() end
 end
 
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "Crystal_Final_Master"
+ScreenGui.Name = "Crystal_Config_Final"
 ScreenGui.ResetOnSpawn = false
 
--- ========== 1. HUD (Top & Bottom) ==========
+-- ========== 1. HUD (Top & Bottom Bars) ==========
 local HudContainer = Instance.new("Frame", ScreenGui)
 HudContainer.Size = UDim2.new(0, 260, 0, 65)
 HudContainer.Position = UDim2.new(0.5, -130, 0.05, 0)
 HudContainer.BackgroundTransparency = 1
 
--- اللوحة العلوية (Crystal Hub | FPS | MS)
+-- اللوحة العلوية
 local TopBar = Instance.new("Frame", HudContainer)
 TopBar.Size = UDim2.new(1, 0, 0, 35)
-TopBar.BackgroundColor3 = DarkColor
-TopBar.BackgroundTransparency = 0.15
-Instance.new("UICorner", TopBar).CornerRadius = CornerRadius15
-local TopStroke = Instance.new("UIStroke", TopBar); TopStroke.Color = CrystalPurple; TopStroke.Thickness = 1.5
+TopBar.BackgroundColor3 = DarkColor; TopBar.BackgroundTransparency = 0.15
+Instance.new("UICorner", TopBar).CornerRadius = GlobalRadius
+local TopS = Instance.new("UIStroke", TopBar); TopS.Color = CrystalPurple; TopS.Thickness = GlobalStroke
 
 local InfoLabel = Instance.new("TextLabel", TopBar)
 InfoLabel.Size = UDim2.new(1, 0, 1, 0); InfoLabel.BackgroundTransparency = 1
 InfoLabel.TextColor3 = CrystalPurple; InfoLabel.Font = Enum.Font.GothamBold; InfoLabel.TextSize = 14
 InfoLabel.Text = "Crystal Hub | FPS: 0 | MS: 0"
 
--- اللوحة السفلية (صغيرة جداً بدون حواف بنفسجية)
+-- اللوحة السفلية
 local BottomBar = Instance.new("Frame", HudContainer)
 BottomBar.Size = UDim2.new(1, 0, 0, 18)
-BottomBar.Position = UDim2.new(0, 0, 0, 40)
+BottomBar.Position = UDim2.new(0, 0, 0, 42)
 BottomBar.BackgroundTransparency = 1
 
 local function CreateStatBox(pos, size, label, trans)
     local f = Instance.new("Frame", BottomBar)
     f.Size = size; f.Position = pos; f.BackgroundColor3 = DarkColor; f.BackgroundTransparency = trans; f.ClipsDescendants = true
-    Instance.new("UICorner", f).CornerRadius = CornerRadius10
+    Instance.new("UICorner", f).CornerRadius = GlobalRadius
     local t = Instance.new("TextLabel", f)
     t.Size = UDim2.new(1, 0, 1, 0); t.BackgroundTransparency = 1; t.ZIndex = 3; t.TextColor3 = Color3.fromRGB(255, 255, 255); t.TextSize = 10; t.Font = Enum.Font.GothamBold; t.Text = label
     return t, f
 end
 
--- الشمال 0% (فاتح) | اليمين 7.4 ثابت (غامق)
 local LeftLabel, LeftFrame = CreateStatBox(UDim2.new(0, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "0%", 0.7)
 local RightLabel, RightFrame = CreateStatBox(UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "7.4", 0.2)
 
-local LeftFill = Instance.new("Frame", LeftFrame)
-LeftFill.Size = UDim2.new(0, 0, 1, 0); LeftFill.BackgroundColor3 = DarkColor; LeftFill.BackgroundTransparency = 0.2; LeftFill.ZIndex = 2; LeftFill.BorderSizePixel = 0
-
--- ========== 2. Side Menu (Grid Layout) ==========
+-- ========== 2. Side Menu (Main UI) ==========
 local MainMenu = Instance.new("Frame", ScreenGui)
-MainMenu.Size = UDim2.new(0, 185, 0, 320)
-MainMenu.Position = UDim2.new(-0.7, 0, 0.2, 0) -- مرفوع للأعلى
+MainMenu.Size = UDim2.new(0, 200, 0, 310) -- صغرنا الطول ليكون آخره زر الحفظ
+MainMenu.Position = UDim2.new(-0.7, 0, 0.2, 0) -- رفعنا المنيو فوق شوية
 MainMenu.BackgroundColor3 = DarkColor; MainMenu.BackgroundTransparency = 0.5
-Instance.new("UICorner", MainMenu).CornerRadius = CornerRadius15
-local MenuStroke = Instance.new("UIStroke", MainMenu); MenuStroke.Color = CrystalPurple
+Instance.new("UICorner", MainMenu).CornerRadius = GlobalRadius
+local MenuS = Instance.new("UIStroke", MainMenu); MenuS.Color = CrystalPurple; MenuS.Thickness = GlobalStroke
 
--- زر Player ESP المنفرد في الأعلى
+-- زر Player ESP العلوي
 local EspBtn = Instance.new("TextButton", MainMenu)
-EspBtn.Size = UDim2.new(0, 165, 0, 32)
-EspBtn.Position = UDim2.new(0.5, -82.5, 0, 12)
+EspBtn.Size = UDim2.new(0, 160, 0, 32); EspBtn.Position = UDim2.new(0.5, -80, 0, 20)
 EspBtn.BackgroundColor3 = DarkColor; EspBtn.BackgroundTransparency = 0.2; EspBtn.TextColor3 = Color3.fromRGB(255, 255, 255); EspBtn.Text = "Player ESP"; EspBtn.Font = Enum.Font.GothamBold; EspBtn.TextSize = 11
-Instance.new("UICorner", EspBtn).CornerRadius = CornerRadius10
-Instance.new("UIStroke", EspBtn).Color = CrystalPurple
+Instance.new("UICorner", EspBtn).CornerRadius = GlobalRadius
+local EspS = Instance.new("UIStroke", EspBtn); EspS.Color = CrystalPurple; EspS.Thickness = GlobalStroke
 
 -- حاوية الأزرار الثنائية
 local GridContainer = Instance.new("Frame", MainMenu)
-GridContainer.Size = UDim2.new(1, -20, 1, -60)
-GridContainer.Position = UDim2.new(0, 10, 0, 52)
+GridContainer.Size = UDim2.new(1, -30, 0, 160)
+GridContainer.Position = UDim2.new(0, 15, 0, 65)
 GridContainer.BackgroundTransparency = 1
+local UIGrid = Instance.new("UIGridLayout", GridContainer); UIGrid.CellSize = UDim2.new(0, 80, 0, 32); UIGrid.CellPadding = UDim2.new(0, 10, 0, 10); UIGrid.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-local UIGrid = Instance.new("UIGridLayout", GridContainer)
-UIGrid.CellSize = UDim2.new(0, 77, 0, 32)
-UIGrid.CellPadding = UDim2.new(0, 10, 0, 8)
-UIGrid.HorizontalAlignment = Enum.HorizontalAlignment.Center
-
-local function AnimateSteal()
-    LeftFill.Size = UDim2.new(0, 0, 1, 0)
-    local duration = 0.6
-    TweenService:Create(LeftFill, TweenInfo.new(duration, Enum.EasingStyle.QuartOut), {Size = UDim2.new(1, 0, 1, 0)}):Play()
-    task.spawn(function()
-        for i = 0, 100, 2 do LeftLabel.Text = i .. "%"; task.wait(duration/50) end
-        task.wait(0.4)
-        TweenService:Create(LeftFill, TweenInfo.new(0.4), {Size = UDim2.new(0, 0, 1, 0)}):Play()
-        for i = 100, 0, -5 do LeftLabel.Text = i .. "%"; task.wait(0.02) end
-    end)
-end
-
+-- وظيفة إنشاء أزرار الشبكة
 local function CreateGridBtn(name)
     local btn = Instance.new("TextButton", GridContainer)
     btn.BackgroundColor3 = DarkColor; btn.BackgroundTransparency = 0.2
     btn.TextColor3 = Color3.fromRGB(255, 255, 255); btn.Text = name; btn.Font = Enum.Font.GothamBold; btn.TextSize = 8
-    Instance.new("UICorner", btn).CornerRadius = CornerRadius10
-    Instance.new("UIStroke", btn).Color = CrystalPurple
-    btn.MouseButton1Click:Connect(function()
-        if name == "Steal Nearest" then AnimateSteal() end
-    end)
+    Instance.new("UICorner", btn).CornerRadius = GlobalRadius
+    local s = Instance.new("UIStroke", btn); s.Color = CrystalPurple; s.Thickness = GlobalStroke
 end
 
--- الأزرار بالترتيب الدقيق
-local btnNames = {
-    "Bat Aimbot", "Steal Nearest",
-    "Auto Medusa", "Auto Play",
-    "Anti Fling", "Anti Ragdoll",
-    "Un Walk", "Infinite Jump",
-    "Spin Bot", "Optimizer"
-}
+local btnNames = {"Bat Aimbot", "Steal Nearest", "Auto Medusa", "Auto Play", "Anti Fling", "Anti Ragdoll", "Un Walk", "Infinite Jump", "Spin Bot", "Optimizer"}
 for _, n in pairs(btnNames) do CreateGridBtn(n) end
 
--- ========== 3. Floating Icon (Fixed Center Right) ==========
-local SideButton = Instance.new("TextButton", ScreenGui)
-SideButton.Size = UDim2.new(0, 55, 0, 55); SideButton.Position = UDim2.new(1, -70, 0.5, -27)
-SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""
-Instance.new("UICorner", SideButton).CornerRadius = CornerRadius15
+-- ========== 3. Save Config Button (الطلب الجديد) ==========
+local SaveBtn = Instance.new("TextButton", MainMenu)
+SaveBtn.Name = "SaveConfig"
+SaveBtn.Text = "SAVE CONFIG"
+SaveBtn.Size = UDim2.new(0, 160, 0, 32)
+SaveBtn.Position = UDim2.new(0.5, -80, 1, -52) -- في أسفل المنيو
+SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.2 -- نفس لون أزرار التفعيلات
+SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SaveBtn.Font = Enum.Font.GothamBold
+SaveBtn.TextSize = 11
+Instance.new("UICorner", SaveBtn).CornerRadius = GlobalRadius -- بيضاوية 15
+local SaveS = Instance.new("UIStroke", SaveBtn); SaveS.Color = CrystalPurple; SaveS.Thickness = GlobalStroke -- حواف بيضاوية 10 بنفسجية
 
+-- برمجة تأثير الوميض البنفسجي عند الضغط (Logic)
+SaveBtn.MouseButton1Click:Connect(function()
+    -- تأثير الوميض البنفسجي
+    local originalColor = SaveBtn.BackgroundColor3
+    local originalTransparency = SaveBtn.BackgroundTransparency
+
+    -- يظهر لون بنفسجي فجأة
+    SaveBtn.BackgroundColor3 = CrystalPurple
+    SaveBtn.BackgroundTransparency = 0 -- معتم تماماً
+
+    task.delay(0.2, function() -- وميض سريع
+        -- يعود للون الأسود الشفاف التدريجي
+        TweenService:Create(SaveBtn, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+            BackgroundColor3 = originalColor,
+            BackgroundTransparency = originalTransparency
+        }):Play()
+    end)
+    
+    -- يمكنك هنا إضافة كود حفظ البيانات الفعلي مستقبلاً
+    print("[Crystal Hub] Config Save Initiated")
+end)
+
+-- ========== 4. Floating Icon & Logic ==========
+local SideButton = Instance.new("TextButton", ScreenGui)
+SideButton.Size = UDim2.new(0, 55, 0, 55); SideButton.Position = UDim2.new(1, -70, 0.5, -27); SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""
+Instance.new("UICorner", SideButton).CornerRadius = GlobalRadius
 for i = 0, 2 do
-    local l = Instance.new("Frame", SideButton); l.Size = UDim2.new(0, 25, 0, 3.5); l.Position = UDim2.new(0.5, -12.5, 0, 18 + (i * 9)); l.BackgroundColor3 = Color3.fromRGB(255, 255, 255); Instance.new("UICorner", l).CornerRadius = UDim.new(0, 2)
+    local l = Instance.new("Frame", SideButton); l.Size = UDim2.new(0, 25, 0, 4); l.Position = UDim2.new(0.5, -12.5, 0, 18 + (i * 9)); l.BackgroundColor3 = Color3.fromRGB(255, 255, 255); Instance.new("UICorner", l).CornerRadius = UDim.new(0, 2)
 end
 
 local menuOpen = false
@@ -155,7 +158,7 @@ SideButton.InputEnded:Connect(function(input)
     end
 end)
 
--- ========== 4. Loops ==========
+-- تحديث الـ Stats
 task.spawn(function()
     while task.wait(0.1) do
         pcall(function()
@@ -165,3 +168,4 @@ task.spawn(function()
         end)
     end
 end)
+
