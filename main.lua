@@ -56,10 +56,10 @@ local function MakeDraggable(gui)
     end)
 end
 
--- [ القوائم المركزية - نفس موقع الصورة ]
+-- [ القوائم المركزية ]
 local MainContainer = Instance.new("Frame", ScreenGui)
 MainContainer.Size = UDim2.new(0, 250, 0, 60)
-MainContainer.Position = UDim2.new(0.5, -125, 0.12, 0) -- نزلتها لتحت شوية زي الصورة
+MainContainer.Position = UDim2.new(0.5, -125, 0.16, 0)
 MainContainer.BackgroundTransparency = 1
 
 local TopBar = Instance.new("Frame", MainContainer)
@@ -89,10 +89,10 @@ end
 CreateStatPart(UDim2.new(0, 0, 0, 0), UDim2.new(0.49, 0, 1, 0), 0.5, "0%") 
 CreateStatPart(UDim2.new(0.51, 0, 0, 0), UDim2.new(0.49, 0, 1, 0), 0.15, "7.4") 
 
--- [ زر المنيو والقائمة الجانبية ]
+-- [ زر المنيو - في نفس مكان Nova Hub بالضبط (أعلى اليمين) ]
 local SideButton = Instance.new("TextButton", ScreenGui)
 SideButton.Size = UDim2.new(0, 60, 0, 60)
-SideButton.Position = UDim2.new(1, -80, 0.5, 0)
+SideButton.Position = UDim2.new(1, -80, 0.12, 0) -- تم وضعه في الأعلى زي الصورة
 SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""
 Instance.new("UICorner", SideButton).CornerRadius = UDim.new(0, 15)
 MakeDraggable(SideButton)
@@ -105,7 +105,33 @@ for i=0,2 do
     Instance.new("UICorner", l).CornerRadius = UDim.new(0, 2)
 end
 
+-- [ القائمة الجانبية ]
 local SideMenu = Instance.new("Frame", ScreenGui)
+SideMenu.Size = UDim2.new(0, 160, 0, 220)
+SideMenu.Position = UDim2.new(-0.7, 0, 0.35, 0)
+SideMenu.BackgroundColor3 = PureBlack; SideMenu.BackgroundTransparency = 0.1
+Instance.new("UICorner", SideMenu).CornerRadius = UDim.new(0, 15)
+Instance.new("UIStroke", SideMenu).Color = CrystalPurple
+MakeDraggable(SideMenu)
+
+local menuOpen = false
+SideButton.MouseButton1Click:Connect(function()
+    if not isDraggingBtn then
+        menuOpen = not menuOpen
+        local targetX = menuOpen and 0.02 or -0.7
+        TweenService:Create(SideMenu, TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2.new(targetX, 0, 0.35, 0)}):Play()
+    end
+end)
+
+-- تحديث البيانات
+task.spawn(function()
+    while true do
+        local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+        local fps = math.floor(1 / (RunService.RenderStepped:Wait()))
+        InfoLabel.Text = string.format("Crystal Hub | FPS %d | MS %d", fps, ping)
+        task.wait(1)
+    end
+end)
 SideMenu.Size = UDim2.new(0, 160, 0, 220)
 SideMenu.Position = UDim2.new(-0.7, 0, 0.35, 0)
 SideMenu.BackgroundColor3 = PureBlack; SideMenu.BackgroundTransparency = 0.1
