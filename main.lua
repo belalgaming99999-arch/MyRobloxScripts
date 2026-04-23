@@ -1,10 +1,11 @@
--- [[ Crystal Hub - Optimized Stroke 1.0 ]]
+-- [[ Crystal Hub - Final Polish Edition ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
 local Player = Players.LocalPlayer
 
+-- الألوان المعتمدة
 local DeepNovaBlue = Color3.fromRGB(0, 130, 255)
 local TextColor = Color3.fromRGB(0, 150, 255) 
 local DeepDarkBg = Color3.fromRGB(2, 2, 2)
@@ -26,7 +27,7 @@ ScreenGui.Name = "Crystal_Final_UI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = Target
 
--- [[ 1. القائمة العلوية - تم ضبط الحواف لـ 1.0 ]]
+-- [[ 1. القائمة العلوية ]]
 local MainBar = Instance.new("Frame")
 MainBar.Size = UDim2.new(0, 240, 0, 32)
 MainBar.Position = UDim2.new(0.5, -120, 0.04, 0) 
@@ -38,7 +39,7 @@ MainBar.Parent = ScreenGui
 Instance.new("UICorner", MainBar).CornerRadius = UDim.new(0, 8)
 local Stroke = Instance.new("UIStroke", MainBar)
 Stroke.Color = DeepNovaBlue
-Stroke.Thickness = 1.0 -- الدرجة المطلوبة بالظبط
+Stroke.Thickness = 1.0
 
 local InfoLabel = Instance.new("TextLabel")
 InfoLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -49,21 +50,30 @@ InfoLabel.Font = Enum.Font.GothamBold
 InfoLabel.Text = "Crystal Hub | Fps -- | Ms --"
 InfoLabel.Parent = MainBar
 
--- [[ 2. الشريط السفلي ]]
+-- [[ 2. الشريط السفلي - مع إضافة مسافة (Gap) وتعديل الشفافية ]]
 local BottomBar = Instance.new("Frame")
 BottomBar.Size = UDim2.new(0, 240, 0, 10)
-BottomBar.Position = UDim2.new(0.5, -120, 0.04, 34)
+-- تم تغيير الـ Offset لـ 36 لعمل مسافة واضحة زي الصورة
+BottomBar.Position = UDim2.new(0.5, -120, 0.04, 36) 
 BottomBar.BackgroundTransparency = 1
 BottomBar.Parent = ScreenGui
 
-local function CreatePart(pos, color, txt)
+-- حاوية الشريط ليكون ملتحم
+local BarContainer = Instance.new("Frame")
+BarContainer.Size = UDim2.new(1, 0, 1, 0)
+BarContainer.BackgroundTransparency = 1
+BarContainer.Parent = BottomBar
+Instance.new("UICorner", BarContainer).CornerRadius = UDim.new(0, 4)
+
+local function CreatePart(pos, size, color, transparency, txt)
     local f = Instance.new("Frame")
-    f.Size = UDim2.new(0.5, 0, 1, 0)
+    f.Size = size
     f.Position = pos
     f.BackgroundColor3 = color
+    f.BackgroundTransparency = transparency
     f.BorderSizePixel = 0
-    f.Parent = BottomBar
-    Instance.new("UICorner", f).CornerRadius = UDim.new(0, 4)
+    f.Parent = BarContainer
+    
     local t = Instance.new("TextLabel", f)
     t.Size = UDim2.new(1, 0, 1, 0)
     t.BackgroundTransparency = 1
@@ -74,8 +84,10 @@ local function CreatePart(pos, color, txt)
     t.Parent = f
 end
 
-CreatePart(UDim2.new(0,0,0,0), Color3.fromRGB(30, 30, 30), "0%")
-CreatePart(UDim2.new(0.5,0,0,0), Color3.fromRGB(10, 10, 10), "7.4")
+-- الجزء الأول (شفاف)
+CreatePart(UDim2.new(0,0,0,0), UDim2.new(0.5, 0, 1, 0), Color3.fromRGB(30, 30, 30), 0.5, "0%")
+-- الجزء الثاني (أسود داكن كما طلبت)
+CreatePart(UDim2.new(0.5,0,0,0), UDim2.new(0.5, 0, 1, 0), Color3.fromRGB(5, 5, 5), 0, "7.4")
 
 -- [[ 3. نظام السرعة فوق الرأس ]]
 local function SetupTag(p)
