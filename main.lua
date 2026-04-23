@@ -1,15 +1,16 @@
--- [[ Crystal Hub - Final Adjusted Dimensions ]]
+-- [[ Crystal Hub - Professional Nova Hub Clone ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
 local Player = Players.LocalPlayer
 
--- الألوان المعتمدة (سواد عميق وأزرق نوفا)
+-- الألوان الدقيقة منNova Hub (سواد كحلي وأزرق كهربائي غامق)
 local DeepNovaBlue = Color3.fromRGB(0, 130, 255)
 local TextColor = Color3.fromRGB(0, 150, 255) 
-local DeepDarkBg = Color3.fromRGB(2, 2, 2)
+local DeepDarkBg = Color3.fromRGB(2, 2, 2) -- سواد أعمق كما في Nova Hub
 
+-- تنظيف النسخ القديمة فوراً لضمان السرعة
 local function Clean()
     local pGui = Player:FindFirstChild("PlayerGui")
     if pGui and pGui:FindFirstChild("Crystal_Final_UI") then pGui.Crystal_Final_UI:Destroy() end
@@ -27,33 +28,34 @@ ScreenGui.Name = "Crystal_Final_UI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = Target
 
--- [[ 1. القائمة العلوية - نزلت درجة لـ 0.05 ]]
+-- [[ 1. القائمة العلوية - يمين شوية وفوق سنة بسيطة ]]
 local MainBar = Instance.new("Frame")
 MainBar.Size = UDim2.new(0, 240, 0, 32)
-MainBar.Position = UDim2.new(0.5, -120, 0.05, 0) -- تعديل الموقع هنا
-MainBar.BackgroundColor3 = DeepDarkBg
-MainBar.BackgroundTransparency = 0.08
+-- Position: 0.55 (يمين) | 0.045 (فوق سنة بسيطة)
+MainBar.Position = UDim2.new(0.55, -120, 0.045, 0) 
+MainBar.BackgroundColor3 = DeepDarkBg -- الخلفية السوداء العميق
+MainBar.BackgroundTransparency = 0.08 -- تقليل الشفافية لتكون أثقل
 MainBar.BorderSizePixel = 0
 MainBar.Parent = ScreenGui
 
 Instance.new("UICorner", MainBar).CornerRadius = UDim.new(0, 8)
 local Stroke = Instance.new("UIStroke", MainBar)
-Stroke.Color = DeepNovaBlue
+Stroke.Color = DeepNovaBlue -- لون الحواف الأزرق الكهربائي الغامق
 Stroke.Thickness = 1.3
 
 local InfoLabel = Instance.new("TextLabel")
 InfoLabel.Size = UDim2.new(1, 0, 1, 0)
 InfoLabel.BackgroundTransparency = 1
-InfoLabel.TextColor3 = TextColor
+InfoLabel.TextColor3 = TextColor -- الخط الأزرق الغامق الواضح
 InfoLabel.TextSize = 13
 InfoLabel.Font = Enum.Font.GothamBold
 InfoLabel.Text = "Crystal Hub | Fps -- | Ms --"
 InfoLabel.Parent = MainBar
 
--- [[ 2. الشريط السفلي - ملتحم مع الموقع الجديد ]]
+-- [[ 2. الشريط السفلي (الملتحم - بدون حواف - نص رمادي فاتح) ]]
 local BottomBar = Instance.new("Frame")
 BottomBar.Size = UDim2.new(0, 240, 0, 10)
-BottomBar.Position = UDim2.new(0.5, -120, 0.05, 34)
+BottomBar.Position = UDim2.new(0.55, -120, 0.045, 34) -- لازقة تحت القائمة الأساسية بظبط
 BottomBar.BackgroundTransparency = 1
 BottomBar.Parent = ScreenGui
 
@@ -69,7 +71,7 @@ local function CreatePart(pos, color, txt)
     t.Size = UDim2.new(1, 0, 1, 0)
     t.BackgroundTransparency = 1
     t.Text = txt
-    t.TextColor3 = Color3.fromRGB(200, 200, 200)
+    t.TextColor3 = Color3.fromRGB(200, 200, 200) -- لون نص رمادي فاتح للعدادات
     t.TextSize = 9
     t.Font = Enum.Font.GothamBold
     t.Parent = f
@@ -78,7 +80,7 @@ end
 CreatePart(UDim2.new(0,0,0,0), Color3.fromRGB(30, 30, 30), "0%")
 CreatePart(UDim2.new(0.5,0,0,0), Color3.fromRGB(10, 10, 10), "7.4")
 
--- [[ 3. نظام السرعة - مرفوع لـ 4.0 ومصغر لـ 16 ]]
+-- [[ 3. نظام السرعة فوق الرأس - حواف خفيفة (1.0) ]]
 local function SetupTag(p)
     local function addTag(char)
         local head = char:WaitForChild("Head", 10)
@@ -88,16 +90,20 @@ local function SetupTag(p)
         local bill = Instance.new("BillboardGui", head)
         bill.Name = "CrystalTag"
         bill.Size = UDim2.new(0, 200, 0, 50)
-        bill.StudsOffset = Vector3.new(0, 4.0, 0) -- مرفوعة درجة
+        bill.StudsOffset = Vector3.new(0, 4.0, 0) 
         bill.AlwaysOnTop = true
 
         local label = Instance.new("TextLabel", bill)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
         label.TextColor3 = Color3.fromRGB(255, 255, 255)
-        label.TextSize = 16 -- مصغرة درجتين
+        label.TextSize = 16
         label.Font = Enum.Font.GothamBold
-        Instance.new("UIStroke", label).Thickness = 1.5
+        
+        -- تخفيف الحواف هنا (خليتها 1.0 بدل 1.5)
+        local sStroke = Instance.new("UIStroke", label)
+        sStroke.Thickness = 1.0 
+        sStroke.Color = Color3.fromRGB(0, 0, 0)
 
         RunService.RenderStepped:Connect(function()
             if char:IsDescendantOf(workspace) and root then
@@ -115,12 +121,12 @@ local function SetupTag(p)
     p.CharacterAdded:Connect(addTag)
 end
 
--- [[ تحديث العدادات: Fps هادئ و Ms لحظي ]]
+-- العدادات
 local curFps = 0
 task.spawn(function()
     while true do
         curFps = math.floor(1 / (RunService.RenderStepped:Wait() + 0.0001))
-        task.wait(0.5) -- رجعت السرعة القديمة للهدوء
+        task.wait(0.5)
     end
 end)
 
