@@ -9,6 +9,7 @@ local CrystalPurple = Color3.fromRGB(120, 0, 255)
 local PureBlack = Color3.fromRGB(0, 0, 0)
 local PureWhite = Color3.fromRGB(255, 255, 255)
 
+-- تنظيف أي واجهة قديمة لمنع ظهور سكريبتين فوق بعض
 local function CleanUI()
     local name = "Crystal_Final_UI"
     pcall(function()
@@ -24,6 +25,7 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.DisplayOrder = 999999
 
+-- نظام منع فتح المنيو أثناء السحب (Dragging)
 local isDraggingBtn = false
 local dragStartPos = nil
 
@@ -36,7 +38,7 @@ local function MakeDraggable(gui)
             input.Changed:Connect(function() 
                 if input.UserInputState == Enum.UserInputState.End then 
                     dragging = false 
-                    task.wait(0.05)
+                    task.wait(0.1) -- مهلة بسيطة للتأكد من حالة السحب
                     isDraggingBtn = false
                 end 
             end)
@@ -49,14 +51,14 @@ local function MakeDraggable(gui)
         if input == dragInput and dragging then
             local delta = input.Position - dragStart
             if (input.Position - dragStartPos).Magnitude > 8 then
-                isDraggingBtn = true
+                isDraggingBtn = true -- لو اتحرك أكتر من 8 بكسل يعتبر سحب مش ضغط
             end
             gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
 end
 
--- [ القوائم المركزية ]
+-- [ اللوحة المركزية - FPS & Stats ]
 local MainContainer = Instance.new("Frame", ScreenGui)
 MainContainer.Size = UDim2.new(0, 250, 0, 60)
 MainContainer.Position = UDim2.new(0.5, -125, 0.16, 0) 
@@ -89,11 +91,10 @@ end
 CreateStatPart(UDim2.new(0, 0, 0, 0), UDim2.new(0.49, 0, 1, 0), 0.5, "0%") 
 CreateStatPart(UDim2.new(0.51, 0, 0, 0), UDim2.new(0.49, 0, 1, 0), 0.15, "7.4") 
 
--- [ زر المنيو - التعديل الجديد في الموقع ]
+-- [ زر الأيقونة - الموقع المظبوط ]
 local SideButton = Instance.new("TextButton", ScreenGui)
 SideButton.Size = UDim2.new(0, 60, 0, 60)
--- تم إنزال الموقع من 0.12 إلى 0.15 (تحت شوية) وتحريك الأوفست من -80 لـ -75 (يمين سنة بسيطة)
-SideButton.Position = UDim2.new(1, -75, 0.15, 0) 
+SideButton.Position = UDim2.new(1, -75, 0.18, 0) 
 SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""
 Instance.new("UICorner", SideButton).CornerRadius = UDim.new(0, 15)
 MakeDraggable(SideButton)
@@ -106,7 +107,7 @@ for i=0,2 do
     Instance.new("UICorner", l).CornerRadius = UDim.new(0, 2)
 end
 
--- [ القائمة الجانبية ]
+-- [ المنيو الجانبي ]
 local SideMenu = Instance.new("Frame", ScreenGui)
 SideMenu.Size = UDim2.new(0, 160, 0, 220)
 SideMenu.Position = UDim2.new(-0.7, 0, 0.35, 0)
@@ -117,123 +118,14 @@ MakeDraggable(SideMenu)
 
 local menuOpen = false
 SideButton.MouseButton1Click:Connect(function()
-    if not isDraggingBtn then
+    if not isDraggingBtn then -- هنا السر: لو بيسحب مش هيفتح
         menuOpen = not menuOpen
         local targetX = menuOpen and 0.02 or -0.7
         TweenService:Create(SideMenu, TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2.new(targetX, 0, 0.35, 0)}):Play()
     end
 end)
 
-task.spawn(function()
-    while true do
-        local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-        local fps = math.floor(1 / (RunService.RenderStepped:Wait()))
-        InfoLabel.Text = string.format("Crystal Hub | FPS %d | MS %d", fps, ping)
-        task.wait(1)
-    end
-end)
-local SideMenu = Instance.new("Frame", ScreenGui)
-SideMenu.Size = UDim2.new(0, 160, 0, 220)
-SideMenu.Position = UDim2.new(-0.7, 0, 0.35, 0)
-SideMenu.BackgroundColor3 = PureBlack; SideMenu.BackgroundTransparency = 0.1
-Instance.new("UICorner", SideMenu).CornerRadius = UDim.new(0, 15)
-Instance.new("UIStroke", SideMenu).Color = CrystalPurple
-MakeDraggable(SideMenu)
-
-local menuOpen = false
-SideButton.MouseButton1Click:Connect(function()
-    if not isDraggingBtn then
-        menuOpen = not menuOpen
-        local targetX = menuOpen and 0.02 or -0.7
-        TweenService:Create(SideMenu, TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2.new(targetX, 0, 0.35, 0)}):Play()
-    end
-end)
-
--- تحديث البيانات
-task.spawn(function()
-    while true do
-        local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-        local fps = math.floor(1 / (RunService.RenderStepped:Wait()))
-        InfoLabel.Text = string.format("Crystal Hub | FPS %d | MS %d", fps, ping)
-        task.wait(1)
-    end
-end)
-SideMenu.Size = UDim2.new(0, 160, 0, 220)
-SideMenu.Position = UDim2.new(-0.7, 0, 0.35, 0)
-SideMenu.BackgroundColor3 = PureBlack; SideMenu.BackgroundTransparency = 0.1
-Instance.new("UICorner", SideMenu).CornerRadius = UDim.new(0, 15)
-Instance.new("UIStroke", SideMenu).Color = CrystalPurple
-MakeDraggable(SideMenu)
-
-local menuOpen = false
-SideButton.MouseButton1Click:Connect(function()
-    if not isDraggingBtn then
-        menuOpen = not menuOpen
-        local targetX = menuOpen and 0.02 or -0.7
-        TweenService:Create(SideMenu, TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2.new(targetX, 0, 0.35, 0)}):Play()
-    end
-end)
-
--- تحديث الـ FPS و الـ MS (تأكدت من تشغيله فوراً)
-task.spawn(function()
-    while true do
-        local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-        local fps = math.floor(1 / (RunService.RenderStepped:Wait()))
-        InfoLabel.Text = string.format("Crystal Hub | FPS %d | MS %d", fps, ping)
-        task.wait(1)
-    end
-end)
-local SideMenu = Instance.new("Frame", ScreenGui)
-SideMenu.Size = UDim2.new(0, 160, 0, 220)
-SideMenu.Position = UDim2.new(-0.6, 0, 0.4, 0) -- يبدأ مخفي
-SideMenu.BackgroundColor3 = PureBlack; SideMenu.BackgroundTransparency = 0.1
-Instance.new("UICorner", SideMenu).CornerRadius = UDim.new(0, 15) -- موحد 15
-local SideStroke = Instance.new("UIStroke", SideMenu)
-SideStroke.Color = CrystalPurple; SideStroke.Thickness = 1.5
-MakeDraggable(SideMenu) -- قابل للسحب
-
--- [ أنيميشن دخول الواجهة ]
-local it = TweenInfo.new(1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-TweenService:Create(MainContainer, it, {Position = UDim2.new(0.5, -125, 0.04, 0)}):Play()
-TweenService:Create(SideButton, it, {Position = UDim2.new(1, -80, 0.9, -120)}):Play()
-
--- تفاعل القائمة الجانبية
-local menuOpen = false
-SideButton.MouseButton1Click:Connect(function()
-    menuOpen = not menuOpen
-    local targetPos = menuOpen and UDim2.new(0.02, 0, 0.4, 0) or UDim2.new(-0.6, 0, 0.4, 0)
-    TweenService:Create(SideMenu, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = targetPos}):Play()
-end)
-
--- [ 3. الأنظمة الفرعية والتحديث البطيء ]
-local function SetupSpeedTag(p)
-    p.CharacterAdded:Connect(function(char)
-        local head = char:WaitForChild("Head", 15)
-        local bill = Instance.new("BillboardGui", head)
-        bill.Name = "CrystalTag"; bill.Size = UDim2.new(0, 80, 0, 20); bill.StudsOffset = Vector3.new(0, 3.5, 0); bill.AlwaysOnTop = true
-        local label = Instance.new("TextLabel", bill)
-        label.Size = UDim2.new(1, 0, 1, 0); label.BackgroundTransparency = 1; label.TextColor3 = PureWhite; label.TextSize = 11; label.Font = Enum.Font.GothamBold
-        RunService.Heartbeat:Connect(function()
-            if char:FindFirstChild("HumanoidRootPart") then
-                label.Text = p == Player and "Speed: " .. string.format("%.1f", char.HumanoidRootPart.Velocity.Magnitude) or p.DisplayName
-            end
-        end)
-    end)
-    if p.Character then SetupSpeedTag(p) end -- لتشغيلها لو اللاعب موجود
-end
-for _, v in pairs(Players:GetPlayers()) do SetupSpeedTag(v) end
-Players.PlayerAdded:Connect(SetupSpeedTag)
-
--- تحديث FPS/Ping بهدوء (شلت رابط الديسكورد)
-task.spawn(function()
-    while true do
-        local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-        local fps = math.floor(1 / (RunService.RenderStepped:Wait()))
-        TitleLabel.Text = string.format("Crystal Hub | FPS %d | MS %d", fps, ping)
-        task.wait(1.2)
-    end
-end)
--- تحديث البيانات
+-- تحديث الـ FPS والـ MS فوراً
 task.spawn(function()
     while true do
         local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
