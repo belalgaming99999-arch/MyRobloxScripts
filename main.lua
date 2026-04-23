@@ -1,11 +1,10 @@
--- [[ Crystal Hub - Final Layout & Head Speed ]] --
+-- [[ Crystal Hub - Layout Precision Fix & Enhanced Speed Display ]] --
 
 if not game:IsLoaded() then game.Loaded:Wait() end
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
-local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 local Player = Players.LocalPlayer
@@ -31,7 +30,7 @@ ScreenGui.Name = "Crystal_Fixed_UI"
 
 -- ========== 1. Top & Bottom HUD ==========
 local HUDContainer = Instance.new("Frame", ScreenGui)
-HUDContainer.Size = UDim2.new(0, 210, 0, 60); HUDContainer.Position = UDim2.new(0.5, -105, 0.02, 0); HUDContainer.BackgroundTransparency = 1
+HUDContainer.Size = UDim2.new(0, 210, 0, 70); HUDContainer.Position = UDim2.new(0.5, -105, 0.02, 0); HUDContainer.BackgroundTransparency = 1
 
 local TopBar = Instance.new("Frame", HUDContainer)
 TopBar.Size = UDim2.new(0.9, 0, 0, 28); TopBar.Position = UDim2.new(0.05, 0, 0, 0); TopBar.BackgroundColor3 = DarkColor; TopBar.BackgroundTransparency = 0.2
@@ -40,7 +39,9 @@ local TopS = Instance.new("UIStroke", TopBar); TopS.Color = CrystalPurple; TopS.
 local Info = Instance.new("TextLabel", TopBar); Info.Size = UDim2.new(1,0,1,0); Info.BackgroundTransparency = 1; Info.TextColor3 = CrystalPurple; Info.Font = Enum.Font.GothamBold; Info.TextSize = 12; Info.Text = "Crystal Hub"
 
 local BottomBar = Instance.new("Frame", HUDContainer)
-BottomBar.Size = UDim2.new(0.9, 0, 0, 14); BottomBar.Position = UDim2.new(0.05, 0, 0, 32); BottomBar.BackgroundTransparency = 1
+BottomBar.Size = UDim2.new(0.9, 0, 0, 14); 
+BottomBar.Position = UDim2.new(0.05, 0, 0, 35); -- منزلة سنة واحدة
+BottomBar.BackgroundTransparency = 1
 
 local function CreateStatBox(pos, size, txt, trans)
     local f = Instance.new("Frame", BottomBar)
@@ -52,71 +53,48 @@ end
 CreateStatBox(UDim2.new(0, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "0%", 0.5) 
 CreateStatBox(UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "7.4", 0.15) 
 
--- ========== 2. Speed Tag (Above Head) ==========
+-- ========== 2. Speed Tag (تكبير الخط + علامة عشرية) ==========
 local function CreateSpeedTag(char)
     local head = char:WaitForChild("Head", 5)
     if not head then return end
-    
     local billboard = Instance.new("BillboardGui", char)
-    billboard.Name = "SpeedTag"
-    billboard.Adornee = head
-    billboard.Size = UDim2.new(0, 100, 0, 30)
-    billboard.StudsOffset = Vector3.new(0, 3, 0)
-    billboard.AlwaysOnTop = true
+    billboard.Name = "SpeedTag"; billboard.Adornee = head; billboard.Size = UDim2.new(0, 120, 0, 40); billboard.StudsOffset = Vector3.new(0, 3.2, 0); billboard.AlwaysOnTop = true
     
     local label = Instance.new("TextLabel", billboard)
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 10
+    label.Size = UDim2.new(1, 0, 1, 0); label.BackgroundTransparency = 1; label.TextColor3 = Color3.fromRGB(255, 255, 255); 
+    label.Font = Enum.Font.GothamBold; 
+    label.TextSize = 12; -- تم التكبير سنتين (من 10 إلى 12)
     label.Text = "Speed: 0.0"
     
-    local stroke = Instance.new("UIStroke", label)
-    stroke.Color = Color3.fromRGB(0, 0, 0)
-    stroke.Thickness = 1 
-    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
-    
+    local stroke = Instance.new("UIStroke", label); stroke.Color = Color3.fromRGB(0, 0, 0); stroke.Thickness = 1; stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
     return label
 end
-
 local SpeedLabel = CreateSpeedTag(Player.Character or Player.CharacterAdded:Wait())
 Player.CharacterAdded:Connect(function(char) SpeedLabel = CreateSpeedTag(char) end)
 
 -- ========== 3. Main Side Menu ==========
 local MainMenu = Instance.new("Frame", ScreenGui)
-MainMenu.Size = UDim2.new(0, 170, 0, 275); MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -137) 
-MainMenu.BackgroundColor3 = DarkColor; MainMenu.BackgroundTransparency = 0.4
+MainMenu.Size = UDim2.new(0, 170, 0, 255); MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -127); MainMenu.BackgroundColor3 = DarkColor; MainMenu.BackgroundTransparency = 0.4
 Instance.new("UICorner", MainMenu).CornerRadius = GlobalRadius
 local MenuS = Instance.new("UIStroke", MainMenu); MenuS.Color = CrystalPurple; MenuS.Thickness = BorderThickness
 
 local function StyleButton(btn, thick)
-    btn.AutoButtonColor = false
-    Instance.new("UICorner", btn).CornerRadius = GlobalRadius
-    local s = Instance.new("UIStroke", btn)
-    s.Color = CrystalPurple
-    s.Thickness = thick or 1.2
-    s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    
+    btn.AutoButtonColor = false; Instance.new("UICorner", btn).CornerRadius = GlobalRadius
+    local s = Instance.new("UIStroke", btn); s.Color = CrystalPurple; s.Thickness = thick or 1.2; s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     local active = false
     btn.MouseButton1Click:Connect(function()
         if btn.Name ~= "SaveBtn" then
             active = not active
-            TweenService:Create(btn, TweenInfo.new(0.25), {
-                BackgroundColor3 = active and CrystalPurple or DarkColor,
-                BackgroundTransparency = active and 0 or 0.3
-            }):Play()
+            TweenService:Create(btn, TweenInfo.new(0.25), {BackgroundColor3 = active and CrystalPurple or DarkColor, BackgroundTransparency = active and 0 or 0.3}):Play()
         end
     end)
 end
 
--- زر Player Esp (مكانه بالأعلى)
 local EspBtn = Instance.new("TextButton", MainMenu)
 EspBtn.Size = UDim2.new(0, 150, 0, 28); EspBtn.Position = UDim2.new(0.5, -75, 0, 12)
 EspBtn.BackgroundColor3 = DarkColor; EspBtn.BackgroundTransparency = 0.3; EspBtn.TextColor3 = Color3.fromRGB(255, 255, 255); EspBtn.Text = "Player Esp"; EspBtn.Font = Enum.Font.GothamBold; EspBtn.TextSize = 10
 StyleButton(EspBtn, 1.5)
 
--- الشبكة (Grid) - تم تحديد حجمها وموضعها لترك مسافة بالأعلى والأسفل
 local Grid = Instance.new("Frame", MainMenu)
 Grid.Size = UDim2.new(1, -20, 0, 160); Grid.Position = UDim2.new(0, 10, 0, 48); Grid.BackgroundTransparency = 1
 local UIGrid = Instance.new("UIGridLayout", Grid); UIGrid.CellSize = UDim2.new(0, 70, 0, 26); UIGrid.CellPadding = UDim2.new(0, 10, 0, 6)
@@ -128,11 +106,8 @@ for _, f in pairs(features) do
     StyleButton(btn, 1)
 end
 
--- زر Save Config (تحت خالص مع مسافة عن التفعيلات)
 local SaveBtn = Instance.new("TextButton", MainMenu)
-SaveBtn.Name = "SaveBtn"
-SaveBtn.Size = UDim2.new(0, 150, 0, 28); SaveBtn.Position = UDim2.new(0.5, -75, 1, -40) 
-SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.3; SaveBtn.ZIndex = 5
+SaveBtn.Name = "SaveBtn"; SaveBtn.Size = UDim2.new(0, 150, 0, 28); SaveBtn.Position = UDim2.new(0.5, -75, 1, -38); SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.3; SaveBtn.ZIndex = 5
 SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255); SaveBtn.Text = "SAVE CONFIG"; SaveBtn.Font = Enum.Font.GothamBold; SaveBtn.TextSize = 9
 StyleButton(SaveBtn, 1.5)
 
@@ -140,7 +115,6 @@ StyleButton(SaveBtn, 1.5)
 local SideButton = Instance.new("TextButton", ScreenGui)
 SideButton.Size = UDim2.new(0, 50, 0, 50); SideButton.Position = UDim2.new(1, -60, 0.35, 0); SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""; SideButton.BorderSizePixel = 0
 Instance.new("UICorner", SideButton).CornerRadius = GlobalRadius
-
 for i=0,2 do
     local line = Instance.new("Frame", SideButton)
     line.Size = UDim2.new(0, 24, 0, 4); line.Position = UDim2.new(0.5, -12, 0, 15 + (i * 9)); line.BackgroundColor3 = Color3.fromRGB(255, 255, 255); line.BorderSizePixel = 0; Instance.new("UICorner", line).CornerRadius = UDim.new(0, 2)
@@ -149,12 +123,12 @@ end
 local menuOpen = false
 SideButton.MouseButton1Up:Connect(function()
     menuOpen = not menuOpen
-    MainMenu:TweenPosition(UDim2.new(menuOpen and 0.02 or -0.7, 0, 0.5, -137), "Out", "Quart", 0.4, true)
+    MainMenu:TweenPosition(UDim2.new(menuOpen and 0.02 or -0.7, 0, 0.5, -127), "Out", "Quart", 0.4, true)
 end)
 
--- ========== 5. Update Loop ==========
+-- ========== 5. Update Loop (تعديل صيغة الرقم) ==========
 task.spawn(function()
-    while task.wait(0.1) do
+    while task.wait(0.05) do
         pcall(function()
             local fps = math.floor(1 / RunService.RenderStepped:Wait())
             local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
@@ -162,10 +136,10 @@ task.spawn(function()
             
             if SpeedLabel and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
                 local vel = Player.Character.HumanoidRootPart.Velocity
-                local speed = math.floor(Vector3.new(vel.X, 0, vel.Z).Magnitude * 10) / 10
-                SpeedLabel.Text = "Speed: " .. tostring(speed)
+                local speed = Vector3.new(vel.X, 0, vel.Z).Magnitude
+                -- استخدام %.1f لإظهار رقم واحد بعد الفاصلة دائماً
+                SpeedLabel.Text = string.format("Speed: %.1f", speed)
             end
         end)
     end
 end)
-
