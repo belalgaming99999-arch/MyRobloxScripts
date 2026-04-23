@@ -1,4 +1,4 @@
--- [[ Crystal Hub - Nova Style Layout ]] --
+-- [[ Crystal Hub - Perfect Spacing Edition ]] --
 
 if not game:IsLoaded() then game.Loaded:Wait() end
 
@@ -51,18 +51,16 @@ local function MakeDraggable(gui)
     return function() return not moved end 
 end
 
--- ========== 1. Top & Bottom HUD (Nova Style) ==========
+-- ========== 1. Top & Bottom HUD ==========
 local HUDContainer = Instance.new("Frame", ScreenGui)
 HUDContainer.Size = UDim2.new(0, 250, 0, 60); HUDContainer.Position = UDim2.new(0.5, -125, 0.02, 0); HUDContainer.BackgroundTransparency = 1
 
--- الشريط العلوي (الاسم والبيانات)
 local TopBar = Instance.new("Frame", HUDContainer)
 TopBar.Size = UDim2.new(1, 0, 0, 32); TopBar.BackgroundColor3 = DarkColor; TopBar.BackgroundTransparency = 0.2
 Instance.new("UICorner", TopBar).CornerRadius = GlobalRadius
 local TopS = Instance.new("UIStroke", TopBar); TopS.Color = CrystalPurple; TopS.Thickness = BorderThickness
 local Info = Instance.new("TextLabel", TopBar); Info.Size = UDim2.new(1,0,1,0); Info.BackgroundTransparency = 1; Info.TextColor3 = CrystalPurple; Info.Font = Enum.Font.GothamBold; Info.TextSize = 12; Info.Text = "Crystal Hub | FPS: 0 | MS: 0"
 
--- اللوحة السفلية (اليمين واليسار)
 local BottomBar = Instance.new("Frame", HUDContainer)
 BottomBar.Size = UDim2.new(1, 0, 0, 18); BottomBar.Position = UDim2.new(0, 0, 0, 38); BottomBar.BackgroundTransparency = 1
 
@@ -70,31 +68,32 @@ local function CreateStatBox(pos, size, txt, trans)
     local f = Instance.new("Frame", BottomBar)
     f.Size = size; f.Position = pos; f.BackgroundColor3 = DarkColor; f.BackgroundTransparency = trans
     Instance.new("UICorner", f).CornerRadius = GlobalRadius
+    local s = Instance.new("UIStroke", f); s.Color = Color3.fromRGB(0, 0, 0); s.Thickness = 1; s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     local t = Instance.new("TextLabel", f); t.Size = UDim2.new(1,0,1,0); t.BackgroundTransparency = 1; t.TextColor3 = Color3.fromRGB(255,255,255); t.Font = Enum.Font.GothamBold; t.TextSize = 10; t.Text = txt
 end
-CreateStatBox(UDim2.new(0, 0, 0, 0), UDim2.new(0.49, 0, 1, 0), "0%", 0.5) -- اليسار
-CreateStatBox(UDim2.new(0.51, 0, 0, 0), UDim2.new(0.49, 0, 1, 0), "7.4", 0.15) -- اليمين
+CreateStatBox(UDim2.new(0, 0, 0, 0), UDim2.new(0.49, 0, 1, 0), "0%", 0.5) 
+CreateStatBox(UDim2.new(0.51, 0, 0, 0), UDim2.new(0.49, 0, 1, 0), "7.4", 0.15) 
 
--- ========== 2. Main Side Menu (Centered) ==========
+-- ========== 2. Main Side Menu (صغرنا الطول لـ 230) ==========
 local MainMenu = Instance.new("Frame", ScreenGui)
-MainMenu.Size = UDim2.new(0, 170, 0, 260); MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -130) 
+MainMenu.Size = UDim2.new(0, 170, 0, 230); MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -115) 
 MainMenu.BackgroundColor3 = DarkColor; MainMenu.BackgroundTransparency = 0.4
 Instance.new("UICorner", MainMenu).CornerRadius = GlobalRadius
 local MenuS = Instance.new("UIStroke", MainMenu); MenuS.Color = CrystalPurple; MenuS.Thickness = BorderThickness
 
--- وظيفة التوجل للأزرار
 local function MakeToggleLogic(btn)
     local active = false
+    btn.AutoButtonColor = false
     btn.MouseButton1Click:Connect(function()
         active = not active
-        TweenService:Create(btn, TweenInfo.new(0.3), {
+        TweenService:Create(btn, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
             BackgroundColor3 = active and CrystalPurple or DarkColor,
             BackgroundTransparency = active and 0 or 0.3
         }):Play()
     end)
 end
 
--- زر Player Esp
+-- زر Player Esp (المسافة من فوق 12)
 local EspBtn = Instance.new("TextButton", MainMenu)
 EspBtn.Size = UDim2.new(0, 150, 0, 28); EspBtn.Position = UDim2.new(0.5, -75, 0, 12)
 EspBtn.BackgroundColor3 = DarkColor; EspBtn.BackgroundTransparency = 0.3; EspBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -105,7 +104,7 @@ MakeToggleLogic(EspBtn)
 
 -- الشبكة
 local Grid = Instance.new("Frame", MainMenu)
-Grid.Size = UDim2.new(1, -20, 0, 160); Grid.Position = UDim2.new(0, 10, 0, 48); Grid.BackgroundTransparency = 1
+Grid.Size = UDim2.new(1, -20, 0, 130); Grid.Position = UDim2.new(0, 10, 0, 48); Grid.BackgroundTransparency = 1
 local UIGrid = Instance.new("UIGridLayout", Grid); UIGrid.CellSize = UDim2.new(0, 70, 0, 26); UIGrid.CellPadding = UDim2.new(0, 10, 0, 6)
 
 local features = {"Bat Aimbot", "Steal Near", "Auto Medusa", "Auto Play", "Anti Fling", "Anti Ragdoll", "Un Walk", "Inf Jump", "Spin Bot", "Optimizer"}
@@ -117,19 +116,31 @@ for _, f in pairs(features) do
     MakeToggleLogic(btn)
 end
 
--- زر Save
+-- زر Save Config (تم رفعه ليكون تحت التفعيلات بمسافة بسيطة)
 local SaveBtn = Instance.new("TextButton", MainMenu)
-SaveBtn.Size = UDim2.new(0, 150, 0, 28); SaveBtn.Position = UDim2.new(0.5, -75, 1, -40); SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.3
-SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255); SaveBtn.Text = "SAVE CONFIG"; SaveBtn.Font = Enum.Font.GothamBold; SaveBtn.TextSize = 9; Instance.new("UICorner", SaveBtn).CornerRadius = GlobalRadius
+SaveBtn.Size = UDim2.new(0, 150, 0, 28); SaveBtn.Position = UDim2.new(0.5, -75, 1, -42) 
+SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.3
+SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255); SaveBtn.Text = "SAVE CONFIG"; SaveBtn.Font = Enum.Font.GothamBold; SaveBtn.TextSize = 9
+Instance.new("UICorner", SaveBtn).CornerRadius = GlobalRadius
 local SaveS = Instance.new("UIStroke", SaveBtn); SaveS.Color = CrystalPurple; SaveS.Thickness = 1.2
+SaveBtn.AutoButtonColor = false
 
--- ========== 3. Floating Button (3 Lines Icon) ==========
+SaveBtn.MouseButton1Click:Connect(function()
+    SaveBtn.BackgroundColor3 = CrystalPurple
+    SaveBtn.BackgroundTransparency = 0
+    task.wait(0.1)
+    TweenService:Create(SaveBtn, TweenInfo.new(0.5, Enum.EasingStyle.Quart), {
+        BackgroundColor3 = DarkColor,
+        BackgroundTransparency = 0.3
+    }):Play()
+end)
+
+-- ========== 3. Floating Button ==========
 local SideButton = Instance.new("TextButton", ScreenGui)
 SideButton.Size = UDim2.new(0, 50, 0, 50); SideButton.Position = UDim2.new(1, -60, 0.5, -25); SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""; SideButton.BorderSizePixel = 0
 Instance.new("UICorner", SideButton).CornerRadius = GlobalRadius
 local canOpen = MakeDraggable(SideButton)
 
--- رسم الـ 3 شرط
 for i=0,2 do
     local line = Instance.new("Frame", SideButton)
     line.Size = UDim2.new(0, 26, 0, 4); line.Position = UDim2.new(0.5, -13, 0, 14 + (i * 10)); line.BackgroundColor3 = Color3.fromRGB(255, 255, 255); line.BorderSizePixel = 0; Instance.new("UICorner", line).CornerRadius = UDim.new(0, 2)
@@ -139,17 +150,18 @@ local menuOpen = false
 SideButton.MouseButton1Up:Connect(function()
     if canOpen() then 
         menuOpen = not menuOpen
-        MainMenu:TweenPosition(UDim2.new(menuOpen and 0.02 or -0.7, 0, 0.5, -130), "Out", "Quart", 0.4, true)
+        MainMenu:TweenPosition(UDim2.new(menuOpen and 0.02 or -0.7, 0, 0.5, -115), "Out", "Quart", 0.4, true)
     end
 end)
 
--- ========== 4. Head Display & Stats ==========
+-- ========== 4. Head Display (White w/ Black Stroke) ==========
 local function CreateHeadDisplay()
     local char = Player.Character or Player.CharacterAdded:Wait()
     local head = char:WaitForChild("Head")
     local billboard = Instance.new("BillboardGui", char)
     billboard.Name = "CrystalHeadGui"; billboard.Adornee = head; billboard.Size = UDim2.new(0, 100, 0, 40); billboard.StudsOffset = Vector3.new(0, 2.5, 0); billboard.AlwaysOnTop = true
-    local textLabel = Instance.new("TextLabel", billboard); textLabel.Size = UDim2.new(1, 0, 1, 0); textLabel.BackgroundTransparency = 1; textLabel.TextColor3 = CrystalPurple; textLabel.Font = Enum.Font.GothamBold; textLabel.TextSize = 14; textLabel.Text = "Speed: 0.0"
+    local textLabel = Instance.new("TextLabel", billboard); textLabel.Size = UDim2.new(1, 0, 1, 0); textLabel.BackgroundTransparency = 1; textLabel.TextColor3 = Color3.fromRGB(255, 255, 255); textLabel.Font = Enum.Font.GothamBold; textLabel.TextSize = 14; textLabel.Text = "Speed: 0.0"
+    local stroke = Instance.new("UIStroke", textLabel); stroke.Color = Color3.fromRGB(0, 0, 0); stroke.Thickness = 1.2
     return textLabel
 end
 
@@ -163,7 +175,6 @@ task.spawn(function()
             local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
             local char = Player.Character
             local speed = (char and char:FindFirstChild("HumanoidRootPart")) and char.HumanoidRootPart.Velocity.Magnitude or 0
-            
             Info.Text = string.format("Crystal Hub | FPS: %d | MS: %d", fps, ping)
             if HeadSpeedLabel then HeadSpeedLabel.Text = string.format("Speed: %.1f", speed) end
         end)
