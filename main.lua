@@ -9,7 +9,7 @@ local CrystalPurple = Color3.fromRGB(120, 0, 255)
 local PureBlack = Color3.fromRGB(0, 0, 0)
 local PureWhite = Color3.fromRGB(255, 255, 255)
 
--- تنظيف أي واجهة قديمة لمنع ظهور سكريبتين فوق بعض
+-- تنظيف الواجهة القديمة
 local function CleanUI()
     local name = "Crystal_Final_UI"
     pcall(function()
@@ -25,7 +25,7 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.DisplayOrder = 999999
 
--- نظام منع فتح المنيو أثناء السحب (Dragging)
+-- نظام منع فتح المنيو أثناء السحب
 local isDraggingBtn = false
 local dragStartPos = nil
 
@@ -38,7 +38,7 @@ local function MakeDraggable(gui)
             input.Changed:Connect(function() 
                 if input.UserInputState == Enum.UserInputState.End then 
                     dragging = false 
-                    task.wait(0.1) -- مهلة بسيطة للتأكد من حالة السحب
+                    task.wait(0.1)
                     isDraggingBtn = false
                 end 
             end)
@@ -51,7 +51,7 @@ local function MakeDraggable(gui)
         if input == dragInput and dragging then
             local delta = input.Position - dragStart
             if (input.Position - dragStartPos).Magnitude > 8 then
-                isDraggingBtn = true -- لو اتحرك أكتر من 8 بكسل يعتبر سحب مش ضغط
+                isDraggingBtn = true
             end
             gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
@@ -61,7 +61,7 @@ end
 -- [ اللوحة المركزية - FPS & Stats ]
 local MainContainer = Instance.new("Frame", ScreenGui)
 MainContainer.Size = UDim2.new(0, 250, 0, 60)
-MainContainer.Position = UDim2.new(0.5, -125, 0.16, 0) 
+MainContainer.Position = UDim2.new(0.5, -125, 0.18, 0) 
 MainContainer.BackgroundTransparency = 1
 
 local TopBar = Instance.new("Frame", MainContainer)
@@ -94,7 +94,7 @@ CreateStatPart(UDim2.new(0.51, 0, 0, 0), UDim2.new(0.49, 0, 1, 0), 0.15, "7.4")
 -- [ زر الأيقونة - الموقع المظبوط ]
 local SideButton = Instance.new("TextButton", ScreenGui)
 SideButton.Size = UDim2.new(0, 60, 0, 60)
-SideButton.Position = UDim2.new(1, -75, 0.18, 0) 
+SideButton.Position = UDim2.new(1, -75, 0.24, 0) 
 SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""
 Instance.new("UICorner", SideButton).CornerRadius = UDim.new(0, 15)
 MakeDraggable(SideButton)
@@ -118,14 +118,54 @@ MakeDraggable(SideMenu)
 
 local menuOpen = false
 SideButton.MouseButton1Click:Connect(function()
-    if not isDraggingBtn then -- هنا السر: لو بيسحب مش هيفتح
+    if not isDraggingBtn then
         menuOpen = not menuOpen
         local targetX = menuOpen and 0.02 or -0.7
         TweenService:Create(SideMenu, TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2.new(targetX, 0, 0.35, 0)}):Play()
     end
 end)
 
--- تحديث الـ FPS والـ MS فوراً
+-- [ نظام الـ Speed والأسماء فوق الرؤوس ]
+local function CreateTag(p)
+    local function ApplyTag(char)
+        local head = char:WaitForChild("Head", 10)
+        if not head then return end
+        
+        -- حذف أي تاق قديم موجود
+        local old = head:FindFirstChild("CrystalTag")
+        if old then old:Destroy() end
+
+        local bill = Instance.new("BillboardGui", head)
+        bill.Name = "CrystalTag"; bill.Size = UDim2.new(0, 100, 0, 30); bill.StudsOffset = Vector3.new(0, 3, 0); bill.AlwaysOnTop = true
+        
+        local label = Instance.new("TextLabel", bill)
+        label.Size = UDim2.new(1, 0, 1, 0); label.BackgroundTransparency = 1; label.TextColor3 = PureWhite
+        label.TextSize = 12; label.Font = Enum.Font.GothamBold; label.TextStrokeTransparency = 0.5
+
+        local conn
+        conn = RunService.RenderStepped:Connect(function()
+            if not char:IsDescendantOf(game) or not head:IsDescendantOf(char) then
+                conn:Disconnect()
+                return
+            end
+            if char:FindFirstChild("HumanoidRootPart") then
+                if p == Player then
+                    label.Text = "Speed: " .. math.floor(char.HumanoidRootPart.Velocity.Magnitude)
+                else
+                    label.Text = p.DisplayName
+                end
+            end
+        end)
+    end
+    
+    p.CharacterAdded:Connect(ApplyTag)
+    if p.Character then ApplyTag(p.Character) end
+end
+
+for _, v in pairs(Players:GetPlayers()) do CreateTag(v) end
+Players.PlayerAdded:Connect(CreateTag)
+
+-- تحديث الـ FPS والـ MS
 task.spawn(function()
     while true do
         local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
