@@ -1,11 +1,10 @@
--- [[ Crystal Hub - Perfectionist Edition ]]
+-- [[ Crystal Hub - Heavy Font & Nova Rounded Edition ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
 local Player = Players.LocalPlayer
 
--- الألوان والشفافية
 local DeepNovaBlue = Color3.fromRGB(0, 130, 255)
 local TextColor = Color3.fromRGB(0, 150, 255) 
 local PureBlack = Color3.fromRGB(0, 0, 0)
@@ -27,49 +26,47 @@ ScreenGui.Name = "Crystal_Final_UI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = Target
 
--- [[ 1. القائمة العلوية ]]
+-- [[ 1. القائمة العلوية - خط تقيل ومسنتر ]]
 local MainBar = Instance.new("Frame")
-MainBar.Size = UDim2.new(0, 240, 0, 32)
-MainBar.Position = UDim2.new(0.5, -120, 0.04, 0) 
+MainBar.Size = UDim2.new(0, 250, 0, 34) -- كبرت المساحة سنة للخط الجديد
+MainBar.Position = UDim2.new(0.5, -125, 0.04, 0) 
 MainBar.BackgroundColor3 = PureBlack
-MainBar.BackgroundTransparency = 0.3 -- الأسود الأساسي
+MainBar.BackgroundTransparency = 0.3 
 MainBar.BorderSizePixel = 0
 MainBar.Parent = ScreenGui
 
-Instance.new("UICorner", MainBar).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", MainBar).CornerRadius = UDim.new(0, 12)
 local MainStroke = Instance.new("UIStroke", MainBar)
 MainStroke.Color = DeepNovaBlue
-MainStroke.Thickness = 1.0
+MainStroke.Thickness = 1.2
 
 local InfoLabel = Instance.new("TextLabel")
-InfoLabel.Size = UDim2.new(1, 0, 1, 0)
+InfoLabel.Size = UDim2.new(0.9, 0, 0.8, 0) -- مساحة النص
+InfoLabel.Position = UDim2.new(0.05, 0, 0.1, 0)
 InfoLabel.BackgroundTransparency = 1
 InfoLabel.TextColor3 = TextColor
-InfoLabel.TextSize = 13
+InfoLabel.TextScaled = true -- جعل الخط كبير وتقيل
 InfoLabel.Font = Enum.Font.GothamBold
 InfoLabel.Text = "Crystal Hub | Fps -- | Ms --"
 InfoLabel.Parent = MainBar
 
--- إضافة حواف للكلام (نفس حجم الـ Speed)
+-- حواف الكلام لزيادة السمك (السر بتاع نوفا)
 local TextStroke = Instance.new("UIStroke", InfoLabel)
-TextStroke.Thickness = 0.3
-TextStroke.Color = PureBlack
+TextStroke.Thickness = 0.6 
+TextStroke.Color = Color3.fromRGB(0, 40, 80) -- حواف كحلية بتخلي الأزرق ينطق
 
--- [[ 2. القائمة السفلى - بيضاوية (Rounded) وألوان متدرجة ]]
+-- [[ 2. القائمة السفلى - بيضاوية 100% ]]
 local BottomBar = Instance.new("Frame")
-BottomBar.Size = UDim2.new(0, 240, 0, 12)
-BottomBar.Position = UDim2.new(0.5, -120, 0.04, 38)
+BottomBar.Size = UDim2.new(0, 250, 0, 14)
+BottomBar.Position = UDim2.new(0.5, -125, 0.04, 40)
 BottomBar.BackgroundTransparency = 1
 BottomBar.Parent = ScreenGui
 
--- الحاوية لجعل الحواف بيضاوية
-local BarContainer = Instance.new("Frame")
-BarContainer.Size = UDim2.new(1, 0, 1, 0)
-BarContainer.BackgroundTransparency = 1
-BarContainer.ClipsDescendants = true 
-BarContainer.Parent = BottomBar
-
-Instance.new("UICorner", BarContainer).CornerRadius = UDim.new(0, 10) -- جعلها بيضاوية زي نوفا
+local CornerClip = Instance.new("CanvasGroup", BottomBar)
+CornerClip.Size = UDim2.new(1, 0, 1, 0)
+CornerClip.BackgroundTransparency = 1
+CornerClip.Parent = BottomBar
+Instance.new("UICorner", CornerClip).CornerRadius = UDim.new(0, 12) 
 
 local function CreatePart(pos, size, color, trans, txt)
     local f = Instance.new("Frame")
@@ -78,29 +75,27 @@ local function CreatePart(pos, size, color, trans, txt)
     f.BackgroundColor3 = color
     f.BackgroundTransparency = trans
     f.BorderSizePixel = 0
-    f.Parent = BarContainer
+    f.Parent = CornerClip
     
     local t = Instance.new("TextLabel", f)
-    t.Size = UDim2.new(1, 0, 1, 0)
+    t.Size = UDim2.new(1, 0, 0.8, 0)
+    t.Position = UDim2.new(0, 0, 0.1, 0)
     t.BackgroundTransparency = 1
     t.Text = txt
-    t.TextColor3 = Color3.fromRGB(220, 220, 220)
-    t.TextSize = 9
+    t.TextColor3 = Color3.fromRGB(240, 240, 240)
+    t.TextScaled = true -- تكبير النص السفلي
     t.Font = Enum.Font.GothamBold
     t.Parent = f
     
-    -- حواف الكلام (نفس حجم الـ Speed)
     local tS = Instance.new("UIStroke", t)
-    tS.Thickness = 0.3
+    tS.Thickness = 0.5
     tS.Color = PureBlack
 end
 
--- الناحية الشمال: أسود شفاف "أفتح بـ 20 درجة" (0.55 شفافية)
 CreatePart(UDim2.new(0,0,0,0), UDim2.new(0.5, 0, 1, 0), PureBlack, 0.55, "0%")
--- الناحية اليمين: أسود شفاف غامق (0.3 شفافية)
-CreatePart(UDim2.new(0.5,0,0,0), UDim2.new(0.5, 0, 1, 0), PureBlack, 0.3, "7.4")
+CreatePart(UDim2.new(0.5,0,0,0), UDim2.new(0.5, 0, 1, 0), PureBlack, 0.2, "7.4")
 
--- [[ 3. نظام السرعة (المرجع للحواف) ]]
+-- [[ 3. نظام السرعة ]]
 local function SetupTag(p)
     local function addTag(char)
         local head = char:WaitForChild("Head", 10)
@@ -117,11 +112,11 @@ local function SetupTag(p)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
         label.TextColor3 = Color3.fromRGB(255, 255, 255)
-        label.TextSize = 12
+        label.TextSize = 13
         label.Font = Enum.Font.GothamBold
         
         local sStroke = Instance.new("UIStroke", label)
-        sStroke.Thickness = 0.3 -- الحجم اللي استخدمناه في كل الكلام
+        sStroke.Thickness = 0.4
         sStroke.Color = PureBlack
 
         RunService.RenderStepped:Connect(function()
