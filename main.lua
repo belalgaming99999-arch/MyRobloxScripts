@@ -1,4 +1,4 @@
--- [[ Crystal Hub - Ultra Soft Tags & Centered ]]
+-- [[ Crystal Hub - Optimized Stroke 1.0 ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -26,7 +26,7 @@ ScreenGui.Name = "Crystal_Final_UI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = Target
 
--- [[ 1. القائمة العلوية - متمركزة بالمنتصف تماماً ]]
+-- [[ 1. القائمة العلوية - تم ضبط الحواف لـ 1.0 ]]
 local MainBar = Instance.new("Frame")
 MainBar.Size = UDim2.new(0, 240, 0, 32)
 MainBar.Position = UDim2.new(0.5, -120, 0.04, 0) 
@@ -38,7 +38,7 @@ MainBar.Parent = ScreenGui
 Instance.new("UICorner", MainBar).CornerRadius = UDim.new(0, 8)
 local Stroke = Instance.new("UIStroke", MainBar)
 Stroke.Color = DeepNovaBlue
-Stroke.Thickness = 1.3
+Stroke.Thickness = 1.0 -- الدرجة المطلوبة بالظبط
 
 local InfoLabel = Instance.new("TextLabel")
 InfoLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -77,7 +77,7 @@ end
 CreatePart(UDim2.new(0,0,0,0), Color3.fromRGB(30, 30, 30), "0%")
 CreatePart(UDim2.new(0.5,0,0,0), Color3.fromRGB(10, 10, 10), "7.4")
 
--- [[ 3. نظام السرعة - تصغير الحجم لـ 14 وتخفيف الحواف لـ 0.5 ]]
+-- [[ 3. نظام السرعة فوق الرأس ]]
 local function SetupTag(p)
     local function addTag(char)
         local head = char:WaitForChild("Head", 10)
@@ -94,11 +94,11 @@ local function SetupTag(p)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
         label.TextColor3 = Color3.fromRGB(255, 255, 255)
-        label.TextSize = 14 -- صغرتها درجتين كمان
+        label.TextSize = 14
         label.Font = Enum.Font.GothamBold
         
         local sStroke = Instance.new("UIStroke", label)
-        sStroke.Thickness = 0.5 -- خففت الحواف درجة كمان
+        sStroke.Thickness = 0.5
         sStroke.Color = Color3.fromRGB(0, 0, 0)
 
         RunService.RenderStepped:Connect(function()
