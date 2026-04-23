@@ -1,4 +1,4 @@
--- [[ Crystal Hub - Super Stable Version ]] --
+-- [[ Crystal Hub - Super Stable Version v2 ]] --
 
 if not game:IsLoaded() then game.Loaded:Wait() end
 
@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 local Player = Players.LocalPlayer
 
 -- الألوان الموحدة
@@ -14,7 +15,16 @@ local RightPartColor = Color3.fromRGB(0, 0, 0)
 local RightPartTrans = 0.15 
 local LeftPartTrans = 0.5   
 
--- 1. تنظيف شامل لكل النسخ السابقة لتجنب أي تداخل
+-- المتغيرات التقنية للميزات
+local Settings = {
+    Aimbot = false,
+    Spin = false,
+    Unwalk = true,
+    AntiRagdoll = true,
+    LockSpeed = 59
+}
+
+-- 1. تنظيف شامل
 local function FinalCleanup()
     local all_guis = {game:GetService("CoreGui"), Player:WaitForChild("PlayerGui")}
     for _, parent in pairs(all_guis) do
@@ -27,17 +37,16 @@ local function FinalCleanup()
 end
 FinalCleanup()
 
-local UI_NAME = "Crystal_Stable_Final"
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = UI_NAME
+ScreenGui.Name = "Crystal_Stable_Final"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
-ScreenGui.DisplayOrder = 9999 -- أعلى طبقة ممكنة
+ScreenGui.DisplayOrder = 9999
 
 local success = pcall(function() ScreenGui.Parent = game:GetService("CoreGui") end)
 if not success then ScreenGui.Parent = Player:WaitForChild("PlayerGui") end
 
--- وظيفة السحب الاحترافية
+-- وظيفة السحب
 local function MakeDraggable(gui)
     local dragging, dragStart, startPos
     local moved = false
@@ -59,9 +68,10 @@ local function MakeDraggable(gui)
     return function() return not moved end 
 end
 
--- [[ اللوحة العلوية والسفلية - حواف 10 ]] --
+-- [[ اللوحة العلوية والسفلية ]] --
 local MainContainer = Instance.new("Frame", ScreenGui)
 MainContainer.Size = UDim2.new(0, 250, 0, 60); MainContainer.Position = UDim2.new(0.5, -125, 0.18, 0); MainContainer.BackgroundTransparency = 1
+MakeDraggable(MainContainer)
 
 local TopBar = Instance.new("Frame", MainContainer)
 TopBar.Size = UDim2.new(1, 0, 0, 34); TopBar.BackgroundColor3 = Color3.fromRGB(0,0,0); TopBar.BackgroundTransparency = 0.15; TopBar.BorderSizePixel = 0
@@ -71,24 +81,11 @@ TopStroke.Color = CrystalPurple; TopStroke.Thickness = 2; TopStroke.ApplyStrokeM
 
 local InfoLabel = Instance.new("TextLabel", TopBar)
 InfoLabel.Size = UDim2.new(1, 0, 1, 0); InfoLabel.BackgroundTransparency = 1; InfoLabel.TextColor3 = CrystalPurple; InfoLabel.TextSize = 13; InfoLabel.Font = Enum.Font.GothamBold
-InfoLabel.Text = "Crystal Hub | Loading..." -- نص البداية
-
-local BottomBar = Instance.new("Frame", MainContainer)
-BottomBar.Size = UDim2.new(1, 0, 0, 16); BottomBar.Position = UDim2.new(0, 0, 0, 40); BottomBar.BackgroundTransparency = 1
-
-local function CreateStat(pos, size, trans, txt)
-    local f = Instance.new("Frame", BottomBar)
-    f.Size = size; f.Position = pos; f.BackgroundColor3 = Color3.fromRGB(0,0,0); f.BackgroundTransparency = trans; f.BorderSizePixel = 0
-    Instance.new("UICorner", f).CornerRadius = UDim.new(0, 10)
-    local t = Instance.new("TextLabel", f)
-    t.Size = UDim2.new(1, 0, 1, 0); t.BackgroundTransparency = 1; t.Text = txt; t.TextColor3 = Color3.fromRGB(255,255,255); t.TextSize = 10; t.Font = Enum.Font.GothamBold
-end
-CreateStat(UDim2.new(0, 0, 0, 0), UDim2.new(0.49, 0, 1, 0), LeftPartTrans, "0%") 
-CreateStat(UDim2.new(0.51, 0, 0, 0), UDim2.new(0.49, 0, 1, 0), RightPartTrans, "7.4") 
+InfoLabel.Text = "Crystal Hub | Initializing..."
 
 -- [[ المنيو الجانبي ]] --
 local SideMenu = Instance.new("Frame", ScreenGui)
-SideMenu.Size = UDim2.new(0, 160, 0, 280); SideMenu.Position = UDim2.new(-0.7, 0, 0.35, 0)
+SideMenu.Size = UDim2.new(0, 160, 0, 320); SideMenu.Position = UDim2.new(-0.7, 0, 0.35, 0)
 SideMenu.BackgroundColor3 = Color3.fromRGB(0,0,0); SideMenu.BackgroundTransparency = LeftPartTrans; SideMenu.BorderSizePixel = 0
 Instance.new("UICorner", SideMenu).CornerRadius = UDim.new(0, 10)
 local SideStroke = Instance.new("UIStroke", SideMenu); SideStroke.Color = CrystalPurple; SideStroke.Thickness = 2
@@ -97,7 +94,8 @@ local UIList = Instance.new("UIListLayout", SideMenu)
 UIList.Padding = UDim.new(0, 7); UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 Instance.new("UIPadding", SideMenu).PaddingTop = UDim.new(0, 12)
 
-local function CreateBtn(txt, parent, size)
+-- وظيفة إنشاء الأزرار المربوطة بالأكشن
+local function CreateBtn(txt, parent, size, callback)
     local btn = Instance.new("TextButton", parent)
     btn.Size = size or UDim2.new(0, 140, 0, 36)
     btn.BackgroundColor3 = RightPartColor; btn.BackgroundTransparency = RightPartTrans; btn.BorderSizePixel = 0
@@ -105,8 +103,100 @@ local function CreateBtn(txt, parent, size)
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
     local s = Instance.new("UIStroke", btn); s.Color = CrystalPurple; s.Thickness = 1.5; s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     
+    local active = false
     btn.MouseButton1Click:Connect(function()
-        local active = (btn.BackgroundColor3 == RightPartColor)
+        active = not active
+        btn.BackgroundColor3 = active and CrystalPurple or RightPartColor
+        btn.BackgroundTransparency = active and 0 or RightPartTrans
+        if callback then callback(active) end
+    end)
+    return btn
+end
+
+-- ميزات المنيو
+CreateBtn("Esp Player", SideMenu, nil, function(state) print("ESP State:", state) end)
+
+local function Row(p)
+    local f = Instance.new("Frame", p); f.Size = UDim2.new(0, 140, 0, 32); f.BackgroundTransparency = 1
+    local l = Instance.new("UIListLayout", f); l.FillDirection = Enum.FillDirection.Horizontal; l.Padding = UDim.new(0, 8); l.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    return f
+end
+
+-- زر Aimbot
+local R1 = Row(SideMenu)
+CreateBtn("AimBot", R1, UDim2.new(0, 66, 1, 0), function(state) Settings.Aimbot = state end)
+-- زر Spin
+CreateBtn("Spin Bot", R1, UDim2.new(0, 66, 1, 0), function(state) Settings.Spin = state end)
+
+local R2 = Row(SideMenu)
+CreateBtn("Auto Medusa", R2, UDim2.new(0, 140, 1, 0), function(state) print("Medusa Active") end)
+
+-- [[ ميزات الحركة التلقائية ]] --
+
+-- 1. Anti-Ragdoll & Unwalk
+RunService.Heartbeat:Connect(function()
+    local char = Player.Character
+    if char and char:FindFirstChildOfClass("Humanoid") then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        
+        -- Unwalk logic
+        if Settings.Unwalk then
+            local animator = hum:FindFirstChildOfClass("Animator")
+            if animator then
+                for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+                    if track.Name:lower():find("walk") or track.Name:lower():find("run") then
+                        track:Stop(0)
+                    end
+                end
+            end
+        end
+
+        -- Anti Ragdoll logic
+        if Settings.AntiRagdoll then
+            if hum:GetState() == Enum.HumanoidStateType.Physics or hum:GetState() == Enum.HumanoidStateType.Ragdoll then
+                hum:ChangeState(Enum.HumanoidStateType.Running)
+                if char:FindFirstChild("HumanoidRootPart") then
+                    char.HumanoidRootPart.AssemblyLinearVelocity = Vector3.zero
+                end
+            end
+        end
+        
+        -- Spin Bot logic
+        if Settings.Spin and char:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.AssemblyAngularVelocity = Vector3.new(0, 100, 0)
+        end
+    end
+end)
+
+-- [[ الأيقونة العائمة ]] --
+local SideButton = Instance.new("TextButton", ScreenGui)
+SideButton.Size = UDim2.new(0, 60, 0, 60); SideButton.Position = UDim2.new(1, -75, 0.30, 0); SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""; SideButton.BorderSizePixel = 0
+Instance.new("UICorner", SideButton).CornerRadius = UDim.new(0, 10)
+local canOpen = MakeDraggable(SideButton) 
+
+for i=0,2 do
+    local line = Instance.new("Frame", SideButton)
+    line.Size = UDim2.new(0, 28, 0, 4); line.Position = UDim2.new(0.5, -14, 0, 18 + (i * 10)); line.BackgroundColor3 = Color3.fromRGB(255, 255, 255); line.BorderSizePixel = 0; Instance.new("UICorner", line).CornerRadius = UDim.new(0, 2)
+end
+
+local menuOpen = false
+SideButton.MouseButton1Up:Connect(function()
+    if canOpen() then 
+        menuOpen = not menuOpen
+        SideMenu:TweenPosition(UDim2.new(menuOpen and 0.02 or -0.7, 0, 0.35, 0), "Out", "Quart", 0.4, true)
+    end
+end)
+
+-- تحديث الـ FPS والـ MS
+task.spawn(function()
+    while task.wait(0.5) do
+        pcall(function()
+            local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+            local fps = math.floor(1 / RunService.RenderStepped:Wait())
+            InfoLabel.Text = string.format("Crystal Hub | FPS %d | MS %d", fps, ping)
+        end)
+    end
+end)
         btn.BackgroundColor3 = active and CrystalPurple or RightPartColor
         btn.BackgroundTransparency = active and 0 or RightPartTrans
     end)
