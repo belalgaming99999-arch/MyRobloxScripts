@@ -1,4 +1,4 @@
--- [[ Crystal Hub - Fully Draggable & Universal Edition ]]
+-- [[ Crystal Hub - Ultra Smooth & Fixed Position Edition ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -7,12 +7,12 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Player = Players.LocalPlayer
 
--- الألوان الموحدة
+-- الألوان الملكية
 local CrystalPurple = Color3.fromRGB(120, 0, 255) 
 local PureBlack = Color3.fromRGB(0, 0, 0)
 local PureWhite = Color3.fromRGB(255, 255, 255)
 
--- تنظيف الواجهات القديمة
+-- تنظيف الواجهة القديمة
 local function ForceClean()
     local name = "Crystal_Final_UI"
     pcall(function()
@@ -22,7 +22,7 @@ local function ForceClean()
 end
 ForceClean()
 
--- إنشاء حاوية الواجهة
+-- حاوية الواجهة
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "Crystal_Final_UI"
 ScreenGui.ResetOnSpawn = false
@@ -31,14 +31,12 @@ ScreenGui.DisplayOrder = 999999
 pcall(function() ScreenGui.Parent = game:GetService("CoreGui") end)
 if not ScreenGui.Parent then ScreenGui.Parent = Player:WaitForChild("PlayerGui") end
 
--- [[ وظيفة السحب (Drag Function) ]]
+-- وظيفة السحب (للمنيو والزر)
 local function MakeDraggable(gui)
     local dragging, dragInput, dragStart, startPos
     gui.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = gui.Position
+            dragging = true; dragStart = input.Position; startPos = gui.Position
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then dragging = false end
             end)
@@ -57,12 +55,11 @@ local function MakeDraggable(gui)
     end)
 end
 
--- [[ 1. القوائم المركزية (ثابتة في الأعلى مع أنيميشن دخول) ]]
+-- [[ 1. القوائم المركزية الثابتة ]]
 local MainBar = Instance.new("Frame", ScreenGui)
 MainBar.Size = UDim2.new(0, 250, 0, 34)
-MainBar.Position = UDim2.new(0.5, -125, -0.2, 0)
-MainBar.BackgroundColor3 = PureBlack
-MainBar.BackgroundTransparency = 0.15
+MainBar.Position = UDim2.new(0.5, -125, 0.06, 0)
+MainBar.BackgroundColor3 = PureBlack; MainBar.BackgroundTransparency = 0.15
 Instance.new("UICorner", MainBar).CornerRadius = UDim.new(0, 15)
 Instance.new("UIStroke", MainBar).Color = CrystalPurple
 
@@ -73,7 +70,7 @@ InfoLabel.Text = "Crystal Hub | FPS -- | MS --"
 
 local BottomBar = Instance.new("Frame", ScreenGui)
 BottomBar.Size = UDim2.new(0, 250, 0, 14)
-BottomBar.Position = UDim2.new(0.5, -125, -0.2, 40)
+BottomBar.Position = UDim2.new(0.5, -125, 0.06, 40)
 BottomBar.BackgroundTransparency = 1
 
 local function CreatePart(pos, size, trans, txt)
@@ -87,14 +84,13 @@ end
 CreatePart(UDim2.new(0, 0, 0, 0), UDim2.new(0.49, 0, 1, 0), 0.5, "0%") 
 CreatePart(UDim2.new(0.51, 0, 0, 0), UDim2.new(0.49, 0, 1, 0), 0.15, "7.4") 
 
--- [[ 2. زر المنيو (قابل للسحب) ]]
+-- [[ 2. زر المنيو (تم رفعه قليلاً للأعلى) ]]
 local SideButton = Instance.new("TextButton", ScreenGui)
 SideButton.Size = UDim2.new(0, 46, 0, 46)
-SideButton.Position = UDim2.new(1.2, 0, 0.9, -110)
-SideButton.BackgroundColor3 = CrystalPurple
-SideButton.Text = ""
+SideButton.Position = UDim2.new(1, -65, 0.65, 0) -- رفعت الموقع من 0.8 لـ 0.65
+SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""
 Instance.new("UICorner", SideButton).CornerRadius = UDim.new(0, 15)
-MakeDraggable(SideButton) -- تفعيل السحب للزر
+MakeDraggable(SideButton)
 
 local LinesFrame = Instance.new("Frame", SideButton)
 LinesFrame.Size = UDim2.new(0.5, 0, 0.4, 0); LinesFrame.Position = UDim2.new(0.25, 0, 0.3, 0); LinesFrame.BackgroundTransparency = 1
@@ -105,7 +101,65 @@ local function CreateLine(p)
 end
 CreateLine(0); CreateLine(0.4); CreateLine(0.8)
 
--- [[ 3. القائمة الجانبية (قابلة للسحب) ]]
+-- [[ 3. القائمة الجانبية (أنيميشن سلاسة من الشمال لليمين) ]]
+local SideMenu = Instance.new("Frame", ScreenGui)
+SideMenu.Size = UDim2.new(0, 160, 0, 240)
+SideMenu.Position = UDim2.new(-0.7, 0, 0.35, 0) -- تبدأ مخفية تماماً خلف الشاشة
+SideMenu.BackgroundColor3 = PureBlack; SideMenu.BackgroundTransparency = 0.1
+Instance.new("UICorner", SideMenu).CornerRadius = UDim.new(0, 15)
+Instance.new("UIStroke", SideMenu).Color = CrystalPurple
+MakeDraggable(SideMenu)
+
+-- برمجة الفتح والتحريك بسلاسة
+local menuOpen = false
+SideButton.MouseButton1Click:Connect(function()
+    menuOpen = not menuOpen
+    -- الأنيميشن من الشمال (خارج الشاشة) لليمين (داخل الشاشة)
+    local targetPos = menuOpen and UDim2.new(0.02, 0, 0.35, 0) or UDim2.new(-0.7, 0, 0.35, 0)
+    local tweenInfo = TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+    TweenService:Create(SideMenu, tweenInfo, {Position = targetPos}):Play()
+end)
+
+-- [[ 4. نظام السرعة (أبيض) ]]
+local function SetupSpeedTag(p)
+    p.CharacterAdded:Connect(function(char)
+        local head = char:WaitForChild("Head", 15)
+        local bill = Instance.new("BillboardGui", head)
+        bill.Name = "CrystalTag"; bill.Size = UDim2.new(0, 80, 0, 20); bill.StudsOffset = Vector3.new(0, 3.5, 0); bill.AlwaysOnTop = true
+        local label = Instance.new("TextLabel", bill)
+        label.Size = UDim2.new(1, 0, 1, 0); label.BackgroundTransparency = 1; label.TextColor3 = PureWhite; label.TextSize = 11; label.Font = Enum.Font.GothamBold
+        RunService.Heartbeat:Connect(function()
+            if char:FindFirstChild("HumanoidRootPart") then
+                label.Text = p == Player and "Speed: " .. string.format("%.1f", char.HumanoidRootPart.Velocity.Magnitude) or p.DisplayName
+            end
+        end)
+    end)
+    if p.Character then task.spawn(function()
+        local char = p.Character
+        local head = char:WaitForChild("Head", 15)
+        local bill = Instance.new("BillboardGui", head)
+        bill.Name = "CrystalTag"; bill.Size = UDim2.new(0, 80, 0, 20); bill.StudsOffset = Vector3.new(0, 3.5, 0); bill.AlwaysOnTop = true
+        local label = Instance.new("TextLabel", bill)
+        label.Size = UDim2.new(1, 0, 1, 0); label.BackgroundTransparency = 1; label.TextColor3 = PureWhite; label.TextSize = 11; label.Font = Enum.Font.GothamBold
+        RunService.Heartbeat:Connect(function()
+            if char:FindFirstChild("HumanoidRootPart") then
+                label.Text = p == Player and "Speed: " .. string.format("%.1f", char.HumanoidRootPart.Velocity.Magnitude) or p.DisplayName
+            end
+        end)
+    end) end
+end
+for _, v in pairs(Players:GetPlayers()) do SetupSpeedTag(v) end
+Players.PlayerAdded:Connect(SetupSpeedTag)
+
+-- تحديث البيانات
+task.spawn(function()
+    while true do
+        local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+        local fps = math.floor(1 / (RunService.RenderStepped:Wait()))
+        InfoLabel.Text = string.format("Crystal Hub | FPS %d | MS %d", fps, ping)
+        task.wait(1.2)
+    end
+end)
 local SideMenu = Instance.new("Frame", ScreenGui)
 SideMenu.Size = UDim2.new(0, 160, 0, 220)
 SideMenu.Position = UDim2.new(-0.6, 0, 0.4, 0)
