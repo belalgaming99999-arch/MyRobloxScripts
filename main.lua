@@ -1,4 +1,4 @@
--- [[ Crystal Hub - Final Ultra Nova Edition ]]
+-- [[ Crystal Hub - Guaranteed Nova Oval Edition ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -28,7 +28,7 @@ ScreenGui.Name = "Crystal_Final_UI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = Target
 
--- [[ 1. القائمة العلوية - تم تصغير عرض النص ]]
+-- [[ 1. القائمة العلوية ]]
 local MainBar = Instance.new("Frame")
 MainBar.Size = UDim2.new(0, 250, 0, 34)
 MainBar.Position = UDim2.new(0.5, -125, 0.04, 0) 
@@ -43,7 +43,6 @@ MainStroke.Color = DeepPurple
 MainStroke.Thickness = 1.2
 
 local InfoLabel = Instance.new("TextLabel")
--- تم تقليل العرض من 0.9 لـ 0.7 ليكون الخط "ملموم" في النص
 InfoLabel.Size = UDim2.new(0.7, 0, 0.6, 0) 
 InfoLabel.Position = UDim2.new(0.15, 0, 0.2, 0)
 InfoLabel.BackgroundTransparency = 1
@@ -57,18 +56,15 @@ local TextStroke = Instance.new("UIStroke", InfoLabel)
 TextStroke.Thickness = 0.5 
 TextStroke.Color = PureBlack
 
--- [[ 2. القائمة السفلى - بيضاوية Nova باللون الأبيض ]]
-local BottomBar = Instance.new("CanvasGroup")
+-- [[ 2. القائمة السفلى - الحل النهائي للبيضاوية ]]
+local BottomBar = Instance.new("Frame")
 BottomBar.Size = UDim2.new(0, 250, 0, 14)
 BottomBar.Position = UDim2.new(0.5, -125, 0.04, 40)
 BottomBar.BackgroundTransparency = 1
 BottomBar.BorderSizePixel = 0
-BottomBar.GroupTransparency = 0 -- يضمن ظهور المحتوى
 BottomBar.Parent = ScreenGui
 
-Instance.new("UICorner", BottomBar).CornerRadius = UDim.new(0, 15)
-
-local function CreatePart(pos, size, color, trans, txt)
+local function CreatePart(pos, size, color, trans, txt, cornerSide)
     local f = Instance.new("Frame")
     f.Size = size
     f.Position = pos
@@ -77,12 +73,16 @@ local function CreatePart(pos, size, color, trans, txt)
     f.BorderSizePixel = 0
     f.Parent = BottomBar
     
+    -- وضع انحناء كبير جداً لكل جزء لضمان الشكل البيضاوي
+    local c = Instance.new("UICorner", f)
+    c.CornerRadius = UDim.new(0, 20) 
+    
     local t = Instance.new("TextLabel", f)
     t.Size = UDim2.new(1, 0, 0.7, 0)
     t.Position = UDim2.new(0, 0, 0.15, 0)
     t.BackgroundTransparency = 1
     t.Text = txt
-    t.TextColor3 = Color3.fromRGB(255, 255, 255) -- أبيض ناصع زي الـ Speed
+    t.TextColor3 = Color3.fromRGB(255, 255, 255)
     t.TextScaled = true 
     t.Font = Enum.Font.GothamBold
     t.Parent = f
@@ -92,7 +92,9 @@ local function CreatePart(pos, size, color, trans, txt)
     tS.Color = PureBlack
 end
 
+-- الجزء الشمال (دائري من طرفه)
 CreatePart(UDim2.new(0,0,0,0), UDim2.new(0.5, 0, 1, 0), PureBlack, 0.6, "0%")
+-- الجزء اليمين (دائري من طرفه ومتناسق مع العلوية)
 CreatePart(UDim2.new(0.5,0,0,0), UDim2.new(0.5, 0, 1, 0), PureBlack, DarkerTransparency, "7.4")
 
 -- [[ 3. نظام السرعة ]]
@@ -106,6 +108,51 @@ local function SetupTag(p)
         bill.Name = "CrystalTag"
         bill.Size = UDim2.new(0, 200, 0, 50)
         bill.StudsOffset = Vector3.new(0, 4.0, 0) 
+        bill.AlwaysOnTop = true
+
+        local label = Instance.new("TextLabel", bill)
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        label.TextSize = 13
+        label.Font = Enum.Font.GothamBold
+        
+        local sStroke = Instance.new("UIStroke", label)
+        sStroke.Thickness = 0.4
+        sStroke.Color = PureBlack
+
+        RunService.RenderStepped:Connect(function()
+            if char:IsDescendantOf(workspace) and root then
+                local speed = root.Velocity.Magnitude
+                if p == Player then
+                    label.Text = "Speed: " .. string.format("%.1f", speed)
+                else
+                    label.Text = p.DisplayName
+                    label.TextColor3 = TextColor
+                end
+            end
+        end)
+    end
+    if p.Character then addTag(p.Character) end
+    p.CharacterAdded:Connect(addTag)
+end
+
+-- العدادات
+local curFps = 0
+task.spawn(function()
+    while true do
+        curFps = math.floor(1 / (RunService.RenderStepped:Wait() + 0.0001))
+        task.wait(0.5)
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+    InfoLabel.Text = "Crystal Hub | Fps " .. curFps .. " | Ms " .. ping
+end)
+
+for _, v in pairs(Players:GetPlayers()) do SetupTag(v) end
+Players.PlayerAdded:Connect(SetupTag)
         bill.AlwaysOnTop = true
 
         local label = Instance.new("TextLabel", bill)
