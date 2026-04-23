@@ -1,4 +1,4 @@
--- [[ Crystal Hub - No Border Bottom HUD ]] --
+-- [[ Crystal Hub - Professional HUD Animation ]] --
 
 if not game:IsLoaded() then game.Loaded:Wait() end
 
@@ -21,85 +21,109 @@ for _, child in pairs(CoreGui:GetChildren()) do
 end
 
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "Crystal_No_Bottom_Borders"
+ScreenGui.Name = "Crystal_Final_Anim"
 ScreenGui.ResetOnSpawn = false
 
--- ========== 1. HUD (Top & Bottom Bars) ==========
+-- ========== 1. اللوحة العلوية والسفلية (HUD) ==========
 local HudContainer = Instance.new("Frame", ScreenGui)
 HudContainer.Size = UDim2.new(0, 260, 0, 80)
 HudContainer.Position = UDim2.new(0.5, -130, 0.05, 0)
 HudContainer.BackgroundTransparency = 1
 
--- اللوحة العلوية (بإطار بنفسجي)
+-- اللوحة العلوية
 local TopBar = Instance.new("Frame", HudContainer)
-TopBar.Size = UDim2.new(1, 0, 0, 35)
+TopBar.Size = UDim2.new(1, 0, 0, 38)
 TopBar.BackgroundColor3 = DarkColor
-TopBar.BackgroundTransparency = 0.2
+TopBar.BackgroundTransparency = 0.15
 Instance.new("UICorner", TopBar).CornerRadius = CornerRadius15
 local TopStroke = Instance.new("UIStroke", TopBar); TopStroke.Color = CrystalPurple; TopStroke.Thickness = 1.5
 
 local InfoLabel = Instance.new("TextLabel", TopBar)
 InfoLabel.Size = UDim2.new(1, 0, 1, 0); InfoLabel.BackgroundTransparency = 1
-InfoLabel.TextColor3 = CrystalPurple; InfoLabel.Font = Enum.Font.GothamBold; InfoLabel.TextSize = 12
+InfoLabel.TextColor3 = CrystalPurple; InfoLabel.Font = Enum.Font.GothamBold; InfoLabel.TextSize = 14
 InfoLabel.Text = "Crystal Hub | FPS: 0 | MS: 0"
 
--- اللوحة السفلية (بدون حواف/إطارات)
+-- اللوحة السفلية
 local BottomBar = Instance.new("Frame", HudContainer)
-BottomBar.Size = UDim2.new(1, 0, 0, 24)
-BottomBar.Position = UDim2.new(0, 0, 0, 42)
+BottomBar.Size = UDim2.new(1, 0, 0, 20)
+BottomBar.Position = UDim2.new(0, 0, 0, 44)
 BottomBar.BackgroundTransparency = 1
 
 local function CreateStatBox(pos, size, label, trans)
     local f = Instance.new("Frame", BottomBar)
     f.Size = size; f.Position = pos
     f.BackgroundColor3 = DarkColor
-    f.BackgroundTransparency = trans 
-    f.BorderSizePixel = 0 -- التأكيد على مسح الحواف التقليدية
+    f.BackgroundTransparency = trans
+    f.ClipsDescendants = true -- عشان تأثير التعبئة ميتطلعش بره
     Instance.new("UICorner", f).CornerRadius = CornerRadius10
     
-    -- ملاحظة: لم يتم إضافة UIStroke هنا بناءً على طلبك
-    
     local t = Instance.new("TextLabel", f)
-    t.Size = UDim2.new(1, 0, 1, 0); t.BackgroundTransparency = 1
+    t.Size = UDim2.new(1, 0, 1, 0); t.BackgroundTransparency = 1; t.ZIndex = 3
     t.TextColor3 = Color3.fromRGB(255, 255, 255); t.TextSize = 11; t.Font = Enum.Font.GothamBold; t.Text = label
     return t, f
 end
 
--- الشمال فاتح (0.7) | اليمين غامق (0.2) - كلاهما بدون إطار بنفسجي
+-- اليمين ثابتة 7.4 (غامقة) | الشمال 0% متغيرة (شفافة فاتحة)
 local LeftLabel, LeftFrame = CreateStatBox(UDim2.new(0, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "0%", 0.7)
 local RightLabel, RightFrame = CreateStatBox(UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "7.4", 0.2)
 
--- ========== 2. Side Menu (بإطار بنفسجي) ==========
+-- شريط التعبئة الداخلي (للجهة الشمال فقط)
+local LeftFill = Instance.new("Frame", LeftFrame)
+LeftFill.Size = UDim2.new(0, 0, 1, 0)
+LeftFill.BackgroundColor3 = DarkColor
+LeftFill.BackgroundTransparency = 0.2 -- اللون الغامق بتاع التعبئة
+LeftFill.BorderSizePixel = 0
+LeftFill.ZIndex = 2
+
+-- ========== 2. المنيو الجانبي (ثابت للتفعيلات فقط) ==========
 local MainMenu = Instance.new("Frame", ScreenGui)
 MainMenu.Size = UDim2.new(0, 160, 0, 400)
 MainMenu.Position = UDim2.new(-0.7, 0, 0.3, 0)
 MainMenu.BackgroundColor3 = DarkColor; MainMenu.BackgroundTransparency = 0.5
 Instance.new("UICorner", MainMenu).CornerRadius = CornerRadius15
-Instance.new("UIStroke", MainMenu).Color = CrystalPurple
+local MenuStroke = Instance.new("UIStroke", MainMenu); MenuStroke.Color = CrystalPurple
 
-local ProgressFill = Instance.new("Frame", MainMenu)
-ProgressFill.Size = UDim2.new(0, 0, 1, 0); ProgressFill.BackgroundColor3 = DarkColor; ProgressFill.BackgroundTransparency = 0.2
-ProgressFill.ZIndex = 0; Instance.new("UICorner", ProgressFill).CornerRadius = CornerRadius15
-
-local UIList = Instance.new("UIListLayout", MainMenu); UIList.Padding = UDim.new(0, 8); UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+local UIList = Instance.new("UIListLayout", MainMenu)
+UIList.Padding = UDim.new(0, 8); UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 Instance.new("UIPadding", MainMenu).PaddingTop = UDim.new(0, 12)
+
+-- وظيفة تحريك الرقم من 0 لـ 100 (سريع)
+local function AnimateSteal()
+    -- التعبئة من الشمال لليمين في اللوحة السفلية
+    LeftFill.Size = UDim2.new(0, 0, 1, 0)
+    
+    -- Tween للتعبئة وللأرقام
+    local duration = 0.4 -- سرعة الوصول لـ 100%
+    TweenService:Create(LeftFill, TweenInfo.new(duration, Enum.EasingStyle.Linear), {Size = UDim2.new(1, 0, 1, 0)}):Play()
+    
+    task.spawn(function()
+        for i = 0, 100, 5 do -- يزيد بسرعة
+            LeftLabel.Text = i .. "%"
+            task.wait(duration / 20)
+        end
+        task.wait(0.2) -- ثبات بسيط عند الـ 100%
+        
+        -- العودة للصفر
+        TweenService:Create(LeftFill, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 1, 0)}):Play()
+        for i = 100, 0, -10 do
+            LeftLabel.Text = i .. "%"
+            task.wait(0.02)
+        end
+    end)
+end
 
 local function CreateBtn(name, key)
     local btn = Instance.new("TextButton", MainMenu)
     btn.Size = UDim2.new(0, 140, 0, 34); btn.BackgroundColor3 = DarkColor; btn.BackgroundTransparency = 0.2
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255); btn.Text = name; btn.Font = Enum.Font.GothamBold; btn.TextSize = 10; btn.ZIndex = 2
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255); btn.Text = name; btn.Font = Enum.Font.GothamBold; btn.TextSize = 11
     Instance.new("UICorner", btn).CornerRadius = CornerRadius10
     local s = Instance.new("UIStroke", btn); s.Color = CrystalPurple; s.Thickness = 1.2
 
     btn.MouseButton1Click:Connect(function()
         if key == "StealNearest" then
-            LeftLabel.Text = "100%"
-            TweenService:Create(ProgressFill, TweenInfo.new(0.4), {Size = UDim2.new(1, 0, 1, 0)}):Play()
-            task.delay(0.6, function()
-                LeftLabel.Text = "0%"
-                TweenService:Create(ProgressFill, TweenInfo.new(0.4), {Size = UDim2.new(0, 0, 1, 0)}):Play()
-            end)
+            AnimateSteal() -- التأثير يحدث هنا فقط
         end
+        -- هنا تضع كود التفعيل الخاص بكل زر
     end)
 end
 
@@ -109,7 +133,7 @@ CreateBtn("Steal Nearest", "StealNearest")
 CreateBtn("Auto Medusa", "Medusa")
 CreateBtn("Infinite Jump", "Jump")
 
--- ========== 3. Floating Icon ==========
+-- ========== 3. الأيقونة والسحب ==========
 local SideButton = Instance.new("TextButton", ScreenGui)
 SideButton.Size = UDim2.new(0, 60, 0, 60); SideButton.Position = UDim2.new(1, -80, 0.5, 0); SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""
 Instance.new("UICorner", SideButton).CornerRadius = CornerRadius15
@@ -140,15 +164,13 @@ SideButton.InputEnded:Connect(function(input)
     end
 end)
 
--- ========== 4. Stats Loop ==========
+-- ========== 4. تحديث الـ HUD ==========
 task.spawn(function()
     while task.wait(0.1) do
         pcall(function()
             local fps = math.floor(1 / RunService.RenderStepped:Wait())
             local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-            local speed = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") and math.floor(Player.Character.HumanoidRootPart.AssemblyLinearVelocity.Magnitude * 10) / 10 or 7.4
             InfoLabel.Text = string.format("Crystal Hub | FPS: %d | MS: %d", fps, ping)
-            RightLabel.Text = tostring(speed)
         end)
     end
 end)
