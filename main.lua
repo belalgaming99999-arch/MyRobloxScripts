@@ -1,4 +1,4 @@
--- [[ Crystal Hub - Precision Oval Layout ]] --
+-- [[ Crystal Hub - Final Precision Layout ]] --
 
 if not game:IsLoaded() then game.Loaded:Wait() end
 
@@ -27,9 +27,9 @@ end
 FullCleanup()
 
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "Crystal_Precision_15"
+ScreenGui.Name = "Crystal_Precision_Final"
 
--- وظيفة السحب للأيقونة
+-- وظيفة السحب
 local function MakeDraggable(gui)
     local dragging, dragStart, startPos
     local moved = false
@@ -51,19 +51,19 @@ local function MakeDraggable(gui)
     return function() return not moved end 
 end
 
--- ========== 1. Top & Bottom HUD (مقاسات موحدة) ==========
+-- ========== 1. Top & Bottom HUD ==========
 local HUDContainer = Instance.new("Frame", ScreenGui)
 HUDContainer.Size = UDim2.new(0, 210, 0, 60); HUDContainer.Position = UDim2.new(0.5, -105, 0.02, 0); HUDContainer.BackgroundTransparency = 1
 
--- الشريط العلوي (تم تصغير العرض ليطابق السفلي)
 local TopBar = Instance.new("Frame", HUDContainer)
 TopBar.Size = UDim2.new(0.9, 0, 0, 28); TopBar.Position = UDim2.new(0.05, 0, 0, 0)
 TopBar.BackgroundColor3 = DarkColor; TopBar.BackgroundTransparency = 0.2
 Instance.new("UICorner", TopBar).CornerRadius = GlobalRadius
 local TopS = Instance.new("UIStroke", TopBar); TopS.Color = CrystalPurple; TopS.Thickness = BorderThickness
-local Info = Instance.new("TextLabel", TopBar); Info.Size = UDim2.new(1,0,1,0); Info.BackgroundTransparency = 1; Info.TextColor3 = CrystalPurple; Info.Font = Enum.Font.GothamBold; Info.TextSize = 11; Info.Text = "Crystal Hub"
 
--- اللوحة السفلية
+-- تكبير الخط سنة واحدة (12)
+local Info = Instance.new("TextLabel", TopBar); Info.Size = UDim2.new(1,0,1,0); Info.BackgroundTransparency = 1; Info.TextColor3 = CrystalPurple; Info.Font = Enum.Font.GothamBold; Info.TextSize = 12; Info.Text = "Crystal Hub"
+
 local BottomBar = Instance.new("Frame", HUDContainer)
 BottomBar.Size = UDim2.new(0.9, 0, 0, 14); BottomBar.Position = UDim2.new(0.05, 0, 0, 32); BottomBar.BackgroundTransparency = 1
 
@@ -77,9 +77,9 @@ end
 CreateStatBox(UDim2.new(0, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "0%", 0.5) 
 CreateStatBox(UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "7.4", 0.15) 
 
--- ========== 2. Main Side Menu (205 Height) ==========
+-- ========== 2. Main Side Menu (200 Height) ==========
 local MainMenu = Instance.new("Frame", ScreenGui)
-MainMenu.Size = UDim2.new(0, 170, 0, 205); MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -102) 
+MainMenu.Size = UDim2.new(0, 170, 0, 200); MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -100) 
 MainMenu.BackgroundColor3 = DarkColor; MainMenu.BackgroundTransparency = 0.4
 Instance.new("UICorner", MainMenu).CornerRadius = GlobalRadius
 local MenuS = Instance.new("UIStroke", MainMenu); MenuS.Color = CrystalPurple; MenuS.Thickness = BorderThickness
@@ -96,7 +96,6 @@ local function MakeToggleLogic(btn)
     end)
 end
 
--- زر Player Esp (مسافة علوية 12)
 local EspBtn = Instance.new("TextButton", MainMenu)
 EspBtn.Size = UDim2.new(0, 150, 0, 28); EspBtn.Position = UDim2.new(0.5, -75, 0, 12)
 EspBtn.BackgroundColor3 = DarkColor; EspBtn.BackgroundTransparency = 0.3; EspBtn.TextColor3 = Color3.fromRGB(255, 255, 255); EspBtn.Text = "Player Esp"; EspBtn.Font = Enum.Font.GothamBold; EspBtn.TextSize = 10
@@ -104,9 +103,9 @@ Instance.new("UICorner", EspBtn).CornerRadius = GlobalRadius
 local EspS = Instance.new("UIStroke", EspBtn); EspS.Color = CrystalPurple; EspS.Thickness = 1.2
 MakeToggleLogic(EspBtn)
 
--- الشبكة (Grid)
+-- الشبكة (تبدأ من 48 وتنتهي قبل زر الحفظ)
 local Grid = Instance.new("Frame", MainMenu)
-Grid.Size = UDim2.new(1, -20, 0, 130); Grid.Position = UDim2.new(0, 10, 0, 48); Grid.BackgroundTransparency = 1
+Grid.Size = UDim2.new(1, -20, 0, 110); Grid.Position = UDim2.new(0, 10, 0, 48); Grid.BackgroundTransparency = 1
 local UIGrid = Instance.new("UIGridLayout", Grid); UIGrid.CellSize = UDim2.new(0, 70, 0, 26); UIGrid.CellPadding = UDim2.new(0, 10, 0, 6)
 
 local features = {"Bat Aimbot", "Steal Near", "Auto Medusa", "Auto Play", "Anti Fling", "Anti Ragdoll", "Un Walk", "Inf Jump", "Spin Bot", "Optimizer"}
@@ -118,16 +117,16 @@ for _, f in pairs(features) do
     MakeToggleLogic(btn)
 end
 
--- زر Save Config (مسافة من التفعيلات تساوي مسافة ESP)
+-- زر Save Config (تحت Optimizer مباشرة بمسافة متناسقة)
 local SaveBtn = Instance.new("TextButton", MainMenu)
-SaveBtn.Size = UDim2.new(0, 150, 0, 28); SaveBtn.Position = UDim2.new(0.5, -75, 1, -40) 
+SaveBtn.Size = UDim2.new(0, 150, 0, 28); SaveBtn.Position = UDim2.new(0.5, -75, 0, 165) 
 SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.3
 SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255); SaveBtn.Text = "SAVE CONFIG"; SaveBtn.Font = Enum.Font.GothamBold; SaveBtn.TextSize = 9
 Instance.new("UICorner", SaveBtn).CornerRadius = GlobalRadius
 local SaveS = Instance.new("UIStroke", SaveBtn); SaveS.Color = CrystalPurple; SaveS.Thickness = 1.2
 SaveBtn.AutoButtonColor = false
 
--- ========== 3. Floating Button (35% High) ==========
+-- ========== 3. Floating Button ==========
 local SideButton = Instance.new("TextButton", ScreenGui)
 SideButton.Size = UDim2.new(0, 50, 0, 50); SideButton.Position = UDim2.new(1, -60, 0.35, 0); SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""; SideButton.BorderSizePixel = 0
 Instance.new("UICorner", SideButton).CornerRadius = GlobalRadius
@@ -142,11 +141,11 @@ local menuOpen = false
 SideButton.MouseButton1Up:Connect(function()
     if canOpen() then 
         menuOpen = not menuOpen
-        MainMenu:TweenPosition(UDim2.new(menuOpen and 0.02 or -0.7, 0, 0.5, -102), "Out", "Quart", 0.4, true)
+        MainMenu:TweenPosition(UDim2.new(menuOpen and 0.02 or -0.7, 0, 0.5, -100), "Out", "Quart", 0.4, true)
     end
 end)
 
--- ========== 4. Head Display & Updates ==========
+-- ========== 4. Head Display & Update Loop ==========
 local function CreateHeadDisplay()
     local char = Player.Character or Player.CharacterAdded:Wait()
     local head = char:WaitForChild("Head")
@@ -172,3 +171,4 @@ task.spawn(function()
         end)
     end
 end)
+
