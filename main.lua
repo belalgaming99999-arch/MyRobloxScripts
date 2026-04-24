@@ -1,4 +1,4 @@
--- [[ Crystal Hub - Precision Layout & Visual Fixes ]] --
+-- [[ Crystal Hub - Final Precision Sync ]] --
 
 if not game:IsLoaded() then game.Loaded:Wait() end
 
@@ -25,7 +25,7 @@ FullCleanup()
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "Crystal_Fixed_UI"
 
--- ========== 1. Top HUD (تعديل: لون أبيض + تصغير الخط) ==========
+-- ========== 1. Top HUD (تعديل: تكبير الخط سنة) ==========
 local HUDContainer = Instance.new("Frame", ScreenGui)
 HUDContainer.Size = UDim2.new(0, 230, 0, 70); HUDContainer.Position = UDim2.new(0.5, -115, 0.02, 0); HUDContainer.BackgroundTransparency = 1
 
@@ -36,9 +36,9 @@ local TopS = Instance.new("UIStroke", TopBar); TopS.Color = CrystalPurple; TopS.
 
 local Info = Instance.new("TextLabel", TopBar)
 Info.Size = UDim2.new(1,0,1,0); Info.BackgroundTransparency = 1; 
-Info.TextColor3 = Color3.fromRGB(255, 255, 255); -- التعديل: لون أبيض
+Info.TextColor3 = Color3.fromRGB(255, 255, 255); 
 Info.Font = Enum.Font.GothamBold; 
-Info.TextSize = 9; -- التعديل: تصغير الخط سنتين (من 11 إلى 9)
+Info.TextSize = 10; -- التعديل: تكبير سنة (من 9 إلى 10)
 Info.Text = "Crystal Hub | FPS 0 | MS 0" 
 
 local BottomBar = Instance.new("Frame", HUDContainer)
@@ -54,7 +54,7 @@ end
 CreateStatBox(UDim2.new(0, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "0%", 0.5) 
 CreateStatBox(UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "7.4", 0.15) 
 
--- ========== 2. Speed Tag (تعديل: تصغير الخط) ==========
+-- ========== 2. Speed Tag ==========
 local SpeedLabel
 local function CreateSpeedTag(char)
     if char:FindFirstChild("SpeedTag") then char.SpeedTag:Destroy() end
@@ -65,7 +65,7 @@ local function CreateSpeedTag(char)
     local label = Instance.new("TextLabel", billboard)
     label.Size = UDim2.new(1, 0, 1, 0); label.BackgroundTransparency = 1; label.TextColor3 = Color3.fromRGB(255, 255, 255)
     label.Font = Enum.Font.GothamBold; 
-    label.TextSize = 11; -- التعديل: تصغير كلمة سبيد سنة (من 12 إلى 11)
+    label.TextSize = 11; 
     label.Text = "Speed: 0.0"
     
     local stroke = Instance.new("UIStroke", label); stroke.Color = Color3.fromRGB(0, 0, 0); stroke.Thickness = 1; stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
@@ -75,7 +75,7 @@ end
 Player.CharacterAdded:Connect(CreateSpeedTag)
 if Player.Character then CreateSpeedTag(Player.Character) end
 
--- ========== 3. Main Side Menu ==========
+-- ========== 3. Main Side Menu (تعديل: توحيد حجم الخط) ==========
 local MainMenu = Instance.new("Frame", ScreenGui)
 MainMenu.Size = UDim2.new(0, 170, 0, 255); MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -127) 
 MainMenu.BackgroundColor3 = DarkColor; MainMenu.BackgroundTransparency = 0.4
@@ -96,7 +96,8 @@ end
 
 local EspBtn = Instance.new("TextButton", MainMenu)
 EspBtn.Size = UDim2.new(0, 150, 0, 28); EspBtn.Position = UDim2.new(0.5, -75, 0, 12)
-EspBtn.BackgroundColor3 = DarkColor; EspBtn.BackgroundTransparency = 0.3; EspBtn.TextColor3 = Color3.fromRGB(255, 255, 255); EspBtn.Text = "Player Esp"; EspBtn.Font = Enum.Font.GothamBold; EspBtn.TextSize = 10
+EspBtn.BackgroundColor3 = DarkColor; EspBtn.BackgroundTransparency = 0.3; EspBtn.TextColor3 = Color3.fromRGB(255, 255, 255); EspBtn.Text = "Player Esp"; EspBtn.Font = Enum.Font.GothamBold; 
+EspBtn.TextSize = 10; -- توحيد الحجم مع اللي فوق
 StyleButton(EspBtn, 1.5)
 
 local Grid = Instance.new("Frame", MainMenu)
@@ -106,17 +107,19 @@ local UIGrid = Instance.new("UIGridLayout", Grid); UIGrid.CellSize = UDim2.new(0
 local features = {"Bat Aimbot", "Steal Near", "Auto Medusa", "Auto Play", "Anti Fling", "Anti Ragdoll", "Un Walk", "Inf Jump", "Spin Bot", "Optimizer"}
 for _, f in pairs(features) do 
     local btn = Instance.new("TextButton", Grid)
-    btn.BackgroundColor3 = DarkColor; btn.BackgroundTransparency = 0.3; btn.TextColor3 = Color3.fromRGB(255, 255, 255); btn.Text = f; btn.Font = Enum.Font.GothamBold; btn.TextSize = 8
+    btn.BackgroundColor3 = DarkColor; btn.BackgroundTransparency = 0.3; btn.TextColor3 = Color3.fromRGB(255, 255, 255); btn.Text = f; btn.Font = Enum.Font.GothamBold; 
+    btn.TextSize = 10; -- التعديل: توحيد حجم خط التفعيلات مع القائمة العلوية
     StyleButton(btn, 1)
 end
 
--- زر Save Config (تعديل: رفع الزر سنتين)
+-- زر Save Config (تعديل: رفع سنة كمان)
 local SaveBtn = Instance.new("TextButton", MainMenu)
 SaveBtn.Name = "SaveBtn"
 SaveBtn.Size = UDim2.new(0, 150, 0, 28); 
-SaveBtn.Position = UDim2.new(0.5, -75, 1, -43); -- التعديل: الرفع من -45 إلى -43 (سنتين)
+SaveBtn.Position = UDim2.new(0.5, -75, 1, -42); -- التعديل: الرفع من -43 إلى -42
 SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.3; SaveBtn.ZIndex = 5
-SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255); SaveBtn.Text = "SAVE CONFIG"; SaveBtn.Font = Enum.Font.GothamBold; SaveBtn.TextSize = 9
+SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255); SaveBtn.Text = "Save Config"; SaveBtn.Font = Enum.Font.GothamBold; 
+SaveBtn.TextSize = 10; -- توحيد الحجم
 StyleButton(SaveBtn, 1.5)
 
 -- ========== 4. Floating Button ==========
