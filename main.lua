@@ -62,7 +62,7 @@ local function SmoothTween(obj, goal)
     TweenService:Create(obj, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), goal):Play()
 end
 
--- [ Top HUD - Unified Border ]
+-- [ Top HUD ]
 local HUDContainer = Instance.new("Frame", ScreenGui)
 HUDContainer.Size = UDim2.new(0, 230, 0, 70); HUDContainer.Position = UDim2.new(0.5, -115, 0.02, 0); HUDContainer.BackgroundTransparency = 1
 
@@ -76,11 +76,11 @@ Info.Size = UDim2.new(1,0,1,0); Info.BackgroundTransparency = 1; Info.TextColor3
 Info.Font = Enum.Font.GothamBold; Info.TextSize = UnifiedFontSize
 Info.Text = "Crystal Hub | FPS ... | MS ..."
 
--- [ Bottom Stats - Unified ]
+-- [ Bottom Stats ]
 local BottomBar = Instance.new("Frame", HUDContainer)
 BottomBar.Size = UDim2.new(0.9, 0, 0, 14); BottomBar.Position = UDim2.new(0.05, 0, 0, 35); BottomBar.BackgroundTransparency = 1
 
-local PercentLabel = nil  -- النسبة اللي هتتغير
+local PercentLabel = nil
 
 local function CreateStatBox(pos, size, txt, trans)
     local f = Instance.new("Frame", BottomBar); f.Size = size; f.Position = pos; f.BackgroundColor3 = DarkColor; f.BackgroundTransparency = trans
@@ -92,7 +92,7 @@ end
 CreateStatBox(UDim2.new(0, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "0%", 0.5) 
 CreateStatBox(UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "7.4", 0.15) 
 
--- [ Sidebar Menu - Unified Border ]
+-- [ Sidebar Menu ]
 local MainMenu = Instance.new("Frame", ScreenGui)
 MainMenu.Size = UDim2.new(0, 180, 0, 285); MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -142) 
 MainMenu.BackgroundColor3 = DarkColor; MainMenu.BackgroundTransparency = 0.4
@@ -159,7 +159,7 @@ for i=0,2 do
 end
 
 -- ============================================================
--- SPEED LABEL (سريع - تحديث كل إطار)
+-- SPEED LABEL (تحديث كل إطار)
 -- ============================================================
 local SpeedLabel = nil
 
@@ -192,7 +192,6 @@ local function CreateFastSpeedTag(char)
     SpeedLabel = label
 end
 
--- تحديث السرعة كل إطار
 task.spawn(function()
     while true do
         RunService.RenderStepped:Wait()
@@ -219,10 +218,14 @@ if Player.Character then
 end
 
 -- ============================================================
--- نظام النسبة 0% تتملى أثناء السرقة
+-- نظام النسبة المئوية (تزيد 1% كل 0.013 ثانية وتنزل برضه)
 -- ============================================================
 
+local STEAL_DURATION = 1.3  -- مدة السرقة بالثواني
 local isStealing = false
+local countdownActive = false
+local stealStartTime = 0
+local currentPercent = 0
 
 -- تحديث النسبة على الشاشة
 local function UpdatePercent(percent)
@@ -231,29 +234,49 @@ local function UpdatePercent(percent)
     end
 end
 
--- بدء عد تنازلي للسرقة
-local function StartStealCountdown(duration)
+-- بدء عد تنازلي بعد السرقة
+local function StartCountdown()
+    if countdownActive then return end
+    countdownActive = true
+    
+    local countdownStart = tick()
+    local startPercent = 100
+    
+    while countdownActive do
+        local elapsed = tick() - countdownStart
+        local percent = math.max(0, startPercent - (elapsed / STEAL_DURATION) * 100)
+        UpdatePercent(percent)
+        
+        if percent <= 0 then
+            countdownActive = false
+            UpdatePercent(0)
+            break
+        end
+        
+        RunService.RenderStepped:Wait()
+    end
+end
+
+-- بدء تقدم السرقة
+local function StartStealProgress()
     if isStealing then return end
     isStealing = true
+    stealStartTime = tick()
     
-    local startTime = tick()
-    
-    task.spawn(function()
-        while isStealing do
-            local elapsed = tick() - startTime
-            local percent = math.clamp((elapsed / duration) * 100, 0, 100)
-            UpdatePercent(percent)
-            
-            if percent >= 100 then
-                isStealing = false
-                task.wait(0.3)
-                UpdatePercent(0)
-                break
-            end
-            
-            RunService.RenderStepped:Wait()
+    while isStealing do
+        local elapsed = tick() - stealStartTime
+        local percent = math.min(100, (elapsed / STEAL_DURATION) * 100)
+        UpdatePercent(percent)
+        
+        if percent >= 100 then
+            isStealing = false
+            -- بعد ما توصل 100%، ابدأ العد التنازلي
+            task.spawn(StartCountdown)
+            break
         end
-    end)
+        
+        RunService.RenderStepped:Wait()
+    end
 end
 
 -- كشف السرقة من سرعة المشي
@@ -266,9 +289,11 @@ task.spawn(function()
                 local hum = char:FindFirstChildOfClass("Humanoid")
                 if hum then
                     local currentSpeed = hum.WalkSpeed
-                    -- لو السرقة بدأت (السرعة قلت عن 25)
-                    if currentSpeed < 25 and currentSpeed > 0 and not isStealing then
-                        StartStealCountdown(1.3)
+                    -- السرقة بدأت (السرعة قلت عن 25)
+                    if currentSpeed < 25 and currentSpeed > 0 then
+                        if not isStealing and not countdownActive then
+                            StartStealProgress()
+                        end
                     end
                 end
             end
@@ -314,3 +339,5 @@ task.spawn(function()
         end)
     end
 end)
+
+print("Crystal Hub Loaded - النسبة تزيد 1% كل 0.013 ثانية وتنزل برضه!")
