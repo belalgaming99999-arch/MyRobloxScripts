@@ -82,7 +82,7 @@ TopS.Color = CrystalPurple
 TopS.Thickness = UnifiedStroke
 
 local Info = Instance.new("TextLabel", TopBar)
-Info.Size = UDim2.new(1, 0, 1, 0)
+Info.Size = UDim2.new(1,0,1,0)
 Info.BackgroundTransparency = 1
 Info.TextColor3 = Color3.fromRGB(255, 255, 255)
 Info.Font = Enum.Font.GothamBold
@@ -105,7 +105,7 @@ local function CreateStatBox(pos, size, txt, trans)
     s.Color = CrystalPurple
     s.Thickness = 1
     local t = Instance.new("TextLabel", f)
-    t.Size = UDim2.new(1, 0, 1, 0)
+    t.Size = UDim2.new(1,0,1,0)
     t.BackgroundTransparency = 1
     t.TextColor3 = Color3.fromRGB(255, 255, 255)
     t.Font = Enum.Font.GothamBold
@@ -126,120 +126,6 @@ Instance.new("UICorner", MainMenu).CornerRadius = GlobalRadius
 local MenuS = Instance.new("UIStroke", MainMenu)
 MenuS.Color = CrystalPurple
 MenuS.Thickness = 1.5
-
-local function CreateToggle(name, parent)
-    local btn = Instance.new("TextButton", parent)
-    btn.BackgroundColor3 = _G.Enabled[name] and CrystalPurple or DarkColor
-    btn.BackgroundTransparency = _G.Enabled[name] and 0 or 0.3
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.Text = name
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = UnifiedFontSize
-    btn.AutoButtonColor = false
-    Instance.new("UICorner", btn).CornerRadius = GlobalRadius
-    local s = Instance.new("UIStroke", btn)
-    s.Color = CrystalPurple
-    s.Thickness = UnifiedStroke
-    s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    btn.MouseButton1Click:Connect(function()
-        _G.Enabled[name] = not _G.Enabled[name]
-        local active = _G.Enabled[name]
-        SmoothTween(btn, {
-            BackgroundColor3 = active and CrystalPurple or DarkColor,
-            BackgroundTransparency = active and 0 or 0.3
-        })
-        -- تشغيل التفعيلة
-        if name == "Player Esp" then
-            toggleESP(active)
-        elseif name == "Bat Aimbot" then
-            if active then startBatAimbot() else stopBatAimbot() end
-        elseif name == "Steal Near" then
-            if active then startStealNearest() else stopStealNearest() end
-        elseif name == "Auto Medusa" then
-            -- handled in loop
-        elseif name == "Anti Fling" then
-            if active then startAntiFling() else stopAntiFling() end
-        elseif name == "Anti Ragdoll" then
-            if active then startAntiRagdoll() else stopAntiRagdoll() end
-        elseif name == "Un Walk" then
-            if active then startUnWalk() else stopUnWalk() end
-        elseif name == "Inf Jump" then
-            InfiniteJumpState = active
-            if active then startInfJump() else stopInfJump() end
-        elseif name == "Spin Bot" then
-            if active then startSpin() else stopSpin() end
-        elseif name == "Optimizer" then
-            if active then enableOptimizer() else disableOptimizer() end
-        end
-    end)
-    return btn
-end
-
-local features = {"Player Esp", "Bat Aimbot", "Steal Near", "Auto Medusa", "Auto Play", "Anti Fling", "Anti Ragdoll", "Un Walk", "Inf Jump", "Spin Bot", "Optimizer"}
-local EspBtn = CreateToggle("Player Esp", MainMenu)
-EspBtn.Size = UDim2.new(1, -20, 0, 30)
-EspBtn.Position = UDim2.new(0, 10, 0, 15)
-
-local Grid = Instance.new("Frame", MainMenu)
-Grid.Size = UDim2.new(1, -20, 0, 180)
-Grid.Position = UDim2.new(0, 10, 0, 55)
-Grid.BackgroundTransparency = 1
-
-local UIGrid = Instance.new("UIGridLayout", Grid)
-UIGrid.CellSize = UDim2.new(0, 75, 0, 28)
-UIGrid.CellPadding = UDim2.new(0, 10, 0, 8)
-
-for i = 2, #features do
-    CreateToggle(features[i], Grid)
-end
-
-local SaveBtn = Instance.new("TextButton", MainMenu)
-SaveBtn.Size = UDim2.new(1, -20, 0, 30)
-SaveBtn.Position = UDim2.new(0, 10, 1, -45)
-SaveBtn.BackgroundColor3 = DarkColor
-SaveBtn.BackgroundTransparency = 0.3
-SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-SaveBtn.Text = "Save Config"
-SaveBtn.Font = Enum.Font.GothamBold
-SaveBtn.TextSize = UnifiedFontSize
-SaveBtn.AutoButtonColor = false
-Instance.new("UICorner", SaveBtn).CornerRadius = GlobalRadius
-
-local SaveS = Instance.new("UIStroke", SaveBtn)
-SaveS.Color = CrystalPurple
-SaveS.Thickness = UnifiedStroke
-SaveS.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-SaveBtn.MouseButton1Click:Connect(function()
-    SaveConfig()
-    SaveBtn.Text = "Config Saved"
-    SmoothTween(SaveBtn, {BackgroundColor3 = CrystalPurple, BackgroundTransparency = 0})
-    task.delay(1, function()
-        SaveBtn.Text = "Save Config"
-        SmoothTween(SaveBtn, {BackgroundColor3 = DarkColor, BackgroundTransparency = 0.3})
-    end)
-end)
-
-local SideButton = Instance.new("TextButton", ScreenGui)
-SideButton.Size = UDim2.new(0, 50, 0, 50)
-SideButton.Position = UDim2.new(1, -65, 0.20, 0)
-SideButton.BackgroundColor3 = CrystalPurple
-SideButton.Text = ""
-SideButton.BorderSizePixel = 0
-Instance.new("UICorner", SideButton).CornerRadius = GlobalRadius
-
-local SideStroke = Instance.new("UIStroke", SideButton)
-SideStroke.Color = Color3.fromRGB(255, 255, 255)
-SideStroke.Thickness = 1.5
-
-for i = 0, 2 do
-    local line = Instance.new("Frame", SideButton)
-    line.Size = UDim2.new(0, 24, 0, 4)
-    line.Position = UDim2.new(0.5, -12, 0, 15 + (i * 9))
-    line.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    line.BorderSizePixel = 0
-    Instance.new("UICorner", line).CornerRadius = UDim.new(0, 2)
-end
 
 -- ========== SPEED LABEL ==========
 local SpeedLabel = nil
@@ -287,7 +173,6 @@ end)
 
 -- ========== ESP PLAYER ==========
 local espConnections = {}
-
 local function createESP(plr)
     if plr == Player then return end
     if not plr.Character then return end
@@ -301,24 +186,6 @@ local function createESP(plr)
     highlight.OutlineTransparency = 0
     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     highlight.Parent = char
-    local head = char:FindFirstChild("Head")
-    if head then
-        local billboard = Instance.new("BillboardGui")
-        billboard.Name = "ESP_Name"
-        billboard.Adornee = head
-        billboard.Size = UDim2.new(0, 200, 0, 50)
-        billboard.StudsOffset = Vector3.new(0, 2.5, 0)
-        billboard.AlwaysOnTop = true
-        billboard.Parent = char
-        local label = Instance.new("TextLabel")
-        label.Size = UDim2.new(1, 0, 1, 0)
-        label.BackgroundTransparency = 1
-        label.Text = plr.DisplayName or plr.Name
-        label.TextColor3 = CrystalPurple
-        label.Font = Enum.Font.GothamBold
-        label.TextScaled = true
-        label.Parent = billboard
-    end
 end
 
 local function removeESP(plr)
@@ -326,8 +193,6 @@ local function removeESP(plr)
     local char = plr.Character
     local highlight = char:FindFirstChild("ESP_BLUE")
     if highlight then highlight:Destroy() end
-    local name = char:FindFirstChild("ESP_Name")
-    if name then name:Destroy() end
 end
 
 local function toggleESP(enable)
@@ -360,8 +225,6 @@ local function toggleESP(enable)
     end
 end
 
-if _G.Enabled["Player Esp"] then toggleESP(true) end
-
 -- ========== BAT AIMBOT ==========
 local AimbotState = false
 local AimbotData = { Conn = nil, Align = nil, Attach = nil }
@@ -393,7 +256,7 @@ local function startBatAimbot()
             char.Humanoid.AutoRotate = false
             AimbotData.Align.Enabled = true
             AimbotData.Align.CFrame = CFrame.lookAt(hrp.Position, Vector3.new(target.Position.X, hrp.Position.Y, target.Position.Z))
-            local tool = char:FindFirstChild("Bat") or char:FindFirstChild("Medusa's Head")
+            local tool = char:FindFirstChild("Bat")
             if tool then pcall(function() tool:Activate() end) end
         else
             AimbotData.Align.Enabled = false
@@ -412,17 +275,7 @@ local function stopBatAimbot()
     AimbotData = { Conn = nil, Align = nil, Attach = nil }
 end
 
-if _G.Enabled["Bat Aimbot"] then AimbotState = true startBatAimbot() end
-
 -- ========== STEAL NEAREST ==========
-local StealNearestState = false
-local isStealing = false
-local stealStartTime = nil
-local progressConnection = nil
-local StealData = {}
-local STEAL_DURATION = 0.35
-local STEAL_RADIUS = 10
-
 local stealCircle = nil
 local function createStealCircle()
     if stealCircle then stealCircle:Destroy() end
@@ -434,7 +287,7 @@ local function createStealCircle()
     stealCircle.Color = CrystalPurple
     stealCircle.Material = Enum.Material.Neon
     stealCircle.Shape = Enum.PartType.Cylinder
-    stealCircle.Size = Vector3.new(0.05, STEAL_RADIUS * 2, STEAL_RADIUS * 2)
+    stealCircle.Size = Vector3.new(0.05, 20, 20)
     stealCircle.Parent = workspace
 end
 createStealCircle()
@@ -451,173 +304,6 @@ RunService.RenderStepped:Connect(function()
         if stealCircle then stealCircle.Transparency = 1 end
     end
 end)
-
-local ScreenProgressFrame = nil
-local ScreenProgressBarFill = nil
-local ScreenProgressLabel = nil
-local ScreenProgressPercentLabel = nil
-
-local function createProgressBar()
-    if ScreenProgressFrame then return end
-    ScreenProgressFrame = Instance.new("Frame")
-    ScreenProgressFrame.Name = "StealProgressBar"
-    ScreenProgressFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    ScreenProgressFrame.BorderSizePixel = 0
-    ScreenProgressFrame.Position = UDim2.new(0.5, -150, 0.1, 0)
-    ScreenProgressFrame.Size = UDim2.new(0, 300, 0, 30)
-    ScreenProgressFrame.Parent = ScreenGui
-    
-    Instance.new("UICorner", ScreenProgressFrame).CornerRadius = UDim.new(0, 8)
-    local stroke = Instance.new("UIStroke", ScreenProgressFrame)
-    stroke.Color = CrystalPurple
-    stroke.Thickness = 2
-    
-    ScreenProgressLabel = Instance.new("TextLabel")
-    ScreenProgressLabel.BackgroundTransparency = 1
-    ScreenProgressLabel.Position = UDim2.new(0, 10, 0, 0)
-    ScreenProgressLabel.Size = UDim2.new(0.6, 0, 1, 0)
-    ScreenProgressLabel.Font = Enum.Font.GothamBold
-    ScreenProgressLabel.Text = "READY"
-    ScreenProgressLabel.TextColor3 = CrystalPurple
-    ScreenProgressLabel.TextSize = 12
-    ScreenProgressLabel.TextXAlignment = Enum.TextXAlignment.Left
-    ScreenProgressLabel.Parent = ScreenProgressFrame
-    
-    ScreenProgressPercentLabel = Instance.new("TextLabel")
-    ScreenProgressPercentLabel.BackgroundTransparency = 1
-    ScreenProgressPercentLabel.Position = UDim2.new(0.6, 0, 0, 0)
-    ScreenProgressPercentLabel.Size = UDim2.new(0.4, -10, 1, 0)
-    ScreenProgressPercentLabel.Font = Enum.Font.GothamBold
-    ScreenProgressPercentLabel.Text = "0%"
-    ScreenProgressPercentLabel.TextColor3 = CrystalPurple
-    ScreenProgressPercentLabel.TextSize = 12
-    ScreenProgressPercentLabel.TextXAlignment = Enum.TextXAlignment.Right
-    ScreenProgressPercentLabel.Parent = ScreenProgressFrame
-    
-    local track = Instance.new("Frame")
-    track.BackgroundColor3 = Color3.fromRGB(50, 40, 0)
-    track.Position = UDim2.new(0, 10, 0, 22)
-    track.Size = UDim2.new(1, -20, 0, 8)
-    track.Parent = ScreenProgressFrame
-    Instance.new("UICorner", track).CornerRadius = UDim.new(1, 0)
-    
-    ScreenProgressBarFill = Instance.new("Frame")
-    ScreenProgressBarFill.BackgroundColor3 = CrystalPurple
-    ScreenProgressBarFill.Size = UDim2.new(0, 0, 1, 0)
-    ScreenProgressBarFill.Parent = track
-    Instance.new("UICorner", ScreenProgressBarFill).CornerRadius = UDim.new(1, 0)
-end
-createProgressBar()
-
-local function ResetProgressBar()
-    if ScreenProgressLabel then ScreenProgressLabel.Text = "READY" end
-    if ScreenProgressPercentLabel then ScreenProgressPercentLabel.Text = "0%" end
-    if ScreenProgressBarFill then ScreenProgressBarFill.Size = UDim2.new(0, 0, 1, 0) end
-end
-
-local function isMyPlotByName(pn)
-    local plots = workspace:FindFirstChild("Plots")
-    if not plots then return false end
-    local plot = plots:FindFirstChild(pn)
-    if not plot then return false end
-    local sign = plot:FindFirstChild("PlotSign")
-    if sign then
-        local yb = sign:FindFirstChild("YourBase")
-        if yb and yb:IsA("BillboardGui") then return yb.Enabled == true end
-    end
-    return false
-end
-
-local function findNearestPrompt()
-    local h = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-    if not h then return nil end
-    local plots = workspace:FindFirstChild("Plots")
-    if not plots then return nil end
-    local np, nd, nn = nil, math.huge, nil
-    for _, plot in ipairs(plots:GetChildren()) do
-        if isMyPlotByName(plot.Name) then
-        else
-            local podiums = plot:FindFirstChild("AnimalPodiums")
-            if podiums then
-                for _, pod in ipairs(podiums:GetChildren()) do
-                    pcall(function()
-                        local base = pod:FindFirstChild("Base")
-                        local spawn = base and base:FindFirstChild("Spawn")
-                        if spawn then
-                            local dist = (spawn.Position - h.Position).Magnitude
-                            if dist < nd and dist <= STEAL_RADIUS then
-                                local att = spawn:FindFirstChild("PromptAttachment")
-                                if att then
-                                    for _, ch in ipairs(att:GetChildren()) do
-                                        if ch:IsA("ProximityPrompt") then np, nd, nn = ch, dist, pod.Name end
-                                    end
-                                end
-                            end
-                        end
-                    end)
-                end
-            end
-        end
-    end
-    return np, nd, nn
-end
-
-local function executeSteal(prompt, name)
-    if isStealing then return end
-    if not StealData[prompt] then
-        StealData[prompt] = {hold = {}, trigger = {}, ready = true}
-        pcall(function()
-            if getconnections then
-                for _, c in ipairs(getconnections(prompt.PromptButtonHoldBegan)) do
-                    if c.Function then table.insert(StealData[prompt].hold, c.Function) end
-                end
-                for _, c in ipairs(getconnections(prompt.Triggered)) do
-                    if c.Function then table.insert(StealData[prompt].trigger, c.Function) end
-                end
-            end
-        end)
-    end
-    local data = StealData[prompt]
-    if not data.ready then return end
-    data.ready = false
-    isStealing = true
-    stealStartTime = tick()
-    if ScreenProgressLabel then ScreenProgressLabel.Text = name or "STEALING..." end
-    if progressConnection then progressConnection:Disconnect() end
-    progressConnection = RunService.Heartbeat:Connect(function()
-        if not isStealing then progressConnection:Disconnect() return end
-        local prog = math.clamp((tick() - stealStartTime) / STEAL_DURATION, 0, 1)
-        if ScreenProgressBarFill then ScreenProgressBarFill.Size = UDim2.new(prog, 0, 1, 0) end
-        if ScreenProgressPercentLabel then ScreenProgressPercentLabel.Text = math.floor(prog * 100) .. "%" end
-    end)
-    task.spawn(function()
-        for _, f in ipairs(data.hold) do task.spawn(f) end
-        task.wait(STEAL_DURATION)
-        for _, f in ipairs(data.trigger) do task.spawn(f) end
-        if progressConnection then progressConnection:Disconnect() end
-        ResetProgressBar()
-        data.ready = true
-        isStealing = false
-    end)
-end
-
-local stealConn = nil
-local function startStealNearest()
-    if stealConn then return end
-    stealConn = RunService.Heartbeat:Connect(function()
-        if not StealNearestState or isStealing then return end
-        local p, _, n = findNearestPrompt()
-        if p then executeSteal(p, n) end
-    end)
-end
-
-local function stopStealNearest()
-    if stealConn then stealConn:Disconnect() stealConn = nil end
-    isStealing = false
-    ResetProgressBar()
-end
-
-if _G.Enabled["Steal Near"] then StealNearestState = true startStealNearest() end
 
 -- ========== AUTO MEDUSA ==========
 local medusaCircle = nil
@@ -819,7 +505,6 @@ end
 local function stopAntiFling()
     if antiFlingConn then antiFlingConn:Disconnect() antiFlingConn = nil end
 end
-if _G.Enabled["Anti Fling"] then startAntiFling() end
 
 -- ========== ANTI RAGDOLL ==========
 local antiRagdollActive = false
@@ -933,7 +618,6 @@ local function stopAntiRagdoll()
     ragdollDisabled = true
     ragdollDisableFunc = nil
 end
-if _G.Enabled["Anti Ragdoll"] then startAntiRagdoll() end
 
 -- ========== UN WALK ==========
 local NoAnimState = false
@@ -979,7 +663,6 @@ local function stopUnWalk()
         end
     end
 end
-if _G.Enabled["Un Walk"] then startUnWalk() end
 
 -- ========== INFINITE JUMP ==========
 local InfiniteJumpState = false
@@ -1010,7 +693,6 @@ end
 local function stopInfJump()
     if InfiniteJumpConn then InfiniteJumpConn:Disconnect() InfiniteJumpConn = nil end
 end
-if _G.Enabled["Inf Jump"] then InfiniteJumpState = true startInfJump() end
 
 -- ========== SPIN BOT ==========
 local HelicopterState = false
@@ -1042,7 +724,6 @@ local function stopSpin()
         end
     end
 end
-if _G.Enabled["Spin Bot"] then startSpin() end
 
 -- ========== OPTIMIZER ==========
 local optimizerActive = false
@@ -1088,9 +769,134 @@ local function disableOptimizer()
         end
     end
 end
-if _G.Enabled["Optimizer"] then enableOptimizer() end
 
--- ========== DRAG & UPDATES ==========
+-- ========== CREATE TOGGLE FUNCTION ==========
+local function CreateToggle(name, parent)
+    local btn = Instance.new("TextButton", parent)
+    btn.BackgroundColor3 = _G.Enabled[name] and CrystalPurple or DarkColor
+    btn.BackgroundTransparency = _G.Enabled[name] and 0 or 0.3
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Text = name
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = UnifiedFontSize
+    btn.AutoButtonColor = false
+    Instance.new("UICorner", btn).CornerRadius = GlobalRadius
+    local s = Instance.new("UIStroke", btn)
+    s.Color = CrystalPurple
+    s.Thickness = UnifiedStroke
+    s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    btn.MouseButton1Click:Connect(function()
+        _G.Enabled[name] = not _G.Enabled[name]
+        local active = _G.Enabled[name]
+        SmoothTween(btn, {
+            BackgroundColor3 = active and CrystalPurple or DarkColor,
+            BackgroundTransparency = active and 0 or 0.3
+        })
+        
+        if name == "Player Esp" then
+            toggleESP(active)
+        elseif name == "Bat Aimbot" then
+            AimbotState = active
+            if active then startBatAimbot() else stopBatAimbot() end
+        elseif name == "Steal Near" then
+            if active then
+                if stealCircle then stealCircle.Transparency = 0.4 end
+            else
+                if stealCircle then stealCircle.Transparency = 1 end
+            end
+        elseif name == "Auto Medusa" then
+        elseif name == "Auto Play" then
+            if active then
+                startLeftSteal()
+                startRightSteal()
+            else
+                stopLeftSteal()
+                stopRightSteal()
+            end
+        elseif name == "Anti Fling" then
+            if active then startAntiFling() else stopAntiFling() end
+        elseif name == "Anti Ragdoll" then
+            if active then startAntiRagdoll() else stopAntiRagdoll() end
+        elseif name == "Un Walk" then
+            if active then startUnWalk() else stopUnWalk() end
+        elseif name == "Inf Jump" then
+            InfiniteJumpState = active
+            if active then startInfJump() else stopInfJump() end
+        elseif name == "Spin Bot" then
+            if active then startSpin() else stopSpin() end
+        elseif name == "Optimizer" then
+            if active then enableOptimizer() else disableOptimizer() end
+        end
+    end)
+    return btn
+end
+
+local features = {"Player Esp", "Bat Aimbot", "Steal Near", "Auto Medusa", "Auto Play", "Anti Fling", "Anti Ragdoll", "Un Walk", "Inf Jump", "Spin Bot", "Optimizer"}
+local EspBtn = CreateToggle("Player Esp", MainMenu)
+EspBtn.Size = UDim2.new(1, -20, 0, 30)
+EspBtn.Position = UDim2.new(0, 10, 0, 15)
+
+local Grid = Instance.new("Frame", MainMenu)
+Grid.Size = UDim2.new(1, -20, 0, 180)
+Grid.Position = UDim2.new(0, 10, 0, 55)
+Grid.BackgroundTransparency = 1
+
+local UIGrid = Instance.new("UIGridLayout", Grid)
+UIGrid.CellSize = UDim2.new(0, 75, 0, 28)
+UIGrid.CellPadding = UDim2.new(0, 10, 0, 8)
+
+for i = 2, #features do
+    CreateToggle(features[i], Grid)
+end
+
+local SaveBtn = Instance.new("TextButton", MainMenu)
+SaveBtn.Size = UDim2.new(1, -20, 0, 30)
+SaveBtn.Position = UDim2.new(0, 10, 1, -45)
+SaveBtn.BackgroundColor3 = DarkColor
+SaveBtn.BackgroundTransparency = 0.3
+SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SaveBtn.Text = "Save Config"
+SaveBtn.Font = Enum.Font.GothamBold
+SaveBtn.TextSize = UnifiedFontSize
+SaveBtn.AutoButtonColor = false
+Instance.new("UICorner", SaveBtn).CornerRadius = GlobalRadius
+
+local SaveS = Instance.new("UIStroke", SaveBtn)
+SaveS.Color = CrystalPurple
+SaveS.Thickness = UnifiedStroke
+SaveS.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+SaveBtn.MouseButton1Click:Connect(function()
+    SaveConfig()
+    SaveBtn.Text = "Config Saved"
+    SmoothTween(SaveBtn, {BackgroundColor3 = CrystalPurple, BackgroundTransparency = 0})
+    task.delay(1, function()
+        SaveBtn.Text = "Save Config"
+        SmoothTween(SaveBtn, {BackgroundColor3 = DarkColor, BackgroundTransparency = 0.3})
+    end)
+end)
+
+local SideButton = Instance.new("TextButton", ScreenGui)
+SideButton.Size = UDim2.new(0, 50, 0, 50)
+SideButton.Position = UDim2.new(1, -65, 0.20, 0)
+SideButton.BackgroundColor3 = CrystalPurple
+SideButton.Text = ""
+SideButton.BorderSizePixel = 0
+Instance.new("UICorner", SideButton).CornerRadius = GlobalRadius
+
+local SideStroke = Instance.new("UIStroke", SideButton)
+SideStroke.Color = Color3.fromRGB(255, 255, 255)
+SideStroke.Thickness = 1.5
+
+for i = 0, 2 do
+    local line = Instance.new("Frame", SideButton)
+    line.Size = UDim2.new(0, 24, 0, 4)
+    line.Position = UDim2.new(0.5, -12, 0, 15 + (i * 9))
+    line.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    line.BorderSizePixel = 0
+    Instance.new("UICorner", line).CornerRadius = UDim.new(0, 2)
+end
+
 local dragging, dragStart, startPos, menuOpen = false, nil, nil, false
 
 SideButton.InputBegan:Connect(function(input)
@@ -1126,4 +932,12 @@ task.spawn(function()
     end
 end)
 
-print("Crystal Hub Loaded Successfully!")
+if _G.Enabled["Player Esp"] then toggleESP(true) end
+if _G.Enabled["Bat Aimbot"] then AimbotState = true startBatAimbot() end
+if _G.Enabled["Anti Fling"] then startAntiFling() end
+if _G.Enabled["Anti Ragdoll"] then startAntiRagdoll() end
+if _G.Enabled["Un Walk"] then startUnWalk() end
+if _G.Enabled["Inf Jump"] then InfiniteJumpState = true startInfJump() end
+if _G.Enabled["Spin Bot"] then startSpin() end
+if _G.Enabled["Optimizer"] then enableOptimizer() end
+if _G.Enabled["Auto Play"] then startLeftSteal() startRightSteal() end
