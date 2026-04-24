@@ -1,4 +1,4 @@
--- [[ Crystal Hub - Layout Precision Fix & Enhanced Speed Display ]] --
+-- [[ Crystal Hub - Precision Layout & Visual Fixes ]] --
 
 if not game:IsLoaded() then game.Loaded:Wait() end
 
@@ -14,13 +14,10 @@ local DarkColor = Color3.fromRGB(0, 0, 0)
 local GlobalRadius = UDim.new(0, 15)
 local BorderThickness = 1.5
 
--- تنظيف النسخ القديمة
+-- تنظيف شامل
 local function FullCleanup()
     for _, child in pairs(CoreGui:GetChildren()) do
         if child:IsA("ScreenGui") and (child.Name:find("Crystal") or child.Name:find("Nova")) then child:Destroy() end
-    end
-    if Player.Character and Player.Character:FindFirstChild("SpeedTag") then
-        Player.Character.SpeedTag:Destroy()
     end
 end
 FullCleanup()
@@ -28,20 +25,24 @@ FullCleanup()
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "Crystal_Fixed_UI"
 
--- ========== 1. Top & Bottom HUD ==========
+-- ========== 1. Top HUD (تعديل: لون أبيض + تصغير الخط) ==========
 local HUDContainer = Instance.new("Frame", ScreenGui)
-HUDContainer.Size = UDim2.new(0, 210, 0, 70); HUDContainer.Position = UDim2.new(0.5, -105, 0.02, 0); HUDContainer.BackgroundTransparency = 1
+HUDContainer.Size = UDim2.new(0, 230, 0, 70); HUDContainer.Position = UDim2.new(0.5, -115, 0.02, 0); HUDContainer.BackgroundTransparency = 1
 
 local TopBar = Instance.new("Frame", HUDContainer)
 TopBar.Size = UDim2.new(0.9, 0, 0, 28); TopBar.Position = UDim2.new(0.05, 0, 0, 0); TopBar.BackgroundColor3 = DarkColor; TopBar.BackgroundTransparency = 0.2
 Instance.new("UICorner", TopBar).CornerRadius = GlobalRadius
 local TopS = Instance.new("UIStroke", TopBar); TopS.Color = CrystalPurple; TopS.Thickness = BorderThickness
-local Info = Instance.new("TextLabel", TopBar); Info.Size = UDim2.new(1,0,1,0); Info.BackgroundTransparency = 1; Info.TextColor3 = CrystalPurple; Info.Font = Enum.Font.GothamBold; Info.TextSize = 12; Info.Text = "Crystal Hub"
+
+local Info = Instance.new("TextLabel", TopBar)
+Info.Size = UDim2.new(1,0,1,0); Info.BackgroundTransparency = 1; 
+Info.TextColor3 = Color3.fromRGB(255, 255, 255); -- التعديل: لون أبيض
+Info.Font = Enum.Font.GothamBold; 
+Info.TextSize = 9; -- التعديل: تصغير الخط سنتين (من 11 إلى 9)
+Info.Text = "Crystal Hub | FPS 0 | MS 0" 
 
 local BottomBar = Instance.new("Frame", HUDContainer)
-BottomBar.Size = UDim2.new(0.9, 0, 0, 14); 
-BottomBar.Position = UDim2.new(0.05, 0, 0, 35); -- منزلة سنة واحدة
-BottomBar.BackgroundTransparency = 1
+BottomBar.Size = UDim2.new(0.9, 0, 0, 14); BottomBar.Position = UDim2.new(0.05, 0, 0, 35); BottomBar.BackgroundTransparency = 1
 
 local function CreateStatBox(pos, size, txt, trans)
     local f = Instance.new("Frame", BottomBar)
@@ -53,28 +54,31 @@ end
 CreateStatBox(UDim2.new(0, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "0%", 0.5) 
 CreateStatBox(UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "7.4", 0.15) 
 
--- ========== 2. Speed Tag (تكبير الخط + علامة عشرية) ==========
+-- ========== 2. Speed Tag (تعديل: تصغير الخط) ==========
+local SpeedLabel
 local function CreateSpeedTag(char)
+    if char:FindFirstChild("SpeedTag") then char.SpeedTag:Destroy() end
     local head = char:WaitForChild("Head", 5)
-    if not head then return end
     local billboard = Instance.new("BillboardGui", char)
     billboard.Name = "SpeedTag"; billboard.Adornee = head; billboard.Size = UDim2.new(0, 120, 0, 40); billboard.StudsOffset = Vector3.new(0, 3.2, 0); billboard.AlwaysOnTop = true
     
     local label = Instance.new("TextLabel", billboard)
-    label.Size = UDim2.new(1, 0, 1, 0); label.BackgroundTransparency = 1; label.TextColor3 = Color3.fromRGB(255, 255, 255); 
+    label.Size = UDim2.new(1, 0, 1, 0); label.BackgroundTransparency = 1; label.TextColor3 = Color3.fromRGB(255, 255, 255)
     label.Font = Enum.Font.GothamBold; 
-    label.TextSize = 12; -- تم التكبير سنتين (من 10 إلى 12)
+    label.TextSize = 11; -- التعديل: تصغير كلمة سبيد سنة (من 12 إلى 11)
     label.Text = "Speed: 0.0"
     
     local stroke = Instance.new("UIStroke", label); stroke.Color = Color3.fromRGB(0, 0, 0); stroke.Thickness = 1; stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
-    return label
+    SpeedLabel = label
 end
-local SpeedLabel = CreateSpeedTag(Player.Character or Player.CharacterAdded:Wait())
-Player.CharacterAdded:Connect(function(char) SpeedLabel = CreateSpeedTag(char) end)
+
+Player.CharacterAdded:Connect(CreateSpeedTag)
+if Player.Character then CreateSpeedTag(Player.Character) end
 
 -- ========== 3. Main Side Menu ==========
 local MainMenu = Instance.new("Frame", ScreenGui)
-MainMenu.Size = UDim2.new(0, 170, 0, 255); MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -127); MainMenu.BackgroundColor3 = DarkColor; MainMenu.BackgroundTransparency = 0.4
+MainMenu.Size = UDim2.new(0, 170, 0, 255); MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -127) 
+MainMenu.BackgroundColor3 = DarkColor; MainMenu.BackgroundTransparency = 0.4
 Instance.new("UICorner", MainMenu).CornerRadius = GlobalRadius
 local MenuS = Instance.new("UIStroke", MainMenu); MenuS.Color = CrystalPurple; MenuS.Thickness = BorderThickness
 
@@ -106,8 +110,12 @@ for _, f in pairs(features) do
     StyleButton(btn, 1)
 end
 
+-- زر Save Config (تعديل: رفع الزر سنتين)
 local SaveBtn = Instance.new("TextButton", MainMenu)
-SaveBtn.Name = "SaveBtn"; SaveBtn.Size = UDim2.new(0, 150, 0, 28); SaveBtn.Position = UDim2.new(0.5, -75, 1, -38); SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.3; SaveBtn.ZIndex = 5
+SaveBtn.Name = "SaveBtn"
+SaveBtn.Size = UDim2.new(0, 150, 0, 28); 
+SaveBtn.Position = UDim2.new(0.5, -75, 1, -43); -- التعديل: الرفع من -45 إلى -43 (سنتين)
+SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.3; SaveBtn.ZIndex = 5
 SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255); SaveBtn.Text = "SAVE CONFIG"; SaveBtn.Font = Enum.Font.GothamBold; SaveBtn.TextSize = 9
 StyleButton(SaveBtn, 1.5)
 
@@ -126,18 +134,17 @@ SideButton.MouseButton1Up:Connect(function()
     MainMenu:TweenPosition(UDim2.new(menuOpen and 0.02 or -0.7, 0, 0.5, -127), "Out", "Quart", 0.4, true)
 end)
 
--- ========== 5. Update Loop (تعديل صيغة الرقم) ==========
+-- ========== 5. Update Loop ==========
 task.spawn(function()
     while task.wait(0.05) do
         pcall(function()
             local fps = math.floor(1 / RunService.RenderStepped:Wait())
             local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-            Info.Text = string.format("Crystal Hub | FPS: %d | MS: %d", fps, ping)
+            Info.Text = string.format("Crystal Hub | FPS %d | MS %d", fps, ping)
             
             if SpeedLabel and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
                 local vel = Player.Character.HumanoidRootPart.Velocity
                 local speed = Vector3.new(vel.X, 0, vel.Z).Magnitude
-                -- استخدام %.1f لإظهار رقم واحد بعد الفاصلة دائماً
                 SpeedLabel.Text = string.format("Speed: %.1f", speed)
             end
         end)
