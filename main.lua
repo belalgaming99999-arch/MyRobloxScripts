@@ -1,4 +1,11 @@
--- [[ Crystal Hub - Professional Flat Edition ]] --
+-- [[ Crystal Hub - Anti-Duplicate Edition ]] --
+
+-- 1. نظام منع التشغيل المتكرر (Anti-Double Run)
+if _G.CrystalLoaded then 
+    print("Crystal Hub is already running!")
+    return -- بيوقف التشغيل لو ضغطت على Execute Clipboard وأنت مشغله أصلاً
+end
+_G.CrystalLoaded = true
 
 if not game:IsLoaded() then game.Loaded:Wait() end
 
@@ -15,17 +22,20 @@ local DarkColor = Color3.fromRGB(0, 0, 0)
 local GlobalRadius = UDim.new(0, 15) 
 local BorderThickness = 1.5
 
--- تنظيف الشاشة من أي مخلفات برمجية
+-- تنظيف فوري لأي بقايا قديمة قبل البدء
 for _, child in pairs(CoreGui:GetChildren()) do
-    if child:IsA("ScreenGui") and (child.Name:find("Crystal") or child.Name:find("Unified")) then 
-        child:Destroy() 
-    end
+    if child:IsA("ScreenGui") and child.Name:find("Crystal") then child:Destroy() end
 end
 
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "Crystal_Final_Pro"
+ScreenGui.Name = "Crystal_Secure_V3"
 
--- ========== 1. Top HUD (Oval 15) ==========
+-- دالة السلاسة (Smooth Tween)
+local function Tween(obj, info, goal)
+    return TweenService:Create(obj, TweenInfo.new(info, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), goal):Play()
+end
+
+-- ========== 1. Top HUD (Instant View) ==========
 local HUDContainer = Instance.new("Frame", ScreenGui)
 HUDContainer.Size = UDim2.new(0, 230, 0, 70); HUDContainer.Position = UDim2.new(0.5, -115, 0.02, 0); HUDContainer.BackgroundTransparency = 1
 
@@ -36,7 +46,8 @@ local TopS = Instance.new("UIStroke", TopBar); TopS.Color = CrystalPurple; TopS.
 
 local Info = Instance.new("TextLabel", TopBar)
 Info.Size = UDim2.new(1,0,1,0); Info.BackgroundTransparency = 1; Info.TextColor3 = Color3.fromRGB(255, 255, 255)
-Info.Font = Enum.Font.GothamBold; Info.TextSize = 10; Info.Text = "Crystal Hub | FPS -- | MS --"
+Info.Font = Enum.Font.GothamBold; Info.TextSize = 10
+Info.Text = "Crystal Hub | FPS -- | MS --"
 
 local BottomBar = Instance.new("Frame", HUDContainer)
 BottomBar.Size = UDim2.new(0.9, 0, 0, 14); BottomBar.Position = UDim2.new(0.05, 0, 0, 35); BottomBar.BackgroundTransparency = 1
@@ -51,7 +62,7 @@ end
 CreateStatBox(UDim2.new(0, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "0%", 0.5) 
 CreateStatBox(UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "7.4", 0.15) 
 
--- ========== 2. Speed Tag (نزلت تحت سنة) ==========
+-- ========== 2. Speed Tag ==========
 local SpeedLabel
 local function CreateSpeedTag(char)
     local head = char:WaitForChild("Head", 5)
@@ -64,22 +75,28 @@ end
 Player.CharacterAdded:Connect(CreateSpeedTag)
 if Player.Character then CreateSpeedTag(Player.Character) end
 
--- ========== 3. Sidebar Menu (مرتبة بالمللي وحواف بنفسجي) ==========
+-- ========== 3. Sidebar Menu (Smooth Interactions) ==========
 local MainMenu = Instance.new("Frame", ScreenGui)
 MainMenu.Size = UDim2.new(0, 180, 0, 285); MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -142) 
 MainMenu.BackgroundColor3 = DarkColor; MainMenu.BackgroundTransparency = 0.4
 Instance.new("UICorner", MainMenu).CornerRadius = GlobalRadius
 local MenuS = Instance.new("UIStroke", MainMenu); MenuS.Color = CrystalPurple; MenuS.Thickness = BorderThickness
 
-local function StyleButton(btn, thick)
+local function StyleButton(btn, isSave)
     btn.AutoButtonColor = false; Instance.new("UICorner", btn).CornerRadius = GlobalRadius
-    -- إضافة الحواف البنفسجية لكل الأزرار كالمطلوب
-    local s = Instance.new("UIStroke", btn); s.Color = CrystalPurple; s.Thickness = thick or BorderThickness; s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    local s = Instance.new("UIStroke", btn); s.Color = CrystalPurple; s.Thickness = (isSave and 1.5 or 1.2); s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    
     btn.MouseButton1Click:Connect(function()
-        if btn.Name ~= "SaveBtn" then
+        if isSave then
+            Tween(btn, 0.3, {BackgroundColor3 = CrystalPurple, BackgroundTransparency = 0})
+            task.wait(0.4)
+            Tween(btn, 0.5, {BackgroundColor3 = DarkColor, BackgroundTransparency = 0.3})
+        else
             local active = btn.BackgroundColor3 == CrystalPurple
-            btn.BackgroundColor3 = active and DarkColor or CrystalPurple
-            btn.BackgroundTransparency = active and 0.3 or 0
+            Tween(btn, 0.3, {
+                BackgroundColor3 = active and DarkColor or CrystalPurple,
+                BackgroundTransparency = active and 0.3 or 0
+            })
         end
     end)
 end
@@ -87,7 +104,7 @@ end
 local EspBtn = Instance.new("TextButton", MainMenu)
 EspBtn.Size = UDim2.new(1, -20, 0, 30); EspBtn.Position = UDim2.new(0, 10, 0, 15)
 EspBtn.BackgroundColor3 = DarkColor; EspBtn.BackgroundTransparency = 0.3; EspBtn.TextColor3 = Color3.fromRGB(255, 255, 255); EspBtn.Text = "Player Esp"; EspBtn.Font = Enum.Font.GothamBold; EspBtn.TextSize = 10
-StyleButton(EspBtn, BorderThickness)
+StyleButton(EspBtn, false)
 
 local Grid = Instance.new("Frame", MainMenu)
 Grid.Size = UDim2.new(1, -20, 0, 180); Grid.Position = UDim2.new(0, 10, 0, 55); Grid.BackgroundTransparency = 1
@@ -97,16 +114,16 @@ local features = {"Bat Aimbot", "Steal Near", "Auto Medusa", "Auto Play", "Anti 
 for _, f in pairs(features) do 
     local btn = Instance.new("TextButton", Grid)
     btn.BackgroundColor3 = DarkColor; btn.BackgroundTransparency = 0.3; btn.TextColor3 = Color3.fromRGB(255, 255, 255); btn.Text = f; btn.Font = Enum.Font.GothamBold; btn.TextSize = 10
-    StyleButton(btn, 1.2) -- حواف بنفسجية لكل زر
+    StyleButton(btn, false)
 end
 
 local SaveBtn = Instance.new("TextButton", MainMenu)
 SaveBtn.Name = "SaveBtn"
 SaveBtn.Size = UDim2.new(1, -20, 0, 30); SaveBtn.Position = UDim2.new(0, 10, 1, -45)
 SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.3; SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255); SaveBtn.Text = "Save Config"; SaveBtn.Font = Enum.Font.GothamBold; SaveBtn.TextSize = 10
-StyleButton(SaveBtn, BorderThickness)
+StyleButton(SaveBtn, true)
 
--- ========== 4. Floating Button (ارتفع سنتين) ==========
+-- ========== 4. Floating Button ==========
 local SideButton = Instance.new("TextButton", ScreenGui)
 SideButton.Size = UDim2.new(0, 50, 0, 50); SideButton.Position = UDim2.new(1, -65, 0.30, 0)
 SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""; SideButton.BorderSizePixel = 0
@@ -118,7 +135,6 @@ for i=0,2 do
     line.Size = UDim2.new(0, 24, 0, 4); line.Position = UDim2.new(0.5, -12, 0, 15 + (i * 9)); line.BackgroundColor3 = Color3.fromRGB(255, 255, 255); line.BorderSizePixel = 0; Instance.new("UICorner", line).CornerRadius = UDim.new(0, 2)
 end
 
--- نظام السحب والفتح السلس
 local dragging, dragStart, startPos, menuOpen = false, nil, nil, false
 SideButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -143,9 +159,9 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- ========== 5. Smooth Update Loop ==========
+-- ========== 5. Stats Loop ==========
 task.spawn(function()
-    while task.wait(0.15) do
+    while task.wait(0.1) do
         pcall(function()
             local fps = math.floor(1 / RunService.RenderStepped:Wait())
             local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
@@ -156,3 +172,4 @@ task.spawn(function()
         end)
     end
 end)
+
