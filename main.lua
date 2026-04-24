@@ -1,4 +1,4 @@
--- Crystal Hub - Fully Unified Edition
+-- Crystal Hub - Fully Unified Edition with DOWN & DROP
 
 if _G.CrystalLoaded then return end
 _G.CrystalLoaded = true
@@ -11,8 +11,6 @@ local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 local CoreGui = game:GetService("CoreGui")
 local Player = Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Lighting = game:GetService("Lighting")
 
 local ConfigFileName = "CrystalHub_Settings.json"
 _G.Enabled = {
@@ -82,7 +80,7 @@ TopS.Color = CrystalPurple
 TopS.Thickness = UnifiedStroke
 
 local Info = Instance.new("TextLabel", TopBar)
-Info.Size = UDim2.new(1,0,1,0)
+Info.Size = UDim2.new(1, 0, 1, 0)
 Info.BackgroundTransparency = 1
 Info.TextColor3 = Color3.fromRGB(255, 255, 255)
 Info.Font = Enum.Font.GothamBold
@@ -105,7 +103,7 @@ local function CreateStatBox(pos, size, txt, trans)
     s.Color = CrystalPurple
     s.Thickness = 1
     local t = Instance.new("TextLabel", f)
-    t.Size = UDim2.new(1,0,1,0)
+    t.Size = UDim2.new(1, 0, 1, 0)
     t.BackgroundTransparency = 1
     t.TextColor3 = Color3.fromRGB(255, 255, 255)
     t.Font = Enum.Font.GothamBold
@@ -117,8 +115,8 @@ CreateStatBox(UDim2.new(0, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "0%", 0.5)
 CreateStatBox(UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "7.4", 0.15)
 
 local MainMenu = Instance.new("Frame", ScreenGui)
-MainMenu.Size = UDim2.new(0, 180, 0, 285)
-MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -142)
+MainMenu.Size = UDim2.new(0, 180, 0, 320)
+MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -160)
 MainMenu.BackgroundColor3 = DarkColor
 MainMenu.BackgroundTransparency = 0.4
 Instance.new("UICorner", MainMenu).CornerRadius = GlobalRadius
@@ -127,7 +125,6 @@ local MenuS = Instance.new("UIStroke", MainMenu)
 MenuS.Color = CrystalPurple
 MenuS.Thickness = 1.5
 
--- ========== SPEED LABEL ==========
 local SpeedLabel = nil
 
 local function CreateSpeedTag(char)
@@ -171,606 +168,6 @@ task.spawn(function()
     end
 end)
 
--- ========== ESP PLAYER ==========
-local espConnections = {}
-local function createESP(plr)
-    if plr == Player then return end
-    if not plr.Character then return end
-    if plr.Character:FindFirstChild("ESP_BLUE") then return end
-    local char = plr.Character
-    local highlight = Instance.new("Highlight")
-    highlight.Name = "ESP_BLUE"
-    highlight.FillColor = CrystalPurple
-    highlight.OutlineColor = CrystalPurple
-    highlight.FillTransparency = 0.2
-    highlight.OutlineTransparency = 0
-    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-    highlight.Parent = char
-end
-
-local function removeESP(plr)
-    if not plr.Character then return end
-    local char = plr.Character
-    local highlight = char:FindFirstChild("ESP_BLUE")
-    if highlight then highlight:Destroy() end
-end
-
-local function toggleESP(enable)
-    if enable then
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= Player then
-                if plr.Character then createESP(plr) end
-                local conn = plr.CharacterAdded:Connect(function()
-                    task.wait(0.2)
-                    if _G.Enabled["Player Esp"] then createESP(plr) end
-                end)
-                table.insert(espConnections, conn)
-            end
-        end
-        local conn = Players.PlayerAdded:Connect(function(plr)
-            if plr == Player then return end
-            local c = plr.CharacterAdded:Connect(function()
-                task.wait(0.2)
-                if _G.Enabled["Player Esp"] then createESP(plr) end
-            end)
-            table.insert(espConnections, c)
-        end)
-        table.insert(espConnections, conn)
-    else
-        for _, plr in ipairs(Players:GetPlayers()) do removeESP(plr) end
-        for _, conn in ipairs(espConnections) do
-            if conn and conn.Connected then conn:Disconnect() end
-        end
-        espConnections = {}
-    end
-end
-
--- ========== BAT AIMBOT ==========
-local AimbotState = false
-local AimbotData = { Conn = nil, Align = nil, Attach = nil }
-
-local function startBatAimbot()
-    local char = Player.Character or Player.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    
-    AimbotData.Attach = Instance.new("Attachment", hrp)
-    AimbotData.Align = Instance.new("AlignOrientation", hrp)
-    AimbotData.Align.Attachment0 = AimbotData.Attach
-    AimbotData.Align.Mode = Enum.OrientationAlignmentMode.OneAttachment
-    AimbotData.Align.RigidityEnabled = true
-    
-    AimbotData.Conn = RunService.RenderStepped:Connect(function()
-        if not AimbotState or not char.Parent then return end
-        local target, dmin = nil, 7.25
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= Player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                local d = (plr.Character.HumanoidRootPart.Position - hrp.Position).Magnitude
-                if d <= dmin then
-                    target = plr.Character.HumanoidRootPart
-                    dmin = d
-                end
-            end
-        end
-        
-        if target then
-            char.Humanoid.AutoRotate = false
-            AimbotData.Align.Enabled = true
-            AimbotData.Align.CFrame = CFrame.lookAt(hrp.Position, Vector3.new(target.Position.X, hrp.Position.Y, target.Position.Z))
-            local tool = char:FindFirstChild("Bat")
-            if tool then pcall(function() tool:Activate() end) end
-        else
-            AimbotData.Align.Enabled = false
-            char.Humanoid.AutoRotate = true
-        end
-    end)
-end
-
-local function stopBatAimbot()
-    if AimbotData.Conn then AimbotData.Conn:Disconnect() end
-    if AimbotData.Align then AimbotData.Align:Destroy() end
-    if AimbotData.Attach then AimbotData.Attach:Destroy() end
-    if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-        Player.Character.Humanoid.AutoRotate = true
-    end
-    AimbotData = { Conn = nil, Align = nil, Attach = nil }
-end
-
--- ========== STEAL NEAREST ==========
-local stealCircle = nil
-local function createStealCircle()
-    if stealCircle then stealCircle:Destroy() end
-    stealCircle = Instance.new("Part")
-    stealCircle.Name = "StealCircle"
-    stealCircle.Anchored = true
-    stealCircle.CanCollide = false
-    stealCircle.Transparency = 0.5
-    stealCircle.Color = CrystalPurple
-    stealCircle.Material = Enum.Material.Neon
-    stealCircle.Shape = Enum.PartType.Cylinder
-    stealCircle.Size = Vector3.new(0.05, 20, 20)
-    stealCircle.Parent = workspace
-end
-createStealCircle()
-
-RunService.RenderStepped:Connect(function()
-    if _G.Enabled["Steal Near"] then
-        local char = Player.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            local root = char.HumanoidRootPart
-            stealCircle.Transparency = 0.4
-            stealCircle.CFrame = CFrame.new(root.Position + Vector3.new(0, -2.8, 0)) * CFrame.Angles(0, 0, math.rad(90))
-        end
-    else
-        if stealCircle then stealCircle.Transparency = 1 end
-    end
-end)
-
--- ========== AUTO MEDUSA ==========
-local medusaCircle = nil
-local medusaLastUse = 0
-local MEDUSA_RADIUS = 10
-local MEDUSA_DELAY = 0.15
-
-local function createMedusaCircle()
-    if medusaCircle then medusaCircle:Destroy() end
-    medusaCircle = Instance.new("Part")
-    medusaCircle.Name = "MedusaCircle"
-    medusaCircle.Anchored = true
-    medusaCircle.CanCollide = false
-    medusaCircle.Transparency = 0.5
-    medusaCircle.Color = CrystalPurple
-    medusaCircle.Material = Enum.Material.Neon
-    medusaCircle.Shape = Enum.PartType.Cylinder
-    medusaCircle.Size = Vector3.new(0.05, MEDUSA_RADIUS * 2, MEDUSA_RADIUS * 2)
-    medusaCircle.Parent = workspace
-end
-createMedusaCircle()
-
-RunService.RenderStepped:Connect(function()
-    if _G.Enabled["Auto Medusa"] then
-        local char = Player.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            local root = char.HumanoidRootPart
-            medusaCircle.Transparency = 0.4
-            medusaCircle.CFrame = CFrame.new(root.Position + Vector3.new(0, -2.8, 0)) * CFrame.Angles(0, 0, math.rad(90))
-        end
-    else
-        if medusaCircle then medusaCircle.Transparency = 1 end
-    end
-end)
-
-task.spawn(function()
-    while true do
-        if _G.Enabled["Auto Medusa"] then
-            pcall(function()
-                local char = Player.Character
-                if not char then return end
-                local root = char:FindFirstChild("HumanoidRootPart")
-                if not root then return end
-                local tool = nil
-                for _, t in ipairs(char:GetChildren()) do
-                    if t:IsA("Tool") and t.Name == "Medusa's Head" then
-                        tool = t
-                        break
-                    end
-                end
-                if tool and tick() - medusaLastUse >= MEDUSA_DELAY then
-                    for _, plr in ipairs(Players:GetPlayers()) do
-                        if plr ~= Player then
-                            local pChar = plr.Character
-                            local pRoot = pChar and pChar:FindFirstChild("HumanoidRootPart")
-                            if pRoot and (pRoot.Position - root.Position).Magnitude <= MEDUSA_RADIUS then
-                                tool:Activate()
-                                medusaLastUse = tick()
-                                break
-                            end
-                        end
-                    end
-                end
-            end)
-        end
-        task.wait(0.1)
-    end
-end)
-
--- ========== AUTO PLAY (LEFT / RIGHT) ==========
-local leftPathActive = false
-local rightPathActive = false
-local lastFlatVel = Vector3.zero
-local PATH_VELOCITY_SPEED = 60
-local PATH_SECOND_SPEED = 30
-local PATH_BASE_STOP = 1.35
-local PATH_MIN_STOP = 0.65
-local PATH_NEXT_POINT_BIAS = 0.45
-local PATH_SMOOTH_FACTOR = 0.12
-
-local path_Right = {
-    {pos = Vector3.new(-470.6, -5.9, 34.4)},
-    {pos = Vector3.new(-484.2, -3.9, 21.4)},
-    {pos = Vector3.new(-475.6, -5.8, 29.3)},
-    {pos = Vector3.new(-473.4, -5.9, 111.0)}
-}
-
-local path_Left = {
-    {pos = Vector3.new(-474.7, -5.9, 91.0)},
-    {pos = Vector3.new(-483.4, -3.9, 97.3)},
-    {pos = Vector3.new(-474.7, -5.9, 91.0)},
-    {pos = Vector3.new(-476.1, -5.5, 25.4)}
-}
-
-local function pathMoveToPoint(hrp, current, nextPoint, speed)
-    local conn
-    conn = RunService.Heartbeat:Connect(function()
-        if not (leftPathActive or rightPathActive) then
-            conn:Disconnect()
-            hrp.AssemblyLinearVelocity = Vector3.zero
-            return
-        end
-        local pos = hrp.Position
-        local target = Vector3.new(current.X, pos.Y, current.Z)
-        local dir = target - pos
-        local dist = dir.Magnitude
-        local stopDist = math.clamp(PATH_BASE_STOP - dist * 0.04, PATH_MIN_STOP, PATH_BASE_STOP)
-        if dist <= stopDist then
-            conn:Disconnect()
-            hrp.AssemblyLinearVelocity = Vector3.zero
-            return
-        end
-        local moveDir = dir.Unit
-        if nextPoint then
-            local nextDir = (Vector3.new(nextPoint.X, pos.Y, nextPoint.Z) - pos).Unit
-            moveDir = (moveDir + nextDir * PATH_NEXT_POINT_BIAS).Unit
-        end
-        if lastFlatVel.Magnitude > 0.1 then
-            moveDir = (moveDir * (1 - PATH_SMOOTH_FACTOR) + lastFlatVel.Unit * PATH_SMOOTH_FACTOR).Unit
-        end
-        local vel = Vector3.new(moveDir.X * speed, hrp.AssemblyLinearVelocity.Y, moveDir.Z * speed)
-        hrp.AssemblyLinearVelocity = vel
-        lastFlatVel = Vector3.new(vel.X, 0, vel.Z)
-    end)
-    while (leftPathActive or rightPathActive) and (Vector3.new(hrp.Position.X, 0, hrp.Position.Z) - Vector3.new(current.X, 0, current.Z)).Magnitude > PATH_BASE_STOP do
-        RunService.Heartbeat:Wait()
-    end
-end
-
-local function runLeftPath()
-    local hrp = (Player.Character or Player.CharacterAdded:Wait()):WaitForChild("HumanoidRootPart")
-    for i, p in ipairs(path_Left) do
-        if not leftPathActive then return end
-        local speed = i > 2 and PATH_SECOND_SPEED or PATH_VELOCITY_SPEED
-        local nextP = path_Left[i + 1] and path_Left[i + 1].pos
-        pathMoveToPoint(hrp, p.pos, nextP, speed)
-        if i == 2 then task.wait(0.2) else task.wait(0.01) end
-    end
-end
-
-local function runRightPath()
-    local hrp = (Player.Character or Player.CharacterAdded:Wait()):WaitForChild("HumanoidRootPart")
-    for i, p in ipairs(path_Right) do
-        if not rightPathActive then return end
-        local speed = i > 2 and PATH_SECOND_SPEED or PATH_VELOCITY_SPEED
-        local nextP = path_Right[i + 1] and path_Right[i + 1].pos
-        pathMoveToPoint(hrp, p.pos, nextP, speed)
-        if i == 2 then task.wait(0.2) else task.wait(0.01) end
-    end
-end
-
-local function startLeftSteal()
-    if leftPathActive then return end
-    leftPathActive = true
-    task.spawn(function()
-        while leftPathActive and _G.Enabled["Auto Play"] do
-            runLeftPath()
-            task.wait(0.1)
-        end
-    end)
-end
-
-local function stopLeftSteal()
-    leftPathActive = false
-    local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-    if hrp then hrp.AssemblyLinearVelocity = Vector3.zero end
-end
-
-local function startRightSteal()
-    if rightPathActive then return end
-    rightPathActive = true
-    task.spawn(function()
-        while rightPathActive and _G.Enabled["Auto Play"] do
-            runRightPath()
-            task.wait(0.1)
-        end
-    end)
-end
-
-local function stopRightSteal()
-    rightPathActive = false
-    local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-    if hrp then hrp.AssemblyLinearVelocity = Vector3.zero end
-end
-
--- ========== ANTI FLING ==========
-local antiFlingConn = nil
-local function startAntiFling()
-    if antiFlingConn then return end
-    antiFlingConn = RunService.Heartbeat:Connect(function()
-        if _G.Enabled["Anti Fling"] and Player.Character then
-            local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
-            if hrp and hrp.AssemblyLinearVelocity.Magnitude > 150 then
-                hrp.AssemblyLinearVelocity = Vector3.zero
-            end
-        end
-    end)
-end
-local function stopAntiFling()
-    if antiFlingConn then antiFlingConn:Disconnect() antiFlingConn = nil end
-end
-
--- ========== ANTI RAGDOLL ==========
-local antiRagdollActive = false
-local ragdollDisabled = false
-local ragdollDisableFunc = nil
-
-local function initAntiRagdoll()
-    local ok, ragdollRemote = pcall(function()
-        return ReplicatedStorage:WaitForChild("Packages", 5):WaitForChild("Ragdoll", 5):WaitForChild("Ragdoll", 5)
-    end)
-    if not ok then return nil end
-
-    local PlayerModule = require(Player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"))
-    local Controls = PlayerModule:GetControls()
-    local updating = false
-
-    local function getRoot()
-        return Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-    end
-
-    local function forceEnableControls(duration)
-        local start = tick()
-        RunService.RenderStepped:Connect(function()
-            if ragdollDisabled or tick() - start > duration then return end
-            Controls:Enable()
-        end)
-    end
-
-    local function addLinearVelocity()
-        if ragdollDisabled then return end
-        local root = getRoot()
-        local humanoid = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
-        if not root or not humanoid then return end
-
-        if not root:FindFirstChild("AntiRagdollLV") then
-            local attachment = Instance.new("Attachment")
-            attachment.Name = "AntiRagdollAttachment"
-            attachment.Parent = root
-            local lv = Instance.new("LinearVelocity")
-            lv.Name = "AntiRagdollLV"
-            lv.Attachment0 = attachment
-            lv.MaxForce = math.huge
-            lv.RelativeTo = Enum.ActuatorRelativeTo.World
-            lv.Parent = root
-        end
-
-        forceEnableControls(0.1)
-        humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
-
-        if not updating then
-            updating = true
-            task.spawn(function()
-                while not ragdollDisabled and getRoot() and getRoot():FindFirstChild("AntiRagdollLV") do
-                    local root2 = getRoot()
-                    local hum2 = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
-                    local lv = root2 and root2:FindFirstChild("AntiRagdollLV")
-                    if lv and hum2 then
-                        local dir = hum2.MoveDirection
-                        lv.VectorVelocity = dir.Magnitude > 0.1 and (dir.Unit * hum2.WalkSpeed) or Vector3.zero
-                    end
-                    task.wait(0.05)
-                end
-                updating = false
-            end)
-        end
-    end
-
-    local function removeLinearVelocity()
-        local root = getRoot()
-        if not root then return end
-        local lv = root:FindFirstChild("AntiRagdollLV")
-        if lv then lv:Destroy() end
-        local att = root:FindFirstChild("AntiRagdollAttachment")
-        if att then att:Destroy() end
-    end
-
-    Player.AttributeChanged:Connect(function(attr)
-        if ragdollDisabled then return end
-        if attr == "RagdollEndTime" and Player:GetAttribute("RagdollEndTime") then
-            addLinearVelocity()
-        else
-            removeLinearVelocity()
-        end
-    end)
-
-    if ragdollRemote then
-        ragdollRemote.OnClientEvent:Connect(function(p1, p2)
-            if ragdollDisabled then return end
-            if p1 == "Destroy" or p2 == "manualD" then
-                removeLinearVelocity()
-            end
-        end)
-    end
-
-    return function()
-        ragdollDisabled = true
-        removeLinearVelocity()
-    end
-end
-
-local function startAntiRagdoll()
-    if antiRagdollActive then return end
-    antiRagdollActive = true
-    ragdollDisabled = false
-    ragdollDisableFunc = initAntiRagdoll()
-end
-
-local function stopAntiRagdoll()
-    antiRagdollActive = false
-    if ragdollDisableFunc then ragdollDisableFunc() end
-    ragdollDisabled = true
-    ragdollDisableFunc = nil
-end
-
--- ========== UN WALK ==========
-local NoAnimState = false
-local NoAnimConnections = {}
-
-local function disableAnims(character)
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if not humanoid then return end
-    for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
-        track:Stop()
-    end
-    if NoAnimConnections[character] then
-        NoAnimConnections[character]:Disconnect()
-    end
-    NoAnimConnections[character] = humanoid.AnimationPlayed:Connect(function(track)
-        track:Stop()
-    end)
-end
-
-local function startUnWalk()
-    if NoAnimState then return end
-    NoAnimState = true
-    local char = Player.Character
-    if char then disableAnims(char) end
-    if NoAnimConnections.characterAdded then
-        NoAnimConnections.characterAdded:Disconnect()
-    end
-    NoAnimConnections.characterAdded = Player.CharacterAdded:Connect(function(newChar)
-        disableAnims(newChar)
-    end)
-end
-
-local function stopUnWalk()
-    NoAnimState = false
-    if NoAnimConnections.characterAdded then
-        NoAnimConnections.characterAdded:Disconnect()
-        NoAnimConnections.characterAdded = nil
-    end
-    for character, conn in pairs(NoAnimConnections) do
-        if character ~= "characterAdded" then
-            conn:Disconnect()
-            NoAnimConnections[character] = nil
-        end
-    end
-end
-
--- ========== INFINITE JUMP ==========
-local InfiniteJumpState = false
-local InfiniteJumpConn = nil
-local JUMP_POWER = 50
-local COOLDOWN = 0.15
-local lastJump = 0
-
-local function startInfJump()
-    if InfiniteJumpConn then return end
-    InfiniteJumpConn = UserInputService.JumpRequest:Connect(function()
-        if not InfiniteJumpState then return end
-        local char = Player.Character
-        local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
-        if hrp and hum then
-            if hum.FloorMaterial == Enum.Material.Air then
-                local now = tick()
-                if now - lastJump >= COOLDOWN then
-                    lastJump = now
-                    hrp.Velocity = Vector3.new(hrp.Velocity.X, JUMP_POWER, hrp.Velocity.Z)
-                end
-            end
-        end
-    end)
-end
-
-local function stopInfJump()
-    if InfiniteJumpConn then InfiniteJumpConn:Disconnect() InfiniteJumpConn = nil end
-end
-
--- ========== SPIN BOT ==========
-local HelicopterState = false
-local spinBAV = nil
-local SPIN_SPEED = 30
-
-local function startSpin()
-    local c = Player.Character
-    if not c then return end
-    local hrp = c:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    if spinBAV then spinBAV:Destroy() spinBAV = nil end
-    spinBAV = Instance.new("BodyAngularVelocity")
-    spinBAV.Name = "SpinBAV"
-    spinBAV.MaxTorque = Vector3.new(0, math.huge, 0)
-    spinBAV.AngularVelocity = Vector3.new(0, SPIN_SPEED, 0)
-    spinBAV.Parent = hrp
-end
-
-local function stopSpin()
-    if spinBAV then spinBAV:Destroy() spinBAV = nil end
-    local c = Player.Character
-    if c then
-        local hrp = c:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            for _, v in pairs(hrp:GetChildren()) do
-                if v.Name == "SpinBAV" then v:Destroy() end
-            end
-        end
-    end
-end
-
--- ========== OPTIMIZER ==========
-local optimizerActive = false
-
-local function enableOptimizer()
-    if optimizerActive then return end
-    optimizerActive = true
-    Lighting.GlobalShadows = false
-    Lighting.FogStart = 0
-    Lighting.FogEnd = 1e9
-    Lighting.Brightness = 1
-    Lighting.EnvironmentDiffuseScale = 0
-    Lighting.EnvironmentSpecularScale = 0
-    for _, v in ipairs(workspace:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.Material = Enum.Material.Plastic
-            v.Reflectance = 0
-        elseif v:IsA("Decal") or v:IsA("Texture") then
-            v.Transparency = 1
-        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") then
-            v.Enabled = false
-        end
-    end
-end
-
-local function disableOptimizer()
-    if not optimizerActive then return end
-    optimizerActive = false
-    Lighting.GlobalShadows = true
-    Lighting.FogStart = 0
-    Lighting.FogEnd = 100000
-    Lighting.Brightness = 2
-    Lighting.EnvironmentDiffuseScale = 1
-    Lighting.EnvironmentSpecularScale = 1
-    for _, v in ipairs(workspace:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.Material = Enum.Material.SmoothPlastic
-            v.Reflectance = 0
-        elseif v:IsA("Decal") or v:IsA("Texture") then
-            v.Transparency = 0
-        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") then
-            v.Enabled = true
-        end
-    end
-end
-
--- ========== CREATE TOGGLE FUNCTION ==========
 local function CreateToggle(name, parent)
     local btn = Instance.new("TextButton", parent)
     btn.BackgroundColor3 = _G.Enabled[name] and CrystalPurple or DarkColor
@@ -792,41 +189,6 @@ local function CreateToggle(name, parent)
             BackgroundColor3 = active and CrystalPurple or DarkColor,
             BackgroundTransparency = active and 0 or 0.3
         })
-        
-        if name == "Player Esp" then
-            toggleESP(active)
-        elseif name == "Bat Aimbot" then
-            AimbotState = active
-            if active then startBatAimbot() else stopBatAimbot() end
-        elseif name == "Steal Near" then
-            if active then
-                if stealCircle then stealCircle.Transparency = 0.4 end
-            else
-                if stealCircle then stealCircle.Transparency = 1 end
-            end
-        elseif name == "Auto Medusa" then
-        elseif name == "Auto Play" then
-            if active then
-                startLeftSteal()
-                startRightSteal()
-            else
-                stopLeftSteal()
-                stopRightSteal()
-            end
-        elseif name == "Anti Fling" then
-            if active then startAntiFling() else stopAntiFling() end
-        elseif name == "Anti Ragdoll" then
-            if active then startAntiRagdoll() else stopAntiRagdoll() end
-        elseif name == "Un Walk" then
-            if active then startUnWalk() else stopUnWalk() end
-        elseif name == "Inf Jump" then
-            InfiniteJumpState = active
-            if active then startInfJump() else stopInfJump() end
-        elseif name == "Spin Bot" then
-            if active then startSpin() else stopSpin() end
-        elseif name == "Optimizer" then
-            if active then enableOptimizer() else disableOptimizer() end
-        end
     end)
     return btn
 end
@@ -837,7 +199,7 @@ EspBtn.Size = UDim2.new(1, -20, 0, 30)
 EspBtn.Position = UDim2.new(0, 10, 0, 15)
 
 local Grid = Instance.new("Frame", MainMenu)
-Grid.Size = UDim2.new(1, -20, 0, 180)
+Grid.Size = UDim2.new(1, -20, 0, 250)
 Grid.Position = UDim2.new(0, 10, 0, 55)
 Grid.BackgroundTransparency = 1
 
@@ -849,9 +211,179 @@ for i = 2, #features do
     CreateToggle(features[i], Grid)
 end
 
+-- ============================================================
+-- DOWN & DROP BUTTONS
+-- ============================================================
+
+-- DOWN FUNCTION (ينزل تحت الأرض بقوة)
+local function doDown()
+    local char = Player.Character
+    if not char then return end
+    
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hum or not hrp or hum.Health <= 0 then return end
+    
+    pcall(function()
+        hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+    end)
+    
+    hrp.AssemblyAngularVelocity = Vector3.zero
+    hrp.AssemblyLinearVelocity = Vector3.new(0, -250, 0)
+    
+    local conn
+    conn = RunService.Heartbeat:Connect(function()
+        char = Player.Character
+        hum = char and char:FindFirstChildOfClass("Humanoid")
+        hrp = char and char:FindFirstChild("HumanoidRootPart")
+        if not hum or not hrp then
+            conn:Disconnect()
+            return
+        end
+        
+        pcall(function()
+            hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+            hum:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+            if hum:GetState() == Enum.HumanoidStateType.Ragdoll or hum:GetState() == Enum.HumanoidStateType.FallingDown then
+                hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+            end
+        end)
+        
+        if hrp.AssemblyLinearVelocity.Y > -100 then
+            hrp.AssemblyLinearVelocity = Vector3.new(0, -250, 0)
+        end
+        
+        local floor = hum.FloorMaterial
+        if floor ~= Enum.Material.Air then
+            conn:Disconnect()
+            hrp.AssemblyAngularVelocity = Vector3.zero
+            hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+            pcall(function()
+                hum:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+                hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+            end)
+        end
+    end)
+end
+
+-- DROP FUNCTION (يطير لفوق بينزل)
+local function doDrop()
+    local char = Player.Character
+    if not char then return end
+    
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hum or not hrp or hum.Health <= 0 then return end
+    
+    pcall(function()
+        hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+        hum:ChangeState(Enum.HumanoidStateType.Jumping)
+    end)
+    
+    hrp.AssemblyAngularVelocity = Vector3.zero
+    hrp.AssemblyLinearVelocity = Vector3.new(0, 183, 0)
+    
+    local startY = hrp.Position.Y
+    local peaked = false
+    local conn
+    conn = RunService.Heartbeat:Connect(function()
+        char = Player.Character
+        hum = char and char:FindFirstChildOfClass("Humanoid")
+        hrp = char and char:FindFirstChild("HumanoidRootPart")
+        if not hum or not hrp then
+            conn:Disconnect()
+            return
+        end
+        
+        pcall(function()
+            hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+            hum:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+            if hum:GetState() == Enum.HumanoidStateType.Ragdoll or hum:GetState() == Enum.HumanoidStateType.FallingDown then
+                hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+            end
+        end)
+        
+        if not peaked and hrp.Position.Y >= startY + 10 then
+            peaked = true
+            hrp.AssemblyAngularVelocity = Vector3.zero
+            hrp.AssemblyLinearVelocity = Vector3.new(0, -200, 0)
+        end
+        
+        local floor = hum.FloorMaterial
+        if peaked and floor ~= Enum.Material.Air and hrp.Position.Y <= startY + 2 then
+            conn:Disconnect()
+            hrp.AssemblyAngularVelocity = Vector3.zero
+            hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+            pcall(function()
+                hum:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+                hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+            end)
+        end
+    end)
+end
+
+-- إضافة زر DOWN في القائمة
+local DownBtn = Instance.new("TextButton", MainMenu)
+DownBtn.Size = UDim2.new(0.48, -5, 0, 30)
+DownBtn.Position = UDim2.new(0.01, 0, 0.88, 0)
+DownBtn.BackgroundColor3 = DarkColor
+DownBtn.BackgroundTransparency = 0.3
+DownBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+DownBtn.Text = "DOWN"
+DownBtn.Font = Enum.Font.GothamBold
+DownBtn.TextSize = UnifiedFontSize
+DownBtn.AutoButtonColor = false
+Instance.new("UICorner", DownBtn).CornerRadius = GlobalRadius
+local DownS = Instance.new("UIStroke", DownBtn)
+DownS.Color = CrystalPurple
+DownS.Thickness = UnifiedStroke
+DownS.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+DownBtn.MouseButton1Click:Connect(function()
+    doDown()
+    SmoothTween(DownBtn, {BackgroundColor3 = CrystalPurple, BackgroundTransparency = 0})
+    task.delay(0.2, function()
+        SmoothTween(DownBtn, {BackgroundColor3 = DarkColor, BackgroundTransparency = 0.3})
+    end)
+end)
+
+-- إضافة زر DROP بجانب DOWN
+local DropBtn = Instance.new("TextButton", MainMenu)
+DropBtn.Size = UDim2.new(0.48, -5, 0, 30)
+DropBtn.Position = UDim2.new(0.51, 0, 0.88, 0)
+DropBtn.BackgroundColor3 = DarkColor
+DropBtn.BackgroundTransparency = 0.3
+DropBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+DropBtn.Text = "DROP"
+DropBtn.Font = Enum.Font.GothamBold
+DropBtn.TextSize = UnifiedFontSize
+DropBtn.AutoButtonColor = false
+Instance.new("UICorner", DropBtn).CornerRadius = GlobalRadius
+local DropS = Instance.new("UIStroke", DropBtn)
+DropS.Color = CrystalPurple
+DropS.Thickness = UnifiedStroke
+DropS.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+DropBtn.MouseButton1Click:Connect(function()
+    doDrop()
+    SmoothTween(DropBtn, {BackgroundColor3 = CrystalPurple, BackgroundTransparency = 0})
+    task.delay(0.2, function()
+        SmoothTween(DropBtn, {BackgroundColor3 = DarkColor, BackgroundTransparency = 0.3})
+    end)
+end)
+
+-- Save Config Button
 local SaveBtn = Instance.new("TextButton", MainMenu)
 SaveBtn.Size = UDim2.new(1, -20, 0, 30)
-SaveBtn.Position = UDim2.new(0, 10, 1, -45)
+SaveBtn.Position = UDim2.new(0, 10, 1, -40)
 SaveBtn.BackgroundColor3 = DarkColor
 SaveBtn.BackgroundTransparency = 0.3
 SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -876,6 +408,7 @@ SaveBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
+-- Side Button
 local SideButton = Instance.new("TextButton", ScreenGui)
 SideButton.Size = UDim2.new(0, 50, 0, 50)
 SideButton.Position = UDim2.new(1, -65, 0.20, 0)
@@ -908,7 +441,7 @@ SideButton.InputBegan:Connect(function(input)
                 dragging = false
                 if (tick() - startTick) < 0.25 and (input.Position - dragStart).Magnitude < 5 then
                     menuOpen = not menuOpen
-                    MainMenu:TweenPosition(UDim2.new(menuOpen and 0.02 or -0.7, 0, 0.5, -142), "Out", "Quart", 0.4, true)
+                    MainMenu:TweenPosition(UDim2.new(menuOpen and 0.02 or -0.7, 0, 0.5, -160), "Out", "Quart", 0.4, true)
                 end
             end
         end)
@@ -932,12 +465,4 @@ task.spawn(function()
     end
 end)
 
-if _G.Enabled["Player Esp"] then toggleESP(true) end
-if _G.Enabled["Bat Aimbot"] then AimbotState = true startBatAimbot() end
-if _G.Enabled["Anti Fling"] then startAntiFling() end
-if _G.Enabled["Anti Ragdoll"] then startAntiRagdoll() end
-if _G.Enabled["Un Walk"] then startUnWalk() end
-if _G.Enabled["Inf Jump"] then InfiniteJumpState = true startInfJump() end
-if _G.Enabled["Spin Bot"] then startSpin() end
-if _G.Enabled["Optimizer"] then enableOptimizer() end
-if _G.Enabled["Auto Play"] then startLeftSteal() startRightSteal() end
+print("Crystal Hub Loaded - DOWN & DROP buttons added!")
