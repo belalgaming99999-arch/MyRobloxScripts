@@ -1,4 +1,4 @@
--- [[ Crystal Hub - Precision Alignment Edition ]] --
+-- [[ Crystal Hub - Professional Clean Edition ]] --
 
 if not game:IsLoaded() then game.Loaded:Wait() end
 
@@ -17,67 +17,84 @@ local BorderThickness = 1.5
 
 local function FullCleanup()
     for _, child in pairs(CoreGui:GetChildren()) do
-        if child:IsA("ScreenGui") and (child.Name:find("Crystal") or child.Name:find("Nova")) then child:Destroy() end
+        if child:IsA("ScreenGui") and (child.Name:find("Crystal") or child.Name:find("Nova")) then 
+            child:Destroy() 
+        end
     end
 end
 FullCleanup()
 
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "Crystal_Aligned_UI"
+ScreenGui.Name = "Crystal_Final_UI"
 
--- ========== 1. Top HUD (Base Font Size: 10) ==========
+-- ========== HUD العلوية ==========
 local HUDContainer = Instance.new("Frame", ScreenGui)
-HUDContainer.Size = UDim2.new(0, 230, 0, 70); HUDContainer.Position = UDim2.new(0.5, -115, 0.02, 0); HUDContainer.BackgroundTransparency = 1
+HUDContainer.Size = UDim2.new(0, 230, 0, 70)
+HUDContainer.Position = UDim2.new(0.5, -115, 0.02, 0)
+HUDContainer.BackgroundTransparency = 1
 
 local TopBar = Instance.new("Frame", HUDContainer)
-TopBar.Size = UDim2.new(0.9, 0, 0, 28); TopBar.Position = UDim2.new(0.05, 0, 0, 0); TopBar.BackgroundColor3 = DarkColor; TopBar.BackgroundTransparency = 0.2
+TopBar.Size = UDim2.new(0.9, 0, 0, 28)
+TopBar.Position = UDim2.new(0.05, 0, 0, 0)
+TopBar.BackgroundColor3 = DarkColor
+TopBar.BackgroundTransparency = 0.2
 Instance.new("UICorner", TopBar).CornerRadius = GlobalRadius
 local TopS = Instance.new("UIStroke", TopBar); TopS.Color = CrystalPurple; TopS.Thickness = BorderThickness
 
 local Info = Instance.new("TextLabel", TopBar)
-Info.Size = UDim2.new(1,0,1,0); Info.BackgroundTransparency = 1; Info.TextColor3 = Color3.fromRGB(255, 255, 255); Info.Font = Enum.Font.GothamBold; 
-Info.TextSize = 10; -- الحجم المرجعي
-Info.Text = "Crystal Hub | FPS 0 | MS 0" 
+Info.Size = UDim2.new(1,0,1,0)
+Info.BackgroundTransparency = 1
+Info.TextColor3 = Color3.fromRGB(255, 255, 255)
+Info.Font = Enum.Font.GothamBold
+Info.TextSize = 10
+Info.Text = "Crystal Hub | FPS -- | MS --" 
 
 local BottomBar = Instance.new("Frame", HUDContainer)
-BottomBar.Size = UDim2.new(0.9, 0, 0, 14); BottomBar.Position = UDim2.new(0.05, 0, 0, 35); BottomBar.BackgroundTransparency = 1
+BottomBar.Size = UDim2.new(0.9, 0, 0, 14)
+BottomBar.Position = UDim2.new(0.05, 0, 0, 35)
+BottomBar.BackgroundTransparency = 1
 
 local function CreateStatBox(pos, size, txt, trans)
     local f = Instance.new("Frame", BottomBar)
     f.Size = size; f.Position = pos; f.BackgroundColor3 = DarkColor; f.BackgroundTransparency = trans
     Instance.new("UICorner", f).CornerRadius = GlobalRadius
-    local s = Instance.new("UIStroke", f); s.Color = CrystalPurple; s.Thickness = 1; s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    local s = Instance.new("UIStroke", f); s.Color = CrystalPurple; s.Thickness = 1
     local t = Instance.new("TextLabel", f); t.Size = UDim2.new(1,0,1,0); t.BackgroundTransparency = 1; t.TextColor3 = Color3.fromRGB(255,255,255); t.Font = Enum.Font.GothamBold; t.TextSize = 9; t.Text = txt
 end
 CreateStatBox(UDim2.new(0, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "0%", 0.5) 
 CreateStatBox(UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "7.4", 0.15) 
 
--- ========== 2. Speed Tag (تعديل: نزلت سنة تحت) ==========
+-- ========== Speed Tag (نزلت سنة تحت) ==========
 local SpeedLabel
 local function CreateSpeedTag(char)
-    if char:FindFirstChild("SpeedTag") then char.SpeedTag:Destroy() end
     local head = char:WaitForChild("Head", 5)
     local billboard = Instance.new("BillboardGui", char)
-    billboard.Name = "SpeedTag"; billboard.Adornee = head; billboard.Size = UDim2.new(0, 120, 0, 40); 
-    billboard.StudsOffset = Vector3.new(0, 2.8, 0); -- نزلت سنة (كانت 3.2)
+    billboard.Name = "SpeedTag"; billboard.Adornee = head; billboard.Size = UDim2.new(0, 120, 0, 40)
+    billboard.StudsOffset = Vector3.new(0, 2.6, 0) -- نزلت سنة إضافية لراحة العين
     billboard.AlwaysOnTop = true
-    local label = Instance.new("TextLabel", billboard); label.Size = UDim2.new(1, 0, 1, 0); label.BackgroundTransparency = 1; label.TextColor3 = Color3.fromRGB(255, 255, 255); label.Font = Enum.Font.GothamBold; label.TextSize = 11; label.Text = "Speed: 0.0"
-    local stroke = Instance.new("UIStroke", label); stroke.Color = Color3.fromRGB(0, 0, 0); stroke.Thickness = 1; stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+    
+    local label = Instance.new("TextLabel", billboard)
+    label.Size = UDim2.new(1, 0, 1, 0); label.BackgroundTransparency = 1; label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.Font = Enum.Font.GothamBold; label.TextSize = 11; label.Text = "Speed: 0.0"
+    Instance.new("UIStroke", label).Thickness = 1
     SpeedLabel = label
 end
 Player.CharacterAdded:Connect(CreateSpeedTag)
 if Player.Character then CreateSpeedTag(Player.Character) end
 
--- ========== 3. Main Side Menu (توحيد الخط 10) ==========
+-- ========== القائمة الجانبية ==========
 local MainMenu = Instance.new("Frame", ScreenGui)
-MainMenu.Size = UDim2.new(0, 170, 0, 255); MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -127) 
-MainMenu.BackgroundColor3 = DarkColor; MainMenu.BackgroundTransparency = 0.4
+MainMenu.Size = UDim2.new(0, 170, 0, 255)
+MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -127) 
+MainMenu.BackgroundColor3 = DarkColor
+MainMenu.BackgroundTransparency = 0.4
 Instance.new("UICorner", MainMenu).CornerRadius = GlobalRadius
 local MenuS = Instance.new("UIStroke", MainMenu); MenuS.Color = CrystalPurple; MenuS.Thickness = BorderThickness
 
 local function StyleButton(btn, thick)
-    btn.AutoButtonColor = false; Instance.new("UICorner", btn).CornerRadius = GlobalRadius
-    local s = Instance.new("UIStroke", btn); s.Color = CrystalPurple; s.Thickness = thick or BorderThickness; s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    btn.AutoButtonColor = false
+    Instance.new("UICorner", btn).CornerRadius = GlobalRadius
+    local s = Instance.new("UIStroke", btn); s.Color = CrystalPurple; s.Thickness = thick or 1
     btn.MouseButton1Click:Connect(function()
         if btn.Name ~= "SaveBtn" then
             local active = btn.BackgroundColor3 == CrystalPurple
@@ -88,8 +105,7 @@ end
 
 local EspBtn = Instance.new("TextButton", MainMenu)
 EspBtn.Size = UDim2.new(0, 150, 0, 28); EspBtn.Position = UDim2.new(0.5, -75, 0, 12)
-EspBtn.BackgroundColor3 = DarkColor; EspBtn.BackgroundTransparency = 0.3; EspBtn.TextColor3 = Color3.fromRGB(255, 255, 255); EspBtn.Text = "Player Esp"; EspBtn.Font = Enum.Font.GothamBold; 
-EspBtn.TextSize = 10; -- مطابق للي فوق
+EspBtn.BackgroundColor3 = DarkColor; EspBtn.BackgroundTransparency = 0.3; EspBtn.TextColor3 = Color3.fromRGB(255, 255, 255); EspBtn.Text = "Player Esp"; EspBtn.Font = Enum.Font.GothamBold; EspBtn.TextSize = 10
 StyleButton(EspBtn, 1.5)
 
 local Grid = Instance.new("Frame", MainMenu)
@@ -99,22 +115,22 @@ local UIGrid = Instance.new("UIGridLayout", Grid); UIGrid.CellSize = UDim2.new(0
 local features = {"Bat Aimbot", "Steal Near", "Auto Medusa", "Auto Play", "Anti Fling", "Anti Ragdoll", "Un Walk", "Inf Jump", "Spin Bot", "Optimizer"}
 for _, f in pairs(features) do 
     local btn = Instance.new("TextButton", Grid)
-    btn.BackgroundColor3 = DarkColor; btn.BackgroundTransparency = 0.3; btn.TextColor3 = Color3.fromRGB(255, 255, 255); btn.Text = f; btn.Font = Enum.Font.GothamBold; 
-    btn.TextSize = 10; -- مطابق للي فوق
+    btn.BackgroundColor3 = DarkColor; btn.BackgroundTransparency = 0.3; btn.TextColor3 = Color3.fromRGB(255, 255, 255); btn.Text = f; btn.Font = Enum.Font.GothamBold; btn.TextSize = 10
     StyleButton(btn, 1)
 end
 
 local SaveBtn = Instance.new("TextButton", MainMenu)
 SaveBtn.Name = "SaveBtn"
-SaveBtn.Size = UDim2.new(0, 150, 0, 28); 
-SaveBtn.Position = UDim2.new(0.5, -75, 0, 212); -- طلع فوق سنتين (من 214 إلى 212)
-SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.3; SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255); SaveBtn.Text = "Save Config"; SaveBtn.Font = Enum.Font.GothamBold; 
-SaveBtn.TextSize = 10; -- مطابق للي فوق
+SaveBtn.Size = UDim2.new(0, 150, 0, 28)
+SaveBtn.Position = UDim2.new(0.5, -75, 0, 210) -- ارتفع سنتين للأعلى
+SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.3; SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255); SaveBtn.Text = "Save Config"; SaveBtn.Font = Enum.Font.GothamBold; SaveBtn.TextSize = 10
 StyleButton(SaveBtn, 1.5)
 
--- ========== 4. Floating Button (Smart Dragging) ==========
+-- ========== الأيقونة المتحركة (ارتفعت سنتين) ==========
 local SideButton = Instance.new("TextButton", ScreenGui)
-SideButton.Size = UDim2.new(0, 50, 0, 50); SideButton.Position = UDim2.new(1, -60, 0.33, 0); SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""; SideButton.BorderSizePixel = 0
+SideButton.Size = UDim2.new(0, 50, 0, 50)
+SideButton.Position = UDim2.new(1, -60, 0.31, 0) -- ارتفعت سنتين (من 0.33 لـ 0.31)
+SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""; SideButton.BorderSizePixel = 0; SideButton.AutoButtonColor = false
 Instance.new("UICorner", SideButton).CornerRadius = GlobalRadius
 local SideStroke = Instance.new("UIStroke", SideButton); SideStroke.Color = Color3.fromRGB(255,255,255); SideStroke.Thickness = 1.5
 
@@ -123,7 +139,8 @@ for i=0,2 do
     line.Size = UDim2.new(0, 24, 0, 4); line.Position = UDim2.new(0.5, -12, 0, 15 + (i * 9)); line.BackgroundColor3 = Color3.fromRGB(255, 255, 255); line.BorderSizePixel = 0; Instance.new("UICorner", line).CornerRadius = UDim.new(0, 2)
 end
 
-local dragging, dragStart, startPos, dragInput
+-- نظام تحريك ذكي وسلس
+local dragging, dragStart, startPos
 local menuOpen = false
 
 SideButton.InputBegan:Connect(function(input)
@@ -133,7 +150,7 @@ SideButton.InputBegan:Connect(function(input)
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
-                if (tick() - startTick) < 0.3 and (input.Position - dragStart).Magnitude < 5 then
+                if (tick() - startTick) < 0.25 and (input.Position - dragStart).Magnitude < 6 then
                     menuOpen = not menuOpen
                     MainMenu:TweenPosition(UDim2.new(menuOpen and 0.02 or -0.7, 0, 0.5, -127), "Out", "Quart", 0.4, true)
                 end
@@ -149,13 +166,19 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- ========== 5. Update Loop ==========
+-- ========== تحديث البيانات بسلاسة (Smooth Update) ==========
 task.spawn(function()
-    while task.wait(0.1) do
+    while task.wait(0.5) do -- تحديث كل نصف ثانية ليكون مريحاً للعين
         pcall(function()
             local fps = math.floor(1 / RunService.RenderStepped:Wait())
             local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-            Info.Text = string.format("Crystal Hub | FPS %d | MS %d", fps, ping)
+            Info.Text = "Crystal Hub | FPS " .. fps .. " | MS " .. ping
+            
+            if SpeedLabel and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+                local vel = Player.Character.HumanoidRootPart.Velocity
+                local speed = math.floor(Vector3.new(vel.X, 0, vel.Z).Magnitude * 10) / 10
+                SpeedLabel.Text = "Speed: " .. speed
+            end
         end)
     end
 end)
