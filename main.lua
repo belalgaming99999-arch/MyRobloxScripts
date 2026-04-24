@@ -1,4 +1,4 @@
--- [[ Crystal Hub - Precision Grid & Symmetry Edition ]] --
+-- [[ Crystal Hub - Professional Flat Edition ]] --
 
 if not game:IsLoaded() then game.Loaded:Wait() end
 
@@ -15,15 +15,15 @@ local DarkColor = Color3.fromRGB(0, 0, 0)
 local GlobalRadius = UDim.new(0, 15) 
 local BorderThickness = 1.5
 
-local function FullCleanup()
-    for _, child in pairs(CoreGui:GetChildren()) do
-        if child:IsA("ScreenGui") and (child.Name:find("Crystal") or child.Name:find("Fixed")) then child:Destroy() end
+-- تنظيف الشاشة من أي مخلفات برمجية
+for _, child in pairs(CoreGui:GetChildren()) do
+    if child:IsA("ScreenGui") and (child.Name:find("Crystal") or child.Name:find("Unified")) then 
+        child:Destroy() 
     end
 end
-FullCleanup()
 
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "Crystal_Symmetric_Final"
+ScreenGui.Name = "Crystal_Final_Pro"
 
 -- ========== 1. Top HUD (Oval 15) ==========
 local HUDContainer = Instance.new("Frame", ScreenGui)
@@ -35,8 +35,8 @@ Instance.new("UICorner", TopBar).CornerRadius = GlobalRadius
 local TopS = Instance.new("UIStroke", TopBar); TopS.Color = CrystalPurple; TopS.Thickness = BorderThickness
 
 local Info = Instance.new("TextLabel", TopBar)
-Info.Size = UDim2.new(1,0,1,0); Info.BackgroundTransparency = 1; Info.TextColor3 = Color3.fromRGB(255, 255, 255); Info.Font = Enum.Font.GothamBold; Info.TextSize = 10
-Info.Text = "Crystal Hub | FPS -- | MS --"
+Info.Size = UDim2.new(1,0,1,0); Info.BackgroundTransparency = 1; Info.TextColor3 = Color3.fromRGB(255, 255, 255)
+Info.Font = Enum.Font.GothamBold; Info.TextSize = 10; Info.Text = "Crystal Hub | FPS -- | MS --"
 
 local BottomBar = Instance.new("Frame", HUDContainer)
 BottomBar.Size = UDim2.new(0.9, 0, 0, 14); BottomBar.Position = UDim2.new(0.05, 0, 0, 35); BottomBar.BackgroundTransparency = 1
@@ -64,16 +64,17 @@ end
 Player.CharacterAdded:Connect(CreateSpeedTag)
 if Player.Character then CreateSpeedTag(Player.Character) end
 
--- ========== 3. Main Side Menu (مرتبة بالمللي) ==========
+-- ========== 3. Sidebar Menu (مرتبة بالمللي وحواف بنفسجي) ==========
 local MainMenu = Instance.new("Frame", ScreenGui)
-MainMenu.Size = UDim2.new(0, 180, 0, 280); MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -140) 
+MainMenu.Size = UDim2.new(0, 180, 0, 285); MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -142) 
 MainMenu.BackgroundColor3 = DarkColor; MainMenu.BackgroundTransparency = 0.4
 Instance.new("UICorner", MainMenu).CornerRadius = GlobalRadius
 local MenuS = Instance.new("UIStroke", MainMenu); MenuS.Color = CrystalPurple; MenuS.Thickness = BorderThickness
 
 local function StyleButton(btn, thick)
     btn.AutoButtonColor = false; Instance.new("UICorner", btn).CornerRadius = GlobalRadius
-    local s = Instance.new("UIStroke", btn); s.Color = CrystalPurple; s.Thickness = thick or BorderThickness
+    -- إضافة الحواف البنفسجية لكل الأزرار كالمطلوب
+    local s = Instance.new("UIStroke", btn); s.Color = CrystalPurple; s.Thickness = thick or BorderThickness; s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     btn.MouseButton1Click:Connect(function()
         if btn.Name ~= "SaveBtn" then
             local active = btn.BackgroundColor3 == CrystalPurple
@@ -89,19 +90,19 @@ EspBtn.BackgroundColor3 = DarkColor; EspBtn.BackgroundTransparency = 0.3; EspBtn
 StyleButton(EspBtn, BorderThickness)
 
 local Grid = Instance.new("Frame", MainMenu)
-Grid.Size = UDim2.new(1, -20, 0, 175); Grid.Position = UDim2.new(0, 10, 0, 55); Grid.BackgroundTransparency = 1
+Grid.Size = UDim2.new(1, -20, 0, 180); Grid.Position = UDim2.new(0, 10, 0, 55); Grid.BackgroundTransparency = 1
 local UIGrid = Instance.new("UIGridLayout", Grid); UIGrid.CellSize = UDim2.new(0, 75, 0, 28); UIGrid.CellPadding = UDim2.new(0, 10, 0, 8)
 
 local features = {"Bat Aimbot", "Steal Near", "Auto Medusa", "Auto Play", "Anti Fling", "Anti Ragdoll", "Un Walk", "Inf Jump", "Spin Bot", "Optimizer"}
 for _, f in pairs(features) do 
     local btn = Instance.new("TextButton", Grid)
     btn.BackgroundColor3 = DarkColor; btn.BackgroundTransparency = 0.3; btn.TextColor3 = Color3.fromRGB(255, 255, 255); btn.Text = f; btn.Font = Enum.Font.GothamBold; btn.TextSize = 10
-    StyleButton(btn, 1)
+    StyleButton(btn, 1.2) -- حواف بنفسجية لكل زر
 end
 
 local SaveBtn = Instance.new("TextButton", MainMenu)
 SaveBtn.Name = "SaveBtn"
-SaveBtn.Size = UDim2.new(1, -20, 0, 30); SaveBtn.Position = UDim2.new(0, 10, 1, -45) -- مرفوع سنتين
+SaveBtn.Size = UDim2.new(1, -20, 0, 30); SaveBtn.Position = UDim2.new(0, 10, 1, -45)
 SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.3; SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255); SaveBtn.Text = "Save Config"; SaveBtn.Font = Enum.Font.GothamBold; SaveBtn.TextSize = 10
 StyleButton(SaveBtn, BorderThickness)
 
@@ -117,19 +118,18 @@ for i=0,2 do
     line.Size = UDim2.new(0, 24, 0, 4); line.Position = UDim2.new(0.5, -12, 0, 15 + (i * 9)); line.BackgroundColor3 = Color3.fromRGB(255, 255, 255); line.BorderSizePixel = 0; Instance.new("UICorner", line).CornerRadius = UDim.new(0, 2)
 end
 
-local dragging, dragStart, startPos
-local menuOpen = false
-
+-- نظام السحب والفتح السلس
+local dragging, dragStart, startPos, menuOpen = false, nil, nil, false
 SideButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true; dragStart = input.Position; startPos = SideButton.Position
+        dragging, dragStart, startPos = true, input.Position, SideButton.Position
         local startTick = tick()
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
                 if (tick() - startTick) < 0.25 and (input.Position - dragStart).Magnitude < 5 then
                     menuOpen = not menuOpen
-                    MainMenu:TweenPosition(UDim2.new(menuOpen and 0.02 or -0.7, 0, 0.5, -140), "Out", "Quart", 0.4, true)
+                    MainMenu:TweenPosition(UDim2.new(menuOpen and 0.02 or -0.7, 0, 0.5, -142), "Out", "Quart", 0.4, true)
                 end
             end
         end)
@@ -143,9 +143,9 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- ========== 5. Update Loop ==========
+-- ========== 5. Smooth Update Loop ==========
 task.spawn(function()
-    while task.wait(0.2) do
+    while task.wait(0.15) do
         pcall(function()
             local fps = math.floor(1 / RunService.RenderStepped:Wait())
             local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
