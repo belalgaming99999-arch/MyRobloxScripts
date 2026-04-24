@@ -80,7 +80,7 @@ Info.Text = "Crystal Hub | FPS ... | MS ..."
 local BottomBar = Instance.new("Frame", HUDContainer)
 BottomBar.Size = UDim2.new(0.9, 0, 0, 14); BottomBar.Position = UDim2.new(0.05, 0, 0, 35); BottomBar.BackgroundTransparency = 1
 
-local PercentLabel = nil  -- النسبة المئوية اللي هتتغير
+local PercentLabel = nil  -- النسبة اللي هتتغير
 
 local function CreateStatBox(pos, size, txt, trans)
     local f = Instance.new("Frame", BottomBar); f.Size = size; f.Position = pos; f.BackgroundColor3 = DarkColor; f.BackgroundTransparency = trans
@@ -88,7 +88,6 @@ local function CreateStatBox(pos, size, txt, trans)
     local s = Instance.new("UIStroke", f); s.Color = CrystalPurple; s.Thickness = 1
     local t = Instance.new("TextLabel", f); t.Size = UDim2.new(1,0,1,0); t.BackgroundTransparency = 1; t.TextColor3 = Color3.fromRGB(255,255,255); t.Font = Enum.Font.GothamBold; t.TextSize = 9; t.Text = txt
     if txt == "0%" then PercentLabel = t end
-    return t
 end
 CreateStatBox(UDim2.new(0, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "0%", 0.5) 
 CreateStatBox(UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "7.4", 0.15) 
@@ -160,7 +159,7 @@ for i=0,2 do
 end
 
 -- ============================================================
--- SPEED LABEL (سريع - تحديث كل إطار زي ZAY)
+-- SPEED LABEL (سريع - تحديث كل إطار)
 -- ============================================================
 local SpeedLabel = nil
 
@@ -193,7 +192,7 @@ local function CreateFastSpeedTag(char)
     SpeedLabel = label
 end
 
--- تحديث السرعة كل إطار (أسرع طريقة زي ZAY)
+-- تحديث السرعة كل إطار
 task.spawn(function()
     while true do
         RunService.RenderStepped:Wait()
@@ -220,13 +219,20 @@ if Player.Character then
 end
 
 -- ============================================================
--- STEAL PROGRESS (النسبة 0% تتملى زيه زي ZAY)
+-- نظام النسبة 0% تتملى أثناء السرقة
 -- ============================================================
-local isStealing = false
-local STEAL_DURATION = 1.3
 
--- بدء عملية السرقة وتحديث النسبة
-local function StartStealProgress()
+local isStealing = false
+
+-- تحديث النسبة على الشاشة
+local function UpdatePercent(percent)
+    if PercentLabel then
+        PercentLabel.Text = tostring(math.floor(percent)) .. "%"
+    end
+end
+
+-- بدء عد تنازلي للسرقة
+local function StartStealCountdown(duration)
     if isStealing then return end
     isStealing = true
     
@@ -235,19 +241,13 @@ local function StartStealProgress()
     task.spawn(function()
         while isStealing do
             local elapsed = tick() - startTime
-            local percent = math.floor(math.clamp((elapsed / STEAL_DURATION) * 100, 0, 100))
-            
-            if PercentLabel then
-                PercentLabel.Text = tostring(percent) .. "%"
-            end
+            local percent = math.clamp((elapsed / duration) * 100, 0, 100)
+            UpdatePercent(percent)
             
             if percent >= 100 then
                 isStealing = false
-                task.delay(0.3, function()
-                    if PercentLabel then
-                        PercentLabel.Text = "0%"
-                    end
-                end)
+                task.wait(0.3)
+                UpdatePercent(0)
                 break
             end
             
@@ -256,36 +256,25 @@ local function StartStealProgress()
     end)
 end
 
--- كشف عملية السرقة في اللعبة
-local function DetectSteal()
-    -- مراقبة Attribute "Stealing"
-    pcall(function()
-        Player:GetAttributeChangedSignal("Stealing"):Connect(function()
-            if Player:GetAttribute("Stealing") == true then
-                StartStealProgress()
-            end
-        end)
-    end)
-    
-    -- مراقبة سرعة المشي
-    task.spawn(function()
-        local lastSpeed = 0
-        while true do
-            task.wait(0.05)
-            pcall(function()
-                local char = Player.Character
-                if char then
-                    local hum = char:FindFirstChildOfClass("Humanoid")
-                    if hum and hum.WalkSpeed < 20 and hum.WalkSpeed > 0 and not isStealing then
-                        StartStealProgress()
+-- كشف السرقة من سرعة المشي
+task.spawn(function()
+    while true do
+        task.wait(0.05)
+        pcall(function()
+            local char = Player.Character
+            if char then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    local currentSpeed = hum.WalkSpeed
+                    -- لو السرقة بدأت (السرعة قلت عن 25)
+                    if currentSpeed < 25 and currentSpeed > 0 and not isStealing then
+                        StartStealCountdown(1.3)
                     end
                 end
-            end)
-        end
-    end)
-end
-
-task.spawn(DetectSteal)
+            end
+        end)
+    end
+end)
 
 -- ============================================================
 -- Drag & Performance
