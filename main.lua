@@ -1,4 +1,4 @@
--- [[ Crystal Hub - Turbo Instant Edition + SAVE SYSTEM ]] --
+-- [[ Crystal Hub - Turbo Final Clean Edition ]] --
 
 if _G.CrystalLoaded then return end
 _G.CrystalLoaded = true
@@ -13,7 +13,7 @@ local CoreGui = game:GetService("CoreGui")
 local Player = Players.LocalPlayer
 
 -- ============================================================
--- 1. CONFIG SYSTEM (نظام الحفظ المدمج)
+-- 1. CONFIG SYSTEM
 -- ============================================================
 local ConfigFileName = "CrystalHub_Settings.json"
 _G.Enabled = {
@@ -24,7 +24,7 @@ _G.Enabled = {
 }
 
 local function SaveConfig()
-    local ok, err = pcall(function()
+    local ok = pcall(function()
         if writefile then
             writefile(ConfigFileName, HttpService:JSONEncode(_G.Enabled))
         end
@@ -36,31 +36,28 @@ local function LoadConfig()
     pcall(function()
         if isfile and isfile(ConfigFileName) then
             local data = HttpService:JSONDecode(readfile(ConfigFileName))
-            for k, v in pairs(data) do
-                _G.Enabled[k] = v
-            end
+            for k, v in pairs(data) do _G.Enabled[k] = v end
         end
     end)
 end
-LoadConfig() -- تحميل الإعدادات فوراً عند التشغيل
+LoadConfig()
 
 -- ============================================================
--- 2. UI SETUP (نفس التصميم والسرعة)
+-- 2. UI SETUP
 -- ============================================================
 local CrystalPurple = Color3.fromRGB(120, 0, 255)
 local DarkColor = Color3.fromRGB(0, 0, 0)
 local GlobalRadius = UDim.new(0, 15) 
-local BorderThickness = 1.5
 
 for _, child in pairs(CoreGui:GetChildren()) do
     if child:IsA("ScreenGui") and child.Name:find("Crystal") then child:Destroy() end
 end
 
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "Crystal_Turbo_Final"
+ScreenGui.Name = "Crystal_Final_Clean"
 
-local function Tween(obj, info, goal)
-    return TweenService:Create(obj, TweenInfo.new(info, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), goal):Play()
+local function SmoothTween(obj, goal)
+    TweenService:Create(obj, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), goal):Play()
 end
 
 -- [ Top HUD ]
@@ -70,49 +67,35 @@ HUDContainer.Size = UDim2.new(0, 230, 0, 70); HUDContainer.Position = UDim2.new(
 local TopBar = Instance.new("Frame", HUDContainer)
 TopBar.Size = UDim2.new(0.9, 0, 0, 28); TopBar.Position = UDim2.new(0.05, 0, 0, 0); TopBar.BackgroundColor3 = DarkColor; TopBar.BackgroundTransparency = 0.2
 Instance.new("UICorner", TopBar).CornerRadius = GlobalRadius
-local TopS = Instance.new("UIStroke", TopBar); TopS.Color = CrystalPurple; TopS.Thickness = BorderThickness
+local TopS = Instance.new("UIStroke", TopBar); TopS.Color = CrystalPurple; TopS.Thickness = 1.5
 
 local Info = Instance.new("TextLabel", TopBar)
 Info.Size = UDim2.new(1,0,1,0); Info.BackgroundTransparency = 1; Info.TextColor3 = Color3.fromRGB(255, 255, 255)
 Info.Font = Enum.Font.GothamBold; Info.TextSize = 10
--- جلب البيانات فوراً
-local f = math.floor(1/RunService.RenderStepped:Wait())
-local p = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-Info.Text = "Crystal Hub | FPS " .. f .. " | MS " .. p
-
--- [ Bottom Stats ]
-local BottomBar = Instance.new("Frame", HUDContainer)
-BottomBar.Size = UDim2.new(0.9, 0, 0, 14); BottomBar.Position = UDim2.new(0.05, 0, 0, 35); BottomBar.BackgroundTransparency = 1
-
-local function CreateStatBox(pos, size, txt, trans)
-    local f = Instance.new("Frame", BottomBar); f.Size = size; f.Position = pos; f.BackgroundColor3 = DarkColor; f.BackgroundTransparency = trans
-    Instance.new("UICorner", f).CornerRadius = GlobalRadius
-    local s = Instance.new("UIStroke", f); s.Color = CrystalPurple; s.Thickness = 1
-    local t = Instance.new("TextLabel", f); t.Size = UDim2.new(1,0,1,0); t.BackgroundTransparency = 1; t.TextColor3 = Color3.fromRGB(255,255,255); t.Font = Enum.Font.GothamBold; t.TextSize = 9; t.Text = txt
-end
-CreateStatBox(UDim2.new(0, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "0%", 0.5) 
-CreateStatBox(UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "7.4", 0.15) 
+Info.Text = "Crystal Hub | FPS ... | MS ..."
 
 -- [ Sidebar Menu ]
 local MainMenu = Instance.new("Frame", ScreenGui)
 MainMenu.Size = UDim2.new(0, 180, 0, 285); MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -142) 
 MainMenu.BackgroundColor3 = DarkColor; MainMenu.BackgroundTransparency = 0.4
 Instance.new("UICorner", MainMenu).CornerRadius = GlobalRadius
-local MenuS = Instance.new("UIStroke", MainMenu); MenuS.Color = CrystalPurple; MenuS.Thickness = BorderThickness
+local MenuS = Instance.new("UIStroke", MainMenu); MenuS.Color = CrystalPurple; MenuS.Thickness = 1.5
 
--- [ Toggle Logic ]
-local function CreateToggle(name, parent, isEsp)
+-- [ Unified Toggle Function ]
+local function CreateToggle(name, parent, isMain)
     local btn = Instance.new("TextButton", parent)
     btn.BackgroundColor3 = _G.Enabled[name] and CrystalPurple or DarkColor
     btn.BackgroundTransparency = _G.Enabled[name] and 0 or 0.3
     btn.TextColor3 = Color3.fromRGB(255, 255, 255); btn.Text = name; btn.Font = Enum.Font.GothamBold; btn.TextSize = 10
+    btn.AutoButtonColor = false -- لتعطيل اللون الرمادي التلقائي عند الضغط
+    
     Instance.new("UICorner", btn).CornerRadius = GlobalRadius
     local s = Instance.new("UIStroke", btn); s.Color = CrystalPurple; s.Thickness = 1.2; s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
     btn.MouseButton1Click:Connect(function()
         _G.Enabled[name] = not _G.Enabled[name]
         local active = _G.Enabled[name]
-        Tween(btn, 0.25, {
+        SmoothTween(btn, {
             BackgroundColor3 = active and CrystalPurple or DarkColor,
             BackgroundTransparency = active and 0 or 0.3
         })
@@ -120,7 +103,7 @@ local function CreateToggle(name, parent, isEsp)
     return btn
 end
 
--- Buttons Creation
+-- Create Buttons
 local EspBtn = CreateToggle("Player Esp", MainMenu)
 EspBtn.Size = UDim2.new(1, -20, 0, 30); EspBtn.Position = UDim2.new(0, 10, 0, 15)
 
@@ -129,29 +112,31 @@ Grid.Size = UDim2.new(1, -20, 0, 180); Grid.Position = UDim2.new(0, 10, 0, 55); 
 local UIGrid = Instance.new("UIGridLayout", Grid); UIGrid.CellSize = UDim2.new(0, 75, 0, 28); UIGrid.CellPadding = UDim2.new(0, 10, 0, 8)
 
 local features = {"Bat Aimbot", "Steal Near", "Auto Medusa", "Auto Play", "Anti Fling", "Anti Ragdoll", "Un Walk", "Inf Jump", "Spin Bot", "Optimizer"}
-for _, fName in pairs(features) do 
-    CreateToggle(fName, Grid)
-end
+for _, fName in pairs(features) do CreateToggle(fName, Grid) end
 
--- [ Save Button (The Real One) ]
+-- [ Save Button - المطابق تماماً ]
 local SaveBtn = Instance.new("TextButton", MainMenu)
 SaveBtn.Size = UDim2.new(1, -20, 0, 30); SaveBtn.Position = UDim2.new(0, 10, 1, -45)
-SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.3; SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255); SaveBtn.Text = "Save Config"; SaveBtn.Font = Enum.Font.GothamBold; SaveBtn.TextSize = 10
+SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.3; SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SaveBtn.Text = "Save Config"; SaveBtn.Font = Enum.Font.GothamBold; SaveBtn.TextSize = 10
+SaveBtn.AutoButtonColor = false
+
 Instance.new("UICorner", SaveBtn).CornerRadius = GlobalRadius
-local SaveS = Instance.new("UIStroke", SaveBtn); SaveS.Color = CrystalPurple; SaveS.Thickness = 1.5
+local SaveS = Instance.new("UIStroke", SaveBtn); SaveS.Color = CrystalPurple; SaveS.Thickness = 1.2; SaveS.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 SaveBtn.MouseButton1Click:Connect(function()
-    local success = SaveConfig()
-    SaveBtn.Text = success and "Config Saved!" or "Error Saving"
-    Tween(SaveBtn, 0.2, {BackgroundColor3 = CrystalPurple, BackgroundTransparency = 0})
+    SaveConfig()
+    SaveBtn.Text = "Config Saved!"
+    SmoothTween(SaveBtn, {BackgroundColor3 = CrystalPurple, BackgroundTransparency = 0})
+    
     task.delay(1, function()
         SaveBtn.Text = "Save Config"
-        Tween(SaveBtn, 0.4, {BackgroundColor3 = DarkColor, BackgroundTransparency = 0.3})
+        SmoothTween(SaveBtn, {BackgroundColor3 = DarkColor, BackgroundTransparency = 0.3})
     end)
 end)
 
 -- ============================================================
--- 3. INTERFACE CONTROLS & LOOPS
+-- 3. INTERFACE & LOOPS
 -- ============================================================
 local SideButton = Instance.new("TextButton", ScreenGui)
 SideButton.Size = UDim2.new(0, 50, 0, 50); SideButton.Position = UDim2.new(1, -65, 0.30, 0)
@@ -190,10 +175,8 @@ end)
 
 task.spawn(function()
     while task.wait(0.1) do
-        pcall(function()
-            local fps = math.floor(1 / RunService.RenderStepped:Wait())
-            local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-            Info.Text = "Crystal Hub | FPS " .. fps .. " | MS " .. ping
-        end)
+        local fps = math.floor(1 / RunService.RenderStepped:Wait())
+        local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+        Info.Text = "Crystal Hub | FPS " .. fps .. " | MS " .. ping
     end
 end)
