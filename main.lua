@@ -1,4 +1,4 @@
--- [[ Crystal Hub - Turbo Final Clean Edition ]] --
+-- [[ Crystal Hub - Turbo Final Clean Edition + Stats + Decimal Speed Tag ]] --
 
 if _G.CrystalLoaded then return end
 _G.CrystalLoaded = true
@@ -43,7 +43,7 @@ end
 LoadConfig()
 
 -- ============================================================
--- 2. UI SETUP
+-- 2. UI SETUP & SPEED TAG
 -- ============================================================
 local CrystalPurple = Color3.fromRGB(120, 0, 255)
 local DarkColor = Color3.fromRGB(0, 0, 0)
@@ -54,11 +54,37 @@ for _, child in pairs(CoreGui:GetChildren()) do
 end
 
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "Crystal_Final_Clean"
+ScreenGui.Name = "Crystal_Final_Pro_V3"
 
 local function SmoothTween(obj, goal)
     TweenService:Create(obj, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), goal):Play()
 end
+
+-- [ Speed Tag Logic - مع العلامة العشرية ]
+local SpeedLabel
+local function CreateSpeedTag(char)
+    local head = char:WaitForChild("Head", 5)
+    if not head then return end
+    
+    if head:FindFirstChild("SpeedTag") then head.SpeedTag:Destroy() end
+    
+    local billboard = Instance.new("BillboardGui", head)
+    billboard.Name = "SpeedTag"; billboard.Size = UDim2.new(0, 100, 0, 30)
+    billboard.StudsOffset = Vector3.new(0, 3, 0); billboard.AlwaysOnTop = true
+    
+    local label = Instance.new("TextLabel", billboard)
+    label.Size = UDim2.new(1, 0, 1, 0); label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(255, 255, 255); label.Font = Enum.Font.GothamBold; label.TextSize = 12
+    label.Text = "Speed: 0.0"
+    
+    -- الحواف السوداء الخفيفة المتناسقة مع القوائم
+    local stroke = Instance.new("UIStroke", label)
+    stroke.Color = Color3.fromRGB(0, 0, 0); stroke.Thickness = 1.5; stroke.Transparency = 0.4
+    
+    SpeedLabel = label
+end
+Player.CharacterAdded:Connect(CreateSpeedTag)
+if Player.Character then CreateSpeedTag(Player.Character) end
 
 -- [ Top HUD ]
 local HUDContainer = Instance.new("Frame", ScreenGui)
@@ -74,6 +100,19 @@ Info.Size = UDim2.new(1,0,1,0); Info.BackgroundTransparency = 1; Info.TextColor3
 Info.Font = Enum.Font.GothamBold; Info.TextSize = 10
 Info.Text = "Crystal Hub | FPS ... | MS ..."
 
+-- [ Bottom Stats Boxes ]
+local BottomBar = Instance.new("Frame", HUDContainer)
+BottomBar.Size = UDim2.new(0.9, 0, 0, 14); BottomBar.Position = UDim2.new(0.05, 0, 0, 35); BottomBar.BackgroundTransparency = 1
+
+local function CreateStatBox(pos, size, txt, trans)
+    local f = Instance.new("Frame", BottomBar); f.Size = size; f.Position = pos; f.BackgroundColor3 = DarkColor; f.BackgroundTransparency = trans
+    Instance.new("UICorner", f).CornerRadius = GlobalRadius
+    local s = Instance.new("UIStroke", f); s.Color = CrystalPurple; s.Thickness = 1
+    local t = Instance.new("TextLabel", f); t.Size = UDim2.new(1,0,1,0); t.BackgroundTransparency = 1; t.TextColor3 = Color3.fromRGB(255,255,255); t.Font = Enum.Font.GothamBold; t.TextSize = 9; t.Text = txt
+end
+CreateStatBox(UDim2.new(0, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "0%", 0.5) 
+CreateStatBox(UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "7.4", 0.15) 
+
 -- [ Sidebar Menu ]
 local MainMenu = Instance.new("Frame", ScreenGui)
 MainMenu.Size = UDim2.new(0, 180, 0, 285); MainMenu.Position = UDim2.new(-0.7, 0, 0.5, -142) 
@@ -81,13 +120,13 @@ MainMenu.BackgroundColor3 = DarkColor; MainMenu.BackgroundTransparency = 0.4
 Instance.new("UICorner", MainMenu).CornerRadius = GlobalRadius
 local MenuS = Instance.new("UIStroke", MainMenu); MenuS.Color = CrystalPurple; MenuS.Thickness = 1.5
 
--- [ Unified Toggle Function ]
-local function CreateToggle(name, parent, isMain)
+-- [ Toggle Function ]
+local function CreateToggle(name, parent)
     local btn = Instance.new("TextButton", parent)
     btn.BackgroundColor3 = _G.Enabled[name] and CrystalPurple or DarkColor
     btn.BackgroundTransparency = _G.Enabled[name] and 0 or 0.3
     btn.TextColor3 = Color3.fromRGB(255, 255, 255); btn.Text = name; btn.Font = Enum.Font.GothamBold; btn.TextSize = 10
-    btn.AutoButtonColor = false -- لتعطيل اللون الرمادي التلقائي عند الضغط
+    btn.AutoButtonColor = false 
     
     Instance.new("UICorner", btn).CornerRadius = GlobalRadius
     local s = Instance.new("UIStroke", btn); s.Color = CrystalPurple; s.Thickness = 1.2; s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -103,7 +142,7 @@ local function CreateToggle(name, parent, isMain)
     return btn
 end
 
--- Create Buttons
+-- Buttons
 local EspBtn = CreateToggle("Player Esp", MainMenu)
 EspBtn.Size = UDim2.new(1, -20, 0, 30); EspBtn.Position = UDim2.new(0, 10, 0, 15)
 
@@ -114,32 +153,28 @@ local UIGrid = Instance.new("UIGridLayout", Grid); UIGrid.CellSize = UDim2.new(0
 local features = {"Bat Aimbot", "Steal Near", "Auto Medusa", "Auto Play", "Anti Fling", "Anti Ragdoll", "Un Walk", "Inf Jump", "Spin Bot", "Optimizer"}
 for _, fName in pairs(features) do CreateToggle(fName, Grid) end
 
--- [ Save Button - المطابق تماماً ]
+-- [ Save Button ]
 local SaveBtn = Instance.new("TextButton", MainMenu)
 SaveBtn.Size = UDim2.new(1, -20, 0, 30); SaveBtn.Position = UDim2.new(0, 10, 1, -45)
 SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.3; SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 SaveBtn.Text = "Save Config"; SaveBtn.Font = Enum.Font.GothamBold; SaveBtn.TextSize = 10
 SaveBtn.AutoButtonColor = false
-
 Instance.new("UICorner", SaveBtn).CornerRadius = GlobalRadius
 local SaveS = Instance.new("UIStroke", SaveBtn); SaveS.Color = CrystalPurple; SaveS.Thickness = 1.2; SaveS.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 SaveBtn.MouseButton1Click:Connect(function()
     SaveConfig()
-    SaveBtn.Text = "Config Saved!"
+    SaveBtn.Text = "Config Saved"
     SmoothTween(SaveBtn, {BackgroundColor3 = CrystalPurple, BackgroundTransparency = 0})
-    
     task.delay(1, function()
         SaveBtn.Text = "Save Config"
         SmoothTween(SaveBtn, {BackgroundColor3 = DarkColor, BackgroundTransparency = 0.3})
     end)
 end)
 
--- ============================================================
--- 3. INTERFACE & LOOPS
--- ============================================================
+-- [ Side Button ]
 local SideButton = Instance.new("TextButton", ScreenGui)
-SideButton.Size = UDim2.new(0, 50, 0, 50); SideButton.Position = UDim2.new(1, -65, 0.30, 0)
+SideButton.Size = UDim2.new(0, 50, 0, 50); SideButton.Position = UDim2.new(1, -65, 0.20, 0)
 SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""; SideButton.BorderSizePixel = 0
 Instance.new("UICorner", SideButton).CornerRadius = GlobalRadius
 local SideStroke = Instance.new("UIStroke", SideButton); SideStroke.Color = Color3.fromRGB(255,255,255); SideStroke.Thickness = 1.5
@@ -149,6 +184,7 @@ for i=0,2 do
     line.Size = UDim2.new(0, 24, 0, 4); line.Position = UDim2.new(0.5, -12, 0, 15 + (i * 9)); line.BackgroundColor3 = Color3.fromRGB(255, 255, 255); line.BorderSizePixel = 0; Instance.new("UICorner", line).CornerRadius = UDim.new(0, 2)
 end
 
+-- Drag Logic
 local dragging, dragStart, startPos, menuOpen = false, nil, nil, false
 SideButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -173,10 +209,19 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
+-- Performance Loop
 task.spawn(function()
     while task.wait(0.1) do
-        local fps = math.floor(1 / RunService.RenderStepped:Wait())
-        local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-        Info.Text = "Crystal Hub | FPS " .. fps .. " | MS " .. ping
+        pcall(function()
+            local fps = math.floor(1 / RunService.RenderStepped:Wait())
+            local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+            Info.Text = "Crystal Hub | FPS " .. fps .. " | MS " .. ping
+            
+            -- تحديث التاج مع العلامة العشرية (Speed: 16.5)
+            if SpeedLabel and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+                local vel = Player.Character.HumanoidRootPart.Velocity.Magnitude
+                SpeedLabel.Text = string.format("Speed: %.1f", vel)
+            end
+        end)
     end
 end)
