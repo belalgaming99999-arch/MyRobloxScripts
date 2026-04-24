@@ -1,4 +1,4 @@
--- [[ Crystal Hub - Restoration Sync ]] --
+-- [[ Crystal Hub - Final Clean Restoration ]] --
 
 if not game:IsLoaded() then game.Loaded:Wait() end
 
@@ -12,19 +12,19 @@ local Player = Players.LocalPlayer
 
 local CrystalPurple = Color3.fromRGB(120, 0, 255)
 local DarkColor = Color3.fromRGB(0, 0, 0)
-local GlobalRadius = UDim.new(0, 15) -- بيضاوي 15 ثابت للكل
+local GlobalRadius = UDim.new(0, 15) 
 local BorderThickness = 1.5
 
--- تنظيف شامل
+-- تنظيف شامل للقديم
 local function FullCleanup()
     for _, child in pairs(CoreGui:GetChildren()) do
-        if child:IsA("ScreenGui") and (child.Name:find("Crystal") or child.Name:find("Nova")) then child:Destroy() end
+        if child:IsA("ScreenGui") and child.Name:find("Crystal") then child:Destroy() end
     end
 end
 FullCleanup()
 
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "Crystal_Final_Fixed"
+ScreenGui.Name = "Crystal_Final_Clean"
 
 -- ========== 1. Top HUD (Oval 15) ==========
 local HUDContainer = Instance.new("Frame", ScreenGui)
@@ -37,7 +37,7 @@ local TopS = Instance.new("UIStroke", TopBar); TopS.Color = CrystalPurple; TopS.
 
 local Info = Instance.new("TextLabel", TopBar)
 Info.Size = UDim2.new(1,0,1,0); Info.BackgroundTransparency = 1; Info.TextColor3 = Color3.fromRGB(255, 255, 255); Info.Font = Enum.Font.GothamBold; Info.TextSize = 10
-Info.Text = "Crystal Hub | FPS 0 | MS 0" -- يظهر مباشرة بدون لودينج
+Info.Text = "Crystal Hub | FPS -- | MS --" -- يظهر فوراً
 
 local BottomBar = Instance.new("Frame", HUDContainer)
 BottomBar.Size = UDim2.new(0.9, 0, 0, 14); BottomBar.Position = UDim2.new(0.05, 0, 0, 35); BottomBar.BackgroundTransparency = 1
@@ -46,21 +46,20 @@ local function CreateStatBox(pos, size, txt, trans)
     local f = Instance.new("Frame", BottomBar)
     f.Size = size; f.Position = pos; f.BackgroundColor3 = DarkColor; f.BackgroundTransparency = trans
     Instance.new("UICorner", f).CornerRadius = GlobalRadius
-    local s = Instance.new("UIStroke", f); s.Color = CrystalPurple; s.Thickness = 1; s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    local s = Instance.new("UIStroke", f); s.Color = CrystalPurple; s.Thickness = 1
     local t = Instance.new("TextLabel", f); t.Size = UDim2.new(1,0,1,0); t.BackgroundTransparency = 1; t.TextColor3 = Color3.fromRGB(255,255,255); t.Font = Enum.Font.GothamBold; t.TextSize = 9; t.Text = txt
 end
 CreateStatBox(UDim2.new(0, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "0%", 0.5) 
 CreateStatBox(UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "7.4", 0.15) 
 
--- ========== 2. Speed Tag (نزلت سنة تحت) ==========
+-- ========== 2. Speed Tag (نزلت سنة) ==========
 local SpeedLabel
 local function CreateSpeedTag(char)
     local head = char:WaitForChild("Head", 5)
     local billboard = Instance.new("BillboardGui", char)
     billboard.Name = "SpeedTag"; billboard.Adornee = head; billboard.Size = UDim2.new(0, 120, 0, 40)
-    billboard.StudsOffset = Vector3.new(0, 2.8, 0); -- الوضع المطلوب
-    billboard.AlwaysOnTop = true
-    local label = Instance.new("TextLabel", billboard); label.Size = UDim2.new(1, 0, 1, 0); label.BackgroundTransparency = 1; label.TextColor3 = Color3.fromRGB(255, 255, 255); label.Font = Enum.Font.GothamBold; label.TextSize = 11; label.Text = "Speed: 0.0"
+    billboard.StudsOffset = Vector3.new(0, 2.6, 0); billboard.AlwaysOnTop = true
+    local label = Instance.new("TextLabel", billboard); label.Size = UDim2.new(1, 0, 1, 0); label.BackgroundTransparency = 1; label.TextColor3 = Color3.fromRGB(255, 255, 255); label.Font = Enum.Font.GothamBold; label.TextSize = 11; label.Text = "Speed: 0"
     SpeedLabel = label
 end
 Player.CharacterAdded:Connect(CreateSpeedTag)
@@ -75,7 +74,7 @@ local MenuS = Instance.new("UIStroke", MainMenu); MenuS.Color = CrystalPurple; M
 
 local function StyleButton(btn, thick)
     btn.AutoButtonColor = false; Instance.new("UICorner", btn).CornerRadius = GlobalRadius
-    local s = Instance.new("UIStroke", btn); s.Color = CrystalPurple; s.Thickness = thick or 1; s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    local s = Instance.new("UIStroke", btn); s.Color = CrystalPurple; s.Thickness = thick or 1
     btn.MouseButton1Click:Connect(function()
         if btn.Name ~= "SaveBtn" then
             local active = btn.BackgroundColor3 == CrystalPurple
@@ -103,13 +102,13 @@ end
 
 local SaveBtn = Instance.new("TextButton", MainMenu)
 SaveBtn.Name = "SaveBtn"
-SaveBtn.Size = UDim2.new(0, 150, 0, 28); SaveBtn.Position = UDim2.new(0.5, -75, 0, 212) -- مرفوع سنتين
+SaveBtn.Size = UDim2.new(0, 150, 0, 28); SaveBtn.Position = UDim2.new(0.5, -75, 0, 210) -- مرفوع
 SaveBtn.BackgroundColor3 = DarkColor; SaveBtn.BackgroundTransparency = 0.3; SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255); SaveBtn.Text = "Save Config"; SaveBtn.Font = Enum.Font.GothamBold; SaveBtn.TextSize = 10
 StyleButton(SaveBtn, 1.5)
 
 -- ========== 4. Floating Button (Smart Drag + Oval 15) ==========
 local SideButton = Instance.new("TextButton", ScreenGui)
-SideButton.Size = UDim2.new(0, 50, 0, 50); SideButton.Position = UDim2.new(1, -60, 0.31, 0) -- مرفوع سنتين
+SideButton.Size = UDim2.new(0, 50, 0, 50); SideButton.Position = UDim2.new(1, -60, 0.31, 0) -- مرفوع
 SideButton.BackgroundColor3 = CrystalPurple; SideButton.Text = ""; SideButton.BorderSizePixel = 0
 Instance.new("UICorner", SideButton).CornerRadius = GlobalRadius
 local SideStroke = Instance.new("UIStroke", SideButton); SideStroke.Color = Color3.fromRGB(255,255,255); SideStroke.Thickness = 1.5
@@ -129,7 +128,7 @@ SideButton.InputBegan:Connect(function(input)
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
-                if (tick() - startTick) < 0.3 and (input.Position - dragStart).Magnitude < 5 then
+                if (tick() - startTick) < 0.25 and (input.Position - dragStart).Magnitude < 5 then
                     menuOpen = not menuOpen
                     MainMenu:TweenPosition(UDim2.new(menuOpen and 0.02 or -0.7, 0, 0.5, -127), "Out", "Quart", 0.4, true)
                 end
@@ -145,17 +144,16 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- ========== 5. Smooth Update Loop ==========
+-- ========== 5. Smooth Stats Loop ==========
 task.spawn(function()
-    while task.wait(0.1) do
+    while task.wait(0.2) do -- تحديث مريح للعين
         pcall(function()
             local fps = math.floor(1 / RunService.RenderStepped:Wait())
             local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-            Info.Text = string.format("Crystal Hub | FPS %d | MS %d", fps, ping)
+            Info.Text = "Crystal Hub | FPS " .. fps .. " | MS " .. ping
             
             if SpeedLabel and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-                local vel = Player.Character.HumanoidRootPart.Velocity
-                local speed = math.floor(Vector3.new(vel.X, 0, vel.Z).Magnitude * 10) / 10
+                local speed = math.floor(Player.Character.HumanoidRootPart.Velocity.Magnitude * 10) / 10
                 SpeedLabel.Text = "Speed: " .. speed
             end
         end)
