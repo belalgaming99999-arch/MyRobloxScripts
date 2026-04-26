@@ -19,7 +19,7 @@ MenuButton.Name = "CrystalMenuBtn"
 MenuButton.Parent = ScreenGui
 MenuButton.Size = UDim2.new(0, 55, 0, 55)
 MenuButton.Position = UDim2.new(0.05, 0, 0.4, 0)
-MenuButton.BackgroundColor3 = Color3.fromRGB(45, 85, 160) -- الأزرق الهادي
+MenuButton.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
 MenuButton.Text = ""
 MenuButton.BorderSizePixel = 0
 Instance.new("UICorner", MenuButton).CornerRadius = UDim.new(0, 14)
@@ -33,42 +33,42 @@ for i = -1, 1 do
     line.BorderSizePixel = 0
 end
 
--- [ القائمة الرئيسية ] --
+-- [ القائمة الرئيسية - تعديل الأبعاد والحواف ] --
 MainFrame.Name = "CrystalHub"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 30, 45)
 MainFrame.Position = UDim2.new(-0.5, 0, 0.4, 65)
-MainFrame.Size = UDim2.new(0, 220, 0, 110)
-MainFrame.BorderSizePixel = 1 -- حواف نحيفة
-MainFrame.BorderColor3 = Color3.fromRGB(45, 85, 160) -- حواف زرقاء مطفية
+MainFrame.Size = UDim2.new(0, 180, 0, 150) -- عرض أصغر وطول أكبر
+MainFrame.BorderSizePixel = 1 
+MainFrame.BorderColor3 = Color3.fromRGB(45, 85, 160) -- حواف زرقاء
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 
--- [ الاسم والخط السلس ] --
+-- [ الاسم والخط ] --
 Title.Parent = MainFrame
-Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Text = "CRYSTAL HUB"
-Title.TextColor3 = Color3.fromRGB(45, 85, 160) -- الاسم بنفس لون الحواف
+Title.TextColor3 = Color3.fromRGB(45, 85, 160)
 Title.BackgroundTransparency = 1
-Title.TextSize = 17
+Title.TextSize = 16
 Title.Font = Enum.Font.GothamBold
 
 UnderLine.Parent = MainFrame
 UnderLine.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
 UnderLine.BorderSizePixel = 0
-UnderLine.Position = UDim2.new(0.25, 0, 0, 32)
-UnderLine.Size = UDim2.new(0.5, 0, 0, 2)
+UnderLine.Position = UDim2.new(0.2, 0, 0, 35)
+UnderLine.Size = UDim2.new(0.6, 0, 0, 2)
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 
--- [ الزر الكبير - أحمر مطفي ] --
+-- [ الزر الكبير ] --
 BigBtn.Name = "EspMainBtn"
 BigBtn.Parent = MainFrame
-BigBtn.Position = UDim2.new(0.05, 0, 0.45, 0)
-BigBtn.Size = UDim2.new(0.9, 0, 0.45, 0)
-BigBtn.BackgroundColor3 = Color3.fromRGB(140, 50, 50) -- أحمر مطفي هادي (Muted Red)
+BigBtn.Position = UDim2.new(0.1, 0, 0.4, 0)
+BigBtn.Size = UDim2.new(0.8, 0, 0.45, 0) -- متناسق مع الطول الجديد
+BigBtn.BackgroundColor3 = Color3.fromRGB(140, 50, 50)
 BigBtn.Text = "Esp Disable"
 BigBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
 BigBtn.Font = Enum.Font.GothamBold
-BigBtn.TextSize = 15
+BigBtn.TextSize = 14
 BigBtn.BorderSizePixel = 0
 Instance.new("UICorner", BigBtn).CornerRadius = UDim.new(0, 10)
 
@@ -95,42 +95,16 @@ MenuButton.MouseButton1Click:Connect(function()
     MainFrame:TweenPosition(targetPos, "Out", "Quint", 0.4, true)
 end)
 
--- [ التفعيل وتغيير الألوان ] --
+-- [ التفعيل ] --
 local espActive = false
 BigBtn.MouseButton1Click:Connect(function()
     espActive = not espActive
     if espActive then
         BigBtn.Text = "Esp Active"
-        TweenService:Create(BigBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(50, 120, 80)}):Play() -- أخضر هادي
+        TweenService:Create(BigBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(50, 120, 80)}):Play()
     else
         BigBtn.Text = "Esp Disable"
-        TweenService:Create(BigBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(140, 50, 50)}):Play() -- أحمر مطفي
-        -- إيقاف الكشف
-        local pGui = LocalPlayer:FindFirstChild("PlayerGui")
-        if pGui then
-            for _, v in pairs(pGui:GetDescendants()) do
-                if v:IsA("GuiObject") and v.BorderSizePixel == 10 then v.BorderSizePixel = 0 end
-            end
-        end
+        TweenService:Create(BigBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(140, 50, 50)}):Play()
     end
 end)
 
--- [ حلقة الكشف ] --
-task.spawn(function()
-    while true do
-        task.wait(0.3)
-        if espActive then
-            local pGui = LocalPlayer:FindFirstChild("PlayerGui")
-            if pGui then
-                for _, v in pairs(pGui:GetDescendants()) do
-                    if v.Name:lower():match("blue") or v.Name:lower():match("opponent") then
-                        if v:GetAttribute("IsBomb") or v:GetAttribute("HasBomb") or v.Name:lower():match("bomb") then
-                            v.BorderColor3 = Color3.fromRGB(255, 50, 50)
-                            v.BorderSizePixel = 10
-                        end
-                    end
-                end
-            end
-        end
-    end
-end)
