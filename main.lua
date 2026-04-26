@@ -6,7 +6,8 @@ local LocalPlayer = Players.LocalPlayer
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
-local UnderLineContainer = Instance.new("Frame")
+local UnderLine = Instance.new("Frame")
+local UnderLineGlow = Instance.new("Frame")
 local BigBtn = Instance.new("TextButton")
 local MenuButton = Instance.new("TextButton")
 
@@ -38,41 +39,42 @@ end
 MainFrame.Name = "CrystalHub"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 30, 45)
-MainFrame.Position = UDim2.new(-0.8, 0, 0.15, 65)
-MainFrame.Size = UDim2.new(0, 190, 0, 130)
 MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true 
+MainFrame.Visible = false
+MainFrame.Size = UDim2.new(0, 0, 0, 0)
+MainFrame.Position = MenuButton.Position
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 
 local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Color3.fromRGB(45, 85, 160)
 MainStroke.Thickness = 1.5
 
--- [ الاسم ] --
+-- [ الاسم والخط المميز ] --
 Title.Parent = MainFrame
-Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Size = UDim2.new(0, 190, 0, 40)
 Title.Text = "CRYSTAL HUB"
 Title.TextColor3 = Color3.fromRGB(45, 85, 160)
 Title.BackgroundTransparency = 1
 Title.TextSize = 20
 Title.Font = Enum.Font.GothamBold
 
--- [ تصميم الخط الانسيابي الجديد ] --
-UnderLineContainer.Name = "SmoothLine"
-UnderLineContainer.Parent = MainFrame
-UnderLineContainer.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
-UnderLineContainer.BorderSizePixel = 0
-UnderLineContainer.Position = UDim2.new(0.5, -50, 0, 36) -- متمركز في المنتصف
-UnderLineContainer.Size = UDim2.new(0, 100, 0, 2) -- الخط الأساسي
-Instance.new("UICorner", UnderLineContainer).CornerRadius = UDim.new(1, 0)
+-- الخط الأساسي (نحيف وانسيابي)
+UnderLine.Parent = MainFrame
+UnderLine.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
+UnderLine.BorderSizePixel = 0
+UnderLine.Position = UDim2.new(0.5, -45, 0, 36)
+UnderLine.Size = UDim2.new(0, 90, 0, 2)
+Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 
--- إضافة "تدرج" للخط ليعطي شكل انسيابي (Tapered Look)
-local GlowPart = Instance.new("Frame", UnderLineContainer)
-GlowPart.Size = UDim2.new(1.2, 0, 0.5, 0)
-GlowPart.Position = UDim2.new(-0.1, 0, 0.25, 0)
-GlowPart.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
-GlowPart.BackgroundTransparency = 0.5
-GlowPart.BorderSizePixel = 0
-Instance.new("UICorner", GlowPart).CornerRadius = UDim.new(1, 0)
+-- تأثير التوهج الهادئ للخط
+UnderLineGlow.Parent = UnderLine
+UnderLineGlow.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
+UnderLineGlow.BackgroundTransparency = 0.6
+UnderLineGlow.BorderSizePixel = 0
+UnderLineGlow.Position = UDim2.new(-0.1, 0, -0.5, 0)
+UnderLineGlow.Size = UDim2.new(1.2, 0, 2, 0)
+Instance.new("UICorner", UnderLineGlow).CornerRadius = UDim.new(1, 0)
 
 -- [ الزر الكبير ] --
 BigBtn.Name = "EspMainBtn"
@@ -88,24 +90,33 @@ BigBtn.BorderSizePixel = 0
 BigBtn.AutoButtonColor = false
 Instance.new("UICorner", BigBtn).CornerRadius = UDim.new(0, 10)
 
--- [ منطق السحب والفتح ] --
-local dragging = false
-local dragStart, startPos
-local dragDistance = 0
+-- [ منطق السحب والشفط بسلاسة ] --
+local dragging, dragStart, startPos, dragDistance = false, nil, nil, 0
 local menuOpen = false
 
-local function updateMenuPosition()
+local function toggleMenu()
+    menuOpen = not menuOpen
     if menuOpen then
-        MainFrame:TweenPosition(UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65), "Out", "Quint", 0.3, true)
+        MainFrame.Visible = true
+        MainFrame:TweenSizeAndPosition(
+            UDim2.new(0, 190, 0, 130),
+            UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65),
+            "Out", "Back", 0.5, true
+        )
+    else
+        MainFrame:TweenSizeAndPosition(
+            UDim2.new(0, 0, 0, 0),
+            MenuButton.Position,
+            "In", "Back", 0.4, true, function()
+                if not menuOpen then MainFrame.Visible = false end
+            end
+        )
     end
 end
 
 MenuButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = MenuButton.Position
-        dragDistance = 0
+        dragging, dragStart, startPos, dragDistance = true, input.Position, MenuButton.Position, 0
     end
 end)
 
@@ -114,37 +125,23 @@ UserInputService.InputChanged:Connect(function(input)
         local delta = input.Position - dragStart
         dragDistance = delta.Magnitude
         MenuButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        updateMenuPosition()
-    end
-end)
-
-MenuButton.MouseButton1Click:Connect(function()
-    if dragDistance < 5 then
-        menuOpen = not menuOpen
         if menuOpen then
-            MainFrame:TweenPosition(UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65), "Out", "Quint", 0.4, true)
-        else
-            MainFrame:TweenPosition(UDim2.new(-0.8, 0, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset), "In", "Quint", 0.4, true)
+            MainFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65)
         end
     end
 end)
 
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = false
-    end
+MenuButton.MouseButton1Click:Connect(function()
+    if dragDistance < 5 then toggleMenu() end
 end)
 
--- [ منطق التفعيل السلس ] --
+UserInputService.InputEnded:Connect(function() dragging = false end)
+
+-- [ تفعيل الزر ] --
 local espActive = false
 BigBtn.MouseButton1Click:Connect(function()
     espActive = not espActive
-    if espActive then
-        BigBtn.Text = "Esp Active"
-        TweenService:Create(BigBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(50, 120, 80)}):Play()
-    else
-        BigBtn.Text = "Esp Disable"
-        TweenService:Create(BigBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(140, 50, 50)}):Play()
-    end
+    local targetColor = espActive and Color3.fromRGB(50, 120, 80) or Color3.fromRGB(140, 50, 50)
+    BigBtn.Text = espActive and "Esp Active" or "Esp Disable"
+    TweenService:Create(BigBtn, TweenInfo.new(0.4, Enum.EasingStyle.Sine), {BackgroundColor3 = targetColor}):Play()
 end)
-
