@@ -1,109 +1,424 @@
--- سكربت مبسط ومضمون (تم تجميعه من ميزات HONEY DUELS)
+repeat task.wait() until game:IsLoaded()
+
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
+local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
 
--- إعدادات عامة
-local speed = 56          -- سرعة الحركة العادية
-local stealSpeed = 29     -- سرعة أثناء السرقة
-local jumpPower = 75      -- قوة القفز
+local lp = Players.LocalPlayer
+
+-- AUTO PLAY 1
+local A1_P1 = Vector3.new(-472.59,-7.30,94.43)
+local A1_P2 = Vector3.new(-484.55,-5.33,95.05)
+local A1_P3 = Vector3.new(-472.59,-7.30,94.43)
+local A1_P4 = Vector3.new(-471.25,-6.83,7.08)
+
+-- AUTO PLAY 2
+local B1 = Vector3.new(-474.02,-7.30,25.55)
+local B2 = Vector3.new(-484.92,-5.13,24.53)
+local B3 = Vector3.new(-474.02,-7.30,25.55)
+local B4 = Vector3.new(-470.93,-6.83,113.38)
+
+local SPEED_IDA = 56
+local SPEED_VOLTA = 29
+
+local auto1=false
+local auto2=false
+local instaGrab=false
+
+-- ==========================================
+-- شريط التقدم الخاص بالسرقة
+-- ==========================================
+local progressBar = nil
+local progressFill = nil
+local progressText = nil
 local isStealing = false
+local stealStartTime = nil
+local STEAL_DURATION = 1.3
 
--- ***** قفل الهدف وتتبعه (Lock Player) *****
-local lockEnabled = false
-local lockedTarget = nil
-local lockConnection = nil
-local function lockPlayer()
-    if lockConnection then lockConnection:Disconnect() end
-    lockConnection = RunService.Heartbeat:Connect(function()
-        if not lockEnabled then return end
-        local char = LocalPlayer.Character
-        local myRoot = char and char:FindFirstChild("HumanoidRootPart")
-        if not myRoot then return end
-        local closest, closestDist = nil, math.huge
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character then
-                local theirRoot = p.Character:FindFirstChild("HumanoidRootPart")
-                if theirRoot then
-                    local d = (myRoot.Position - theirRoot.Position).Magnitude
-                    if d < closestDist then closestDist = d; closest = p.Character end
-                end
-            end
-        end
-        lockedTarget = closest
-        -- حركة التتبع
-        if lockedTarget then
-            local targetHRP = lockedTarget:FindFirstChild("HumanoidRootPart")
-            if targetHRP then
-                local dir = (targetHRP.Position - myRoot.Position)
-                local flatDir = Vector3.new(dir.X, 0, dir.Z).Unit
-                myRoot.AssemblyLinearVelocity = flatDir * 58
-            end
-        end
-    end)
+local function createProgressBar()
+    if progressBar then return end
+    
+    progressBar = Instance.new("Frame")
+    progressBar.Size = UDim2.new(0, 200, 0, 30)
+    progressBar.Position = UDim2.new(0.5, -100, 0.7, 0)
+    progressBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    progressBar.BackgroundTransparency = 0.3
+    progressBar.BorderSizePixel = 1
+    progressBar.BorderColor3 = Color3.fromRGB(255, 255, 255)
+    progressBar.Visible = false
+    progressBar.Parent = game.CoreGui
+    Instance.new("UICorner", progressBar).CornerRadius = UDim.new(0, 8)
+    
+    progressFill = Instance.new("Frame")
+    progressFill.Size = UDim2.new(0, 0, 1, 0)
+    progressFill.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+    progressFill.BorderSizePixel = 0
+    progressFill.Parent = progressBar
+    Instance.new("UICorner", progressFill).CornerRadius = UDim.new(0, 8)
+    
+    progressText = Instance.new("TextLabel")
+    progressText.Size = UDim2.new(1, 0, 1, 0)
+    progressText.BackgroundTransparency = 1
+    progressText.Text = "0%"
+    progressText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    progressText.Font = Enum.Font.GothamBold
+    progressText.TextSize = 12
+    progressText.Parent = progressBar
 end
 
--- ***** منع السقوط (Anti-Ragdoll) *****
-local antiRagdollConn = nil
-local function antiRagdoll()
-    if antiRagdollConn then antiRagdollConn:Disconnect() end
-    antiRagdollConn = RunService.Heartbeat:Connect(function()
-        local char = LocalPlayer.Character
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
-        if hum and (hum:GetState() == Enum.HumanoidStateType.Ragdoll or hum:GetState() == Enum.HumanoidStateType.FallingDown) then
-            hum:ChangeState(Enum.HumanoidStateType.Running)
-        end
-    end)
-end
-
--- ***** سرقة تلقائية (Auto Steal) *****
-local autoStealEnabled = false
-local autoStealConn = nil
-local function autoSteal()
-    if autoStealConn then autoStealConn:Disconnect() end
-    autoStealConn = RunService.Heartbeat:Connect(function()
-        if not autoStealEnabled then return end
-        local char = LocalPlayer.Character
-        local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            for _, prompt in pairs(workspace:GetDescendants()) do
-                if prompt:IsA("ProximityPrompt") and prompt.ActionText == "Steal" then
-                    local distance = (hrp.Position - prompt.Parent.Position).Magnitude
-                    if distance < 10 then
-                        pcall(function() fireproximityprompt(prompt) end)
-                    end
-                end
-            end
-        end
-    end)
-end
-
--- ***** قفز لا نهائي وجاذبية *****
-local infJump = false
-UserInputService.JumpRequest:Connect(function()
-    local char = LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hrp and infJump then hrp.Velocity = Vector3.new(hrp.Velocity.X, jumpPower, hrp.Velocity.Z) end
-end)
-
--- ***** مراقبة السرقة (لتحديد السرعة) *****
-LocalPlayer:GetAttributeChangedSignal("Stealing"):Connect(function()
-    isStealing = LocalPlayer:GetAttribute("Stealing") == true
-end)
-
--- ***** تحسين سرعة الحركة *****
-RunService.Heartbeat:Connect(function()
-    local char = LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if hrp and hum and hum.MoveDirection.Magnitude > 0.1 then
-        local currentSpeed = isStealing and stealSpeed or speed
-        hrp.AssemblyLinearVelocity = hum.MoveDirection * currentSpeed + Vector3.new(0, hrp.AssemblyLinearVelocity.Y, 0)
+local function showProgressBar()
+    if progressBar then
+        progressBar.Visible = true
+        progressFill.Size = UDim2.new(0, 0, 1, 0)
+        progressText.Text = "0%"
     end
+end
+
+local function updateProgressBar(percent)
+    if progressFill and progressText then
+        progressFill.Size = UDim2.new(percent / 100, 0, 1, 0)
+        progressText.Text = math.floor(percent) .. "%"
+    end
+end
+
+local function hideProgressBar()
+    if progressBar then
+        progressBar.Visible = false
+        updateProgressBar(0)
+    end
+end
+
+local function startStealProgress()
+    if isStealing then return end
+    isStealing = true
+    stealStartTime = tick()
+    showProgressBar()
+    
+    task.spawn(function()
+        while isStealing do
+            local elapsed = tick() - stealStartTime
+            local percent = math.min((elapsed / STEAL_DURATION) * 100, 100)
+            updateProgressBar(percent)
+            
+            if percent >= 100 then
+                isStealing = false
+                task.wait(0.2)
+                hideProgressBar()
+                break
+            end
+            task.wait(0.03)
+        end
+    end)
+end
+
+createProgressBar()
+
+-- ==========================================
+
+local function hrp()
+local c = lp.Character
+return c and c:FindFirstChild("HumanoidRootPart")
+end
+
+local function go(pos,speed,cond)
+local r = hrp()
+if not r then return end
+
+while cond() and (r.Position - pos).Magnitude > 1 do
+
+local dir = (pos - r.Position).Unit
+
+r.AssemblyLinearVelocity = Vector3.new(
+dir.X * speed,
+r.AssemblyLinearVelocity.Y,
+dir.Z * speed
+)
+
+task.wait()
+end
+end
+
+local InternalStealCache = {}
+local stealRadius = 7
+
+local function buildCallbacks(prompt)
+
+if InternalStealCache[prompt] then return end
+
+local data = {hold={},trigger={},ready=true}
+
+local ok1,conns1=pcall(getconnections,prompt.PromptButtonHoldBegan)
+if ok1 then
+for _,c in pairs(conns1) do
+if c.Function then
+table.insert(data.hold,c.Function)
+end
+end
+end
+
+local ok2,conns2=pcall(getconnections,prompt.Triggered)
+if ok2 then
+for _,c in pairs(conns2) do
+if c.Function then
+table.insert(data.trigger,c.Function)
+end
+end
+end
+
+InternalStealCache[prompt]=data
+end
+
+local function runSteal(prompt)
+
+local data = InternalStealCache[prompt]
+if not data or not data.ready then return end
+
+data.ready=false
+
+-- بدء شريط التقدم عند بدء السرقة
+startStealProgress()
+
+task.spawn(function()
+
+for _,fn in pairs(data.hold) do
+task.spawn(fn)
+end
+
+task.wait(.15)
+
+for _,fn in pairs(data.trigger) do
+task.spawn(fn)
+end
+
+task.wait(.05)
+data.ready=true
+
+end)
+end
+
+RunService.Heartbeat:Connect(function()
+
+if not instaGrab then return end
+
+local r = hrp()
+if not r then return end
+
+for _,v in pairs(workspace:GetDescendants()) do
+if v:IsA("ProximityPrompt") then
+
+local p = v.Parent
+
+local pos2 =
+p:IsA("Attachment") and p.WorldPosition
+or p.Position
+
+if pos2 and (pos2-r.Position).Magnitude < stealRadius then
+buildCallbacks(v)
+runSteal(v)
+end
+
+end
+end
 end)
 
--- ***** تشغيل الميزات الأساسية *****
-antiRagdoll()                     -- تفعيل منع السقوط
-autoSteal()                       -- تفعيل السرقة التلقائية
-lockPlayer()                      -- تفعيل قفل الهدف (اختياري)
+local gui=Instance.new("ScreenGui",game.CoreGui)
+
+local main=Instance.new("Frame",gui)
+main.Size=UDim2.new(0,180,0,60)
+main.Position=UDim2.new(0.4,0,0.4,0)
+main.BackgroundColor3=Color3.fromRGB(0,0,0)
+main.BorderColor3=Color3.fromRGB(255,255,255)
+main.BorderSizePixel=2
+Instance.new("UICorner",main).CornerRadius=UDim.new(0,10)
+
+local title=Instance.new("TextLabel",main)
+title.Size=UDim2.new(1,0,0,16)
+title.Position=UDim2.new(0,0,0,2)
+title.Text="AntiLoser"
+title.BackgroundTransparency=1
+title.TextColor3=Color3.fromRGB(255,255,255)
+title.Font=Enum.Font.GothamBold
+title.TextSize=14
+
+local dragging=false
+local dragStart
+local startPos
+
+main.InputBegan:Connect(function(i)
+if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
+dragging=true
+dragStart=i.Position
+startPos=main.Position
+
+i.Changed:Connect(function()
+if i.UserInputState==Enum.UserInputState.End then
+dragging=false
+end
+end)
+end
+end)
+
+UIS.InputChanged:Connect(function(i)
+
+if dragging then
+
+local delta=i.Position-dragStart
+
+main.Position=UDim2.new(
+startPos.X.Scale,
+startPos.X.Offset+delta.X,
+startPos.Y.Scale,
+startPos.Y.Offset+delta.Y
+)
+
+end
+end)
+
+local function makeBtn(txt,x)
+
+local b=Instance.new("TextButton",main)
+
+b.Size=UDim2.new(0,80,0,30)
+b.Position=UDim2.new(0,x,0,26)
+
+b.Text=txt
+b.Font=Enum.Font.GothamSemibold
+b.TextSize=14
+
+b.BackgroundColor3=Color3.fromRGB(255,255,255)
+b.TextColor3=Color3.fromRGB(0,0,0)
+
+Instance.new("UICorner",b).CornerRadius=UDim.new(0,8)
+
+return b
+end
+
+local auto1Btn=makeBtn("Auto Play 1",5)
+local auto2Btn=makeBtn("Auto Play 2",95)
+
+local gear=Instance.new("TextButton",main)
+gear.Size=UDim2.new(0,22,0,22)
+gear.Position=UDim2.new(1,-26,0,2)
+gear.Text="⚙️"
+gear.BackgroundTransparency=1
+gear.TextColor3=Color3.fromRGB(255,255,255)
+
+local settings=Instance.new("Frame",gui)
+settings.Size=UDim2.new(0,200,0,150)
+settings.Position=UDim2.new(0.5,-100,0.5,-75)
+settings.BackgroundColor3=Color3.fromRGB(5,5,5)
+settings.BorderSizePixel=0
+settings.Visible=false
+settings.BackgroundTransparency=1
+Instance.new("UICorner",settings).CornerRadius=UDim.new(0,10)
+
+local close=Instance.new("TextButton",settings)
+close.Size=UDim2.new(0,22,0,22)
+close.Position=UDim2.new(1,-24,0,2)
+close.Text="X"
+close.BackgroundTransparency=1
+close.TextColor3=Color3.fromRGB(255,255,255)
+
+local function makeBox(text,y,default,callback)
+
+local lbl=Instance.new("TextLabel",settings)
+lbl.Size=UDim2.new(1,0,0,20)
+lbl.Position=UDim2.new(0,0,0,y)
+lbl.Text=text
+lbl.BackgroundTransparency=1
+lbl.TextColor3=Color3.new(1,1,1)
+lbl.Font=Enum.Font.GothamBold
+lbl.TextSize=14
+
+local box=Instance.new("TextBox",settings)
+box.Size=UDim2.new(0.9,0,0,28)
+box.Position=UDim2.new(0.05,0,0,y+22)
+box.Text=tostring(default)
+box.BackgroundColor3=Color3.fromRGB(20,20,20)
+box.TextColor3=Color3.new(1,1,1)
+box.Font=Enum.Font.Gotham
+box.TextSize=14
+Instance.new("UICorner",box)
+
+box.FocusLost:Connect(function()
+local num=tonumber(box.Text)
+if num then
+callback(num)
+end
+end)
+
+end
+
+makeBox("Speed No Steal",20,56,function(v)
+SPEED_IDA=v
+end)
+
+makeBox("Speed Stealing",70,29,function(v)
+SPEED_VOLTA=v
+end)
+
+local fadeIn=TweenService:Create(settings,TweenInfo.new(.25),{BackgroundTransparency=0})
+local fadeOut=TweenService:Create(settings,TweenInfo.new(.25),{BackgroundTransparency=1})
+
+gear.MouseButton1Click:Connect(function()
+settings.Visible=true
+settings.BackgroundTransparency=1
+fadeIn:Play()
+end)
+
+close.MouseButton1Click:Connect(function()
+fadeOut:Play()
+fadeOut.Completed:Wait()
+settings.Visible=false
+end)
+
+auto1Btn.MouseButton1Click:Connect(function()
+
+auto1=not auto1
+auto1Btn.BackgroundColor3=auto1 and Color3.fromRGB(0,200,0) or Color3.fromRGB(255,255,255)
+
+if auto1 then
+task.spawn(function()
+
+go(A1_P1,SPEED_IDA,function()return auto1 end)
+
+go(A1_P2,SPEED_IDA,function()return auto1 end)
+instaGrab=true
+
+go(A1_P3,SPEED_VOLTA,function()return auto1 end)
+instaGrab=false
+
+go(A1_P4,SPEED_VOLTA,function()return auto1 end)
+
+auto1=false
+auto1Btn.BackgroundColor3=Color3.fromRGB(255,255,255)
+
+end)
+end
+end)
+
+auto2Btn.MouseButton1Click:Connect(function()
+
+auto2=not auto2
+auto2Btn.BackgroundColor3=auto2 and Color3.fromRGB(0,200,0) or Color3.fromRGB(255,255,255)
+
+if auto2 then
+task.spawn(function()
+
+go(B1,SPEED_IDA,function()return auto2 end)
+
+go(B2,SPEED_IDA,function()return auto2 end)
+instaGrab=true
+
+go(B3,SPEED_VOLTA,function()return auto2 end)
+instaGrab=false
+
+go(B4,SPEED_VOLTA,function()return auto2 end)
+
+auto2=false
+auto2Btn.BackgroundColor3=Color3.fromRGB(255,255,255)
+
+end)
+end
+end)
