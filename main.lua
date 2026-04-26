@@ -6,18 +6,19 @@ local ToggleBtn = Instance.new("TextButton")
 local MenuButton = Instance.new("TextButton")
 local MenuCorner = Instance.new("UICorner")
 
--- إعدادات واجهة المستخدم
+-- إعدادات الواجهة
 ScreenGui.Parent = game:GetService("CoreGui")
 ScreenGui.ResetOnSpawn = false
 
--- إعداد الزر العائم (أحمر افتراضي)
+-- إعداد الزر العائم (أحمر عند التشغيل)
 MenuButton.Name = "MenuButton"
 MenuButton.Parent = ScreenGui
 MenuButton.Size = UDim2.new(0, 50, 0, 50)
-MenuButton.Position = UDim2.new(-0.1, 0, 0.4, 0)
+MenuButton.Position = UDim2.new(-0.2, 0, 0.4, 0)
 MenuButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 MenuButton.Text = ""
 MenuButton.AutoButtonColor = false
+MenuButton.ZIndex = 10
 MenuCorner.CornerRadius = UDim.new(0, 12)
 MenuCorner.Parent = MenuButton
 
@@ -30,11 +31,11 @@ for i = -1, 1 do
     line.BorderSizePixel = 0
 end
 
--- القائمة الرئيسية (Crystal Hub)
+-- القائمة الرئيسية (مخفية)
 MainFrame.Name = "CrystalHub"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-MainFrame.Position = UDim2.new(-0.3, 0, 0.4, 55)
+MainFrame.Position = UDim2.new(-0.5, 0, 0.4, 60)
 MainFrame.Size = UDim2.new(0, 180, 0, 110)
 MainFrame.BorderSizePixel = 0
 local MainCorner = Instance.new("UICorner")
@@ -62,26 +63,28 @@ local BtnCorner = Instance.new("UICorner")
 BtnCorner.CornerRadius = UDim.new(0, 10)
 BtnCorner.Parent = ToggleBtn
 
--- وظائف الأنيميشن
+-- وظيفة الأنيميشن السلسة
 local function PlayTween(obj, prop, val)
-    TweenService:Create(obj, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {[prop] = val}):Play()
+    TweenService:Create(obj, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {[prop] = val}):Play()
 end
 
-MenuButton:TweenPosition(UDim2.new(0.02, 0, 0.4, 0), "Out", "Back", 0.6)
+-- دخول الأيقونة فقط عند التشغيل
+task.wait(0.1)
+MenuButton:TweenPosition(UDim2.new(0.02, 0, 0.4, 0), "Out", "Back", 0.7)
 
 local menuOpen = false
 MenuButton.MouseButton1Click:Connect(function()
     menuOpen = not menuOpen
     if menuOpen then
-        PlayTween(MenuButton, "BackgroundColor3", Color3.fromRGB(50, 200, 50)) -- يتحول للأخضر
-        MainFrame:TweenPosition(UDim2.new(0.02, 0, 0.4, 55), "Out", "Exponential", 0.5)
+        PlayTween(MenuButton, "BackgroundColor3", Color3.fromRGB(50, 200, 50))
+        MainFrame:TweenPosition(UDim2.new(0.02, 0, 0.4, 60), "Out", "Exponential", 0.5)
     else
-        PlayTween(MenuButton, "BackgroundColor3", Color3.fromRGB(200, 50, 50)) -- يعود للأحمر
-        MainFrame:TweenPosition(UDim2.new(-0.3, 0, 0.4, 55), "Out", "Exponential", 0.5)
+        PlayTween(MenuButton, "BackgroundColor3", Color3.fromRGB(200, 50, 50))
+        MainFrame:TweenPosition(UDim2.new(-0.5, 0, 0.4, 60), "Out", "Exponential", 0.5)
     end
 end)
 
--- منطق الكشف (تعديل خاص لواجهة المقايضة)
+-- نظام التجسس الذكي لكشف خيارات الخصم
 local espActive = false
 ToggleBtn.MouseButton1Click:Connect(function()
     espActive = not espActive
@@ -98,27 +101,25 @@ task.spawn(function()
     while true do
         task.wait(0.1)
         if espActive then
-            -- كشف الكاندي في العالم (Workspace)
-            for _, obj in pairs(workspace:GetDescendants()) do
-                if obj.Name == "Candy" or obj.Name == "Diamond" then
-                    if obj:IsA("BasePart") and not obj:FindFirstChild("Highlight") then
-                        local hl = Instance.new("Highlight", obj)
-                        hl.FillColor = Color3.fromRGB(160, 32, 240) -- بنفسجي ثقيل
-                        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                    end
-                end
-            end
-            
-            -- كشف الكاندي داخل واجهة المقايضة (GUI)
-            local playerGui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
-            if playerGui then
-                for _, uiObj in pairs(playerGui:GetDescendants()) do
-                    -- البحث عن الكاندي المخفي تحت الكروت في الـ UI
-                    if (uiObj.Name:lower():match("candy") or uiObj.Name:lower():match("reward")) and uiObj:IsA("ImageLabel") then
-                        -- وضع إطار بنفسجي ثقيل جداً حول الكرت الصحيح
-                        uiObj.BorderColor3 = Color3.fromRGB(160, 32, 240)
-                        uiObj.BorderSizePixel = 5 -- سمك كبير ليكون واضحاً
-                        uiObj.ZIndex = 100 -- يظهر فوق كل شيء
+            -- 1. مراقبة واجهة المقايضة (Trade UI)
+            local pGui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
+            if pGui then
+                for _, v in pairs(pGui:GetDescendants()) do
+                    -- كشف الأماكن المختارة حتى لو كانت مخفية (Hidden Values)
+                    -- يبحث السكربت عن أي Frame أو Button تم اختياره برمجياً من الخصم
+                    if v:IsA("ImageLabel") or v:IsA("TextButton") then
+                        if v:GetAttribute("Selected") == true or v.Name:lower():match("correct") or v.Name:lower():match("chosen") then
+                            v.BorderColor3 = Color3.fromRGB(160, 32, 240) -- بنفسجي ثقيل
+                            v.BorderSizePixel = 10 -- إطار عملاق جداً
+                            v.ZIndex = 5000
+                        end
+                        -- في بعض النسخ، الحلويات تكون موجودة كـ Object مخفي داخل الكرت
+                        for _, child in pairs(v:GetChildren()) do
+                            if child.Name:lower():match("candy") or child.Name:lower():match("pet") then
+                                v.BorderColor3 = Color3.fromRGB(160, 32, 240)
+                                v.BorderSizePixel = 10
+                            end
+                        end
                     end
                 end
             end
