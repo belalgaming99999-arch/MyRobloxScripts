@@ -33,42 +33,49 @@ for i = -1, 1 do
     line.BorderSizePixel = 0
 end
 
--- [ القائمة الرئيسية - تعديل الأبعاد والحواف ] --
+-- [ القائمة الرئيسية ] --
 MainFrame.Name = "CrystalHub"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 30, 45)
 MainFrame.Position = UDim2.new(-0.5, 0, 0.4, 65)
-MainFrame.Size = UDim2.new(0, 180, 0, 150) -- عرض أصغر وطول أكبر
-MainFrame.BorderSizePixel = 1 
-MainFrame.BorderColor3 = Color3.fromRGB(45, 85, 160) -- حواف زرقاء
+MainFrame.Size = UDim2.new(0, 190, 0, 160) -- أبعاد متناسقة
+MainFrame.BorderSizePixel = 0 -- نستخدم UIStroke للحواف الخفيفة
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 
--- [ الاسم والخط ] --
+-- إضافة حواف خفيفة جداً زرقاء
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Parent = MainFrame
+MainStroke.Color = Color3.fromRGB(45, 85, 160)
+MainStroke.Thickness = 1.5
+MainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+-- [ الاسم - تكبير العرض والخط ] --
 Title.Parent = MainFrame
-Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Size = UDim2.new(1, 0, 0, 45)
 Title.Text = "CRYSTAL HUB"
 Title.TextColor3 = Color3.fromRGB(45, 85, 160)
 Title.BackgroundTransparency = 1
-Title.TextSize = 16
+Title.TextSize = 20 -- تكبير الخط
 Title.Font = Enum.Font.GothamBold
+Title.TextScaled = false -- لضمان الحجم الذي حددناه
 
 UnderLine.Parent = MainFrame
 UnderLine.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
 UnderLine.BorderSizePixel = 0
-UnderLine.Position = UDim2.new(0.2, 0, 0, 35)
-UnderLine.Size = UDim2.new(0.6, 0, 0, 2)
+UnderLine.Position = UDim2.new(0.15, 0, 0, 38)
+UnderLine.Size = UDim2.new(0.7, 0, 0, 2)
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 
--- [ الزر الكبير ] --
+-- [ الزر الكبير - تكبير الخط ] --
 BigBtn.Name = "EspMainBtn"
 BigBtn.Parent = MainFrame
-BigBtn.Position = UDim2.new(0.1, 0, 0.4, 0)
-BigBtn.Size = UDim2.new(0.8, 0, 0.45, 0) -- متناسق مع الطول الجديد
-BigBtn.BackgroundColor3 = Color3.fromRGB(140, 50, 50)
+BigBtn.Position = UDim2.new(0.1, 0, 0.42, 0)
+BigBtn.Size = UDim2.new(0.8, 0, 0.48, 0)
+BigBtn.BackgroundColor3 = Color3.fromRGB(140, 50, 50) -- أحمر مطفي
 BigBtn.Text = "Esp Disable"
 BigBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
 BigBtn.Font = Enum.Font.GothamBold
-BigBtn.TextSize = 14
+BigBtn.TextSize = 18 -- تكبير الخط داخل الزر
 BigBtn.BorderSizePixel = 0
 Instance.new("UICorner", BigBtn).CornerRadius = UDim.new(0, 10)
 
@@ -107,4 +114,3 @@ BigBtn.MouseButton1Click:Connect(function()
         TweenService:Create(BigBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(140, 50, 50)}):Play()
     end
 end)
-
