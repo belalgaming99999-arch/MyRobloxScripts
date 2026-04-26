@@ -6,7 +6,7 @@ local LocalPlayer = Players.LocalPlayer
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
-local UnderLine = Instance.new("Frame")
+local UnderLineContainer = Instance.new("Frame")
 local BigBtn = Instance.new("TextButton")
 local MenuButton = Instance.new("TextButton")
 
@@ -22,7 +22,7 @@ MenuButton.Position = UDim2.new(0.05, 0, 0.15, 0)
 MenuButton.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
 MenuButton.Text = ""
 MenuButton.BorderSizePixel = 0
-MenuButton.AutoButtonColor = false -- إلغاء اللون الرمادي عند الضغط
+MenuButton.AutoButtonColor = false 
 Instance.new("UICorner", MenuButton).CornerRadius = UDim.new(0, 14)
 
 for i = -1, 1 do
@@ -38,7 +38,7 @@ end
 MainFrame.Name = "CrystalHub"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 30, 45)
-MainFrame.Position = UDim2.new(-0.5, 0, 0.15, 65)
+MainFrame.Position = UDim2.new(-0.8, 0, 0.15, 65)
 MainFrame.Size = UDim2.new(0, 190, 0, 130)
 MainFrame.BorderSizePixel = 0
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
@@ -47,7 +47,7 @@ local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Color3.fromRGB(45, 85, 160)
 MainStroke.Thickness = 1.5
 
--- [ الاسم والخط ] --
+-- [ الاسم ] --
 Title.Parent = MainFrame
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Text = "CRYSTAL HUB"
@@ -56,30 +56,49 @@ Title.BackgroundTransparency = 1
 Title.TextSize = 20
 Title.Font = Enum.Font.GothamBold
 
-UnderLine.Parent = MainFrame
-UnderLine.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
-UnderLine.BorderSizePixel = 0
-UnderLine.Position = UDim2.new(0.15, 0, 0, 35)
-UnderLine.Size = UDim2.new(0.7, 0, 0, 2)
-Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
+-- [ تصميم الخط الانسيابي الجديد ] --
+UnderLineContainer.Name = "SmoothLine"
+UnderLineContainer.Parent = MainFrame
+UnderLineContainer.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
+UnderLineContainer.BorderSizePixel = 0
+UnderLineContainer.Position = UDim2.new(0.5, -50, 0, 36) -- متمركز في المنتصف
+UnderLineContainer.Size = UDim2.new(0, 100, 0, 2) -- الخط الأساسي
+Instance.new("UICorner", UnderLineContainer).CornerRadius = UDim.new(1, 0)
 
--- [ الزر الكبير - تفعيل سلس بدون ألوان إضافية ] --
+-- إضافة "تدرج" للخط ليعطي شكل انسيابي (Tapered Look)
+local GlowPart = Instance.new("Frame", UnderLineContainer)
+GlowPart.Size = UDim2.new(1.2, 0, 0.5, 0)
+GlowPart.Position = UDim2.new(-0.1, 0, 0.25, 0)
+GlowPart.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
+GlowPart.BackgroundTransparency = 0.5
+GlowPart.BorderSizePixel = 0
+Instance.new("UICorner", GlowPart).CornerRadius = UDim.new(1, 0)
+
+-- [ الزر الكبير ] --
 BigBtn.Name = "EspMainBtn"
 BigBtn.Parent = MainFrame
-BigBtn.Position = UDim2.new(0.1, 0, 0.38, 5)
-BigBtn.Size = UDim2.new(0.8, 0, 0, 60)
-BigBtn.BackgroundColor3 = Color3.fromRGB(140, 50, 50) -- الأحمر المطفي الهادئ
+BigBtn.Position = UDim2.new(0.1, 0, 0.42, 0)
+BigBtn.Size = UDim2.new(0.8, 0, 0, 55)
+BigBtn.BackgroundColor3 = Color3.fromRGB(140, 50, 50)
 BigBtn.Text = "Esp Disable"
 BigBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
 BigBtn.Font = Enum.Font.GothamBold
 BigBtn.TextSize = 18
 BigBtn.BorderSizePixel = 0
-BigBtn.AutoButtonColor = false -- أهم تعديل: يمنع ظهور اللون الأبيض/الرمادي عند اللمس
+BigBtn.AutoButtonColor = false
 Instance.new("UICorner", BigBtn).CornerRadius = UDim.new(0, 10)
 
--- [ منطق السحب الذكي ] --
-local dragging, dragStart, startPos
+-- [ منطق السحب والفتح ] --
+local dragging = false
+local dragStart, startPos
 local dragDistance = 0
+local menuOpen = false
+
+local function updateMenuPosition()
+    if menuOpen then
+        MainFrame:TweenPosition(UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65), "Out", "Quint", 0.3, true)
+    end
+end
 
 MenuButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -95,18 +114,24 @@ UserInputService.InputChanged:Connect(function(input)
         local delta = input.Position - dragStart
         dragDistance = delta.Magnitude
         MenuButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        updateMenuPosition()
     end
 end)
 
-local menuOpen = false
+MenuButton.MouseButton1Click:Connect(function()
+    if dragDistance < 5 then
+        menuOpen = not menuOpen
+        if menuOpen then
+            MainFrame:TweenPosition(UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65), "Out", "Quint", 0.4, true)
+        else
+            MainFrame:TweenPosition(UDim2.new(-0.8, 0, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset), "In", "Quint", 0.4, true)
+        end
+    end
+end)
+
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = false
-        if dragDistance < 5 then
-            menuOpen = not menuOpen
-            local targetPos = menuOpen and UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65) or UDim2.new(-0.8, 0, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset)
-            MainFrame:TweenPosition(targetPos, "Out", "Quint", 0.4, true)
-        end
     end
 end)
 
@@ -116,11 +141,9 @@ BigBtn.MouseButton1Click:Connect(function()
     espActive = not espActive
     if espActive then
         BigBtn.Text = "Esp Active"
-        -- تحول سلس للأخضر الهادئ
         TweenService:Create(BigBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(50, 120, 80)}):Play()
     else
         BigBtn.Text = "Esp Disable"
-        -- عودة سلسة للأحمر المطفي الهادئ
         TweenService:Create(BigBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(140, 50, 50)}):Play()
     end
 end)
