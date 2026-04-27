@@ -11,22 +11,9 @@ local UnderLineGlow = Instance.new("Frame")
 local BigBtn = Instance.new("TextButton")
 local MenuButton = Instance.new("TextButton")
 
--- [ إعدادات الأصوات SFX ] --
-local function playSound(id, pitch)
-    local s = Instance.new("Sound")
-    s.SoundId = "rbxassetid://" .. id
-    s.Pitch = pitch or 1
-    s.Volume = 0.5
-    s.Parent = game:GetService("SoundService")
-    s:Play()
-    s.Ended:Connect(function() s:Destroy() end)
-end
-
--- [ إعدادات الشاشة ] --
 ScreenGui.Parent = game:GetService("CoreGui")
 ScreenGui.ResetOnSpawn = false
 
--- [ الأيقونة العائمة ] --
 MenuButton.Name = "CrystalMenuBtn"
 MenuButton.Parent = ScreenGui
 MenuButton.Size = UDim2.new(0, 55, 0, 55)
@@ -46,7 +33,6 @@ for i = -1, 1 do
     line.BorderSizePixel = 0
 end
 
--- [ القائمة الرئيسية ] --
 MainFrame.Name = "CrystalHub"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 30, 45)
@@ -61,7 +47,6 @@ local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Color3.fromRGB(45, 85, 160)
 MainStroke.Thickness = 1.5
 
--- [ الاسم والخط المميز ] --
 Title.Parent = MainFrame
 Title.Size = UDim2.new(0, 190, 0, 40)
 Title.Text = "CRYSTAL HUB"
@@ -85,7 +70,6 @@ UnderLineGlow.Position = UDim2.new(-0.1, 0, -0.5, 0)
 UnderLineGlow.Size = UDim2.new(1.2, 0, 2, 0)
 Instance.new("UICorner", UnderLineGlow).CornerRadius = UDim.new(1, 0)
 
--- [ الزر الكبير ] --
 BigBtn.Name = "EspMainBtn"
 BigBtn.Parent = MainFrame
 BigBtn.Position = UDim2.new(0.1, 0, 0.42, 0)
@@ -99,30 +83,16 @@ BigBtn.BorderSizePixel = 0
 BigBtn.AutoButtonColor = false
 Instance.new("UICorner", BigBtn).CornerRadius = UDim.new(0, 10)
 
--- [ منطق السحب والشفط ] --
 local dragging, dragStart, startPos, dragDistance = false, nil, nil, 0
 local menuOpen = false
 
 local function toggleMenu()
     menuOpen = not menuOpen
-    -- تشغيل صوت عند فتح/غلق القائمة
-    playSound(12221967, 1.2) -- صوت كليك خفيف
-    
     if menuOpen then
         MainFrame.Visible = true
-        MainFrame:TweenSizeAndPosition(
-            UDim2.new(0, 190, 0, 130),
-            UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65),
-            "Out", "Back", 0.5, true
-        )
+        MainFrame:TweenSizeAndPosition(UDim2.new(0, 190, 0, 130), UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65), "Out", "Back", 0.5, true)
     else
-        MainFrame:TweenSizeAndPosition(
-            UDim2.new(0, 0, 0, 0),
-            MenuButton.Position,
-            "In", "Back", 0.4, true, function()
-                if not menuOpen then MainFrame.Visible = false end
-            end
-        )
+        MainFrame:TweenSizeAndPosition(UDim2.new(0, 0, 0, 0), MenuButton.Position, "In", "Back", 0.4, true, function() if not menuOpen then MainFrame.Visible = false end end)
     end
 end
 
@@ -137,30 +107,41 @@ UserInputService.InputChanged:Connect(function(input)
         local delta = input.Position - dragStart
         dragDistance = delta.Magnitude
         MenuButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        if menuOpen then
-            MainFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65)
-        end
+        if menuOpen then MainFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65) end
     end
 end)
 
-MenuButton.MouseButton1Click:Connect(function()
-    if dragDistance < 5 then toggleMenu() end
-end)
-
+MenuButton.MouseButton1Click:Connect(function() if dragDistance < 5 then toggleMenu() end end)
 UserInputService.InputEnded:Connect(function() dragging = false end)
 
--- [ تفعيل الزر مع الصوت ] --
 local espActive = false
 BigBtn.MouseButton1Click:Connect(function()
     espActive = not espActive
+    BigBtn.Text = espActive and "Esp Active" or "Esp Disable"
+    TweenService:Create(BigBtn, TweenInfo.new(0.4), {BackgroundColor3 = espActive and Color3.fromRGB(50, 120, 80) or Color3.fromRGB(140, 50, 50)}):Play()
+
+    while espActive do
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("Model") or obj:IsA("BasePart") then
+                if obj.Name:lower():find("bomb") or obj.Name:lower():find("mine") then
+                    local h = obj:FindFirstChild("Highlight") or Instance.new("Highlight", obj)
+                    h.FillColor = Color3.fromRGB(255, 0, 0)
+                    h.Enabled = true
+                elseif obj.Name:lower():find("card") or obj.Name:lower():find("safe") then
+                    local h = obj:FindFirstChild("Highlight") or Instance.new("Highlight", obj)
+                    h.FillColor = Color3.fromRGB(0, 255, 0)
+                    h.Enabled = true
+                end
+            end
+        end
+        task.wait(1)
+        if not espActive then break end
+    end
     
-    if espActive then
-        playSound(12222016, 1.5) -- صوت تفعيل (نغمة للأعلى)
-        BigBtn.Text = "Esp Active"
-        TweenService:Create(BigBtn, TweenInfo.new(0.4), {BackgroundColor3 = Color3.fromRGB(50, 120, 80)}):Play()
-    else
-        playSound(12222016, 0.8) -- صوت إيقاف (نغمة للأسفل)
-        BigBtn.Text = "Esp Disable"
-        TweenService:Create(BigBtn, TweenInfo.new(0.4), {BackgroundColor3 = Color3.fromRGB(140, 50, 50)}):Play()
+    if not espActive then
+        for _, obj in pairs(workspace:GetDescendants()) do
+            local h = obj:FindFirstChild("Highlight")
+            if h then h:Destroy() end
+        end
     end
 end)
