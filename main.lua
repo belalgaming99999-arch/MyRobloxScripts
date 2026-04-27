@@ -120,28 +120,36 @@ BigBtn.MouseButton1Click:Connect(function()
     BigBtn.Text = espActive and "Esp Active" or "Esp Disable"
     TweenService:Create(BigBtn, TweenInfo.new(0.4), {BackgroundColor3 = espActive and Color3.fromRGB(50, 120, 80) or Color3.fromRGB(140, 50, 50)}):Play()
 
-    while espActive do
-        for _, obj in pairs(workspace:GetDescendants()) do
-            if obj:IsA("Model") or obj:IsA("BasePart") then
-                if obj.Name:lower():find("bomb") or obj.Name:lower():find("mine") then
-                    local h = obj:FindFirstChild("Highlight") or Instance.new("Highlight", obj)
-                    h.FillColor = Color3.fromRGB(255, 0, 0)
+    task.spawn(function()
+        while espActive do
+            local bombCount = 0
+            for _, card in pairs(workspace:GetDescendants()) do
+                if card.Name:lower():find("candy") or card.Name:lower():find("card") or card:FindFirstChild("CardHandle") then
+                    local h = card:FindFirstChild("Highlight") or Instance.new("Highlight", card)
                     h.Enabled = true
-                elseif obj.Name:lower():find("card") or obj.Name:lower():find("safe") then
-                    local h = obj:FindFirstChild("Highlight") or Instance.new("Highlight", obj)
-                    h.FillColor = Color3.fromRGB(0, 255, 0)
-                    h.Enabled = true
+                    
+                    -- فحص فائق الذكاء: البحث عن أي قيمة تدل على الخطر (Bomb/Tsunami/Explosion)
+                    local isDanger = card:FindFirstChild("Bomb") or card:FindFirstChild("Tsunami") or card:FindFirstChild("Bad") or card:FindFirstChildWhichIsA("Explosion")
+                    
+                    -- لو اللعبة مخفية القنبلة بداخل الـ Tags
+                    if not isDanger and card:FindFirstChild("Configuration") then
+                        isDanger = card.Configuration:FindFirstChild("Bomb")
+                    end
+
+                    if isDanger and bombCount < 3 then
+                        h.FillColor = Color3.fromRGB(255, 0, 0) -- أحمر للقنبلة
+                        bombCount = bombCount + 1
+                    else
+                        h.FillColor = Color3.fromRGB(0, 255, 0) -- أخضر للسليم
+                    end
                 end
             end
+            task.wait(0.5)
         end
-        task.wait(1)
-        if not espActive then break end
-    end
-    
-    if not espActive then
+        
         for _, obj in pairs(workspace:GetDescendants()) do
             local h = obj:FindFirstChild("Highlight")
             if h then h:Destroy() end
         end
-    end
+    end)
 end)
