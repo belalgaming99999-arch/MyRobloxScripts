@@ -28,11 +28,17 @@ MenuButton.AutoButtonColor = false
 MenuButton.Text = ""
 Instance.new("UICorner", MenuButton).CornerRadius = UDim.new(0, 14)
 
-for i = -1, 1 do
+local LinesContainer = Instance.new("Frame", MenuButton)
+LinesContainer.Size = UDim2.new(0, 28, 0, 22)
+LinesContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
+LinesContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+LinesContainer.BackgroundTransparency = 1
+
+for i = 0, 2 do
     local line = Instance.new("Frame")
-    line.Parent = MenuButton
-    line.Size = UDim2.new(0, 28, 0, 4)
-    line.Position = UDim2.new(0.5, -14, 0.5, i * 9)
+    line.Parent = LinesContainer
+    line.Size = UDim2.new(1, 0, 0, 4)
+    line.Position = UDim2.new(0, 0, 0, i * 9)
     line.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     line.BorderSizePixel = 0 
 end
@@ -97,21 +103,24 @@ end
 ConfigButton(EspBtn, "Esp Bomb", 2)
 ConfigButton(PopBtn, "Auto Pop", 3)
 
-local dragging, dragStart, startPos, dragDistance = false, nil, nil, 0
+local dragging, dragStart, startPos = false, nil, nil
+local isActuallyDragging = false
 
 MenuButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
+        isActuallyDragging = false
         dragStart = input.Position
         startPos = MenuButton.Position
-        dragDistance = 0
     end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
-        dragDistance = delta.Magnitude
+        if delta.Magnitude > 5 then
+            isActuallyDragging = true
+        end
         MenuButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         if MainFrame.Visible then
             MainFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65)
@@ -119,18 +128,21 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
+MenuButton.MouseButton1Click:Connect(function()
+    if not isActuallyDragging then
+        local open = not MainFrame.Visible
+        if open then
+            MainFrame.Visible = true
+            MainFrame:TweenSizeAndPosition(UDim2.new(0, 190, 0, 175), UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65), "Out", "Back", 0.3, true)
+        else
+            MainFrame:TweenSizeAndPosition(UDim2.new(0, 0, 0, 0), MenuButton.Position, "In", "Back", 0.2, true, function() if not MainFrame.Visible then MainFrame.Visible = false end end)
+        end
+    end
+end)
+
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = false
-        if dragDistance < 5 then
-            local open = not MainFrame.Visible
-            if open then
-                MainFrame.Visible = true
-                MainFrame:TweenSizeAndPosition(UDim2.new(0, 190, 0, 175), UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65), "Out", "Back", 0.3, true)
-            else
-                MainFrame:TweenSizeAndPosition(UDim2.new(0, 0, 0, 0), MenuButton.Position, "In", "Back", 0.2, true, function() MainFrame.Visible = false end)
-            end
-        end
     end
 end)
 
@@ -138,7 +150,7 @@ local espActive = false
 EspBtn.MouseButton1Click:Connect(function()
     espActive = not espActive
     EspBtn.Text = espActive and "Esp Bomb [Active]" or "Esp Bomb [Disable]"
-    TweenService:Create(EspBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {BackgroundColor3 = espActive and Color3.fromRGB(50, 120, 80) or Color3.fromRGB(140, 50, 50)}):Play()
+    TweenService:Create(EspBtn, TweenInfo.new(0.2), {BackgroundColor3 = espActive and Color3.fromRGB(50, 120, 80) or Color3.fromRGB(140, 50, 50)}):Play()
     if not espActive then
         for _, v in pairs(workspace:GetDescendants()) do if v.Name == "BombTracker" then v:Destroy() end end
     end
@@ -148,7 +160,7 @@ local popActive = false
 PopBtn.MouseButton1Click:Connect(function()
     popActive = not popActive
     PopBtn.Text = popActive and "Auto Pop [Active]" or "Auto Pop [Disable]"
-    TweenService:Create(PopBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {BackgroundColor3 = popActive and Color3.fromRGB(50, 120, 80) or Color3.fromRGB(140, 50, 50)}):Play()
+    TweenService:Create(PopBtn, TweenInfo.new(0.2), {BackgroundColor3 = popActive and Color3.fromRGB(50, 120, 80) or Color3.fromRGB(140, 50, 50)}):Play()
 end)
 
 task.spawn(function()
@@ -192,4 +204,3 @@ RunService.Heartbeat:Connect(function()
         end
     end
 end)
-
