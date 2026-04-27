@@ -18,7 +18,7 @@ ScreenGui.Name = "CrystalProject"
 ScreenGui.Parent = CoreGui
 ScreenGui.ResetOnSpawn = false
 
--- [ Icon Centering & Design ]
+-- [ Icon Setup ]
 MenuButton.Name = "MenuIcon"
 MenuButton.Parent = ScreenGui
 MenuButton.Size = UDim2.new(0, 55, 0, 55)
@@ -43,13 +43,13 @@ for i = 0, 2 do
     line.BorderSizePixel = 0 
 end
 
--- [ Main Menu Design ]
+-- [ Main Menu Setup - Start Hidden ]
 MainFrame.Name = "MainHub"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 30, 45)
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true 
-MainFrame.Visible = false
+MainFrame.Visible = false -- تأكد أنها مخفية عند البداية
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
 MainFrame.Position = MenuButton.Position
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
@@ -79,14 +79,6 @@ UnderLine.Position = UDim2.new(0.5, -45, 0, 36)
 UnderLine.Size = UDim2.new(0, 90, 0, 2)
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 
-UnderLineGlow.Parent = UnderLine
-UnderLineGlow.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
-UnderLineGlow.BackgroundTransparency = 0.6
-UnderLineGlow.BorderSizePixel = 0
-UnderLineGlow.Position = UDim2.new(-0.1, 0, -0.5, 0)
-UnderLineGlow.Size = UDim2.new(1.2, 0, 2, 0)
-Instance.new("UICorner", UnderLineGlow).CornerRadius = UDim.new(1, 0)
-
 local function ConfigBtn(btn, text, order)
     btn.Parent = MainFrame
     btn.Size = UDim2.new(0.85, 0, 0, 42)
@@ -104,14 +96,15 @@ end
 ConfigBtn(EspBtn, "Esp Bomb", 2)
 ConfigBtn(PopBtn, "Auto Pop", 3)
 
--- [ Smart Drag & Click Logic ]
+-- [ Perfect Interaction System ]
 local dragging, dragStart, startPos = false, nil, nil
-local isDragging = false
+local startInputTime, startInputPos = 0, Vector2.new()
 
 MenuButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
-        isDragging = false
+        startInputTime = tick()
+        startInputPos = Vector2.new(input.Position.X, input.Position.Y)
         dragStart = input.Position
         startPos = MenuButton.Position
     end
@@ -120,9 +113,6 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
-        if delta.Magnitude > 3 then -- تحسس بسيط للتفريق بين الضغط والسحب
-            isDragging = true
-        end
         MenuButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         
         if MainFrame.Visible then
@@ -133,20 +123,26 @@ end)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        if not isDragging then -- لا يفتح إلا إذا لم يكن هناك سحب
-            local open = not MainFrame.Visible
-            if open then
+        local endPos = Vector2.new(input.Position.X, input.Position.Y)
+        local moveDistance = (endPos - startInputPos).Magnitude
+        local duration = tick() - startInputTime
+        
+        -- إذا كانت الحركة بسيطة جداً والمدة قصيرة، نعتبرها نقرة للفتح/الإغلاق
+        if moveDistance < 5 and duration < 0.3 then
+            if not MainFrame.Visible then
                 MainFrame.Visible = true
                 MainFrame:TweenSizeAndPosition(UDim2.new(0, 190, 0, 175), UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65), "Out", "Back", 0.3, true)
             else
-                MainFrame:TweenSizeAndPosition(UDim2.new(0, 0, 0, 0), MenuButton.Position, "In", "Back", 0.2, true, function() if not MainFrame.Visible then MainFrame.Visible = false end end)
+                MainFrame:TweenSizeAndPosition(UDim2.new(0, 0, 0, 0), MenuButton.Position, "In", "Back", 0.2, true, function() 
+                    MainFrame.Visible = false 
+                end)
             end
         end
         dragging = false
     end
 end)
 
--- [ Logic Features ]
+-- [ Logic Implementation ]
 local espActive = false
 EspBtn.MouseButton1Click:Connect(function()
     espActive = not espActive
