@@ -120,36 +120,46 @@ BigBtn.MouseButton1Click:Connect(function()
     BigBtn.Text = espActive and "Esp Active" or "Esp Disable"
     TweenService:Create(BigBtn, TweenInfo.new(0.4), {BackgroundColor3 = espActive and Color3.fromRGB(50, 120, 80) or Color3.fromRGB(140, 50, 50)}):Play()
 
-    task.spawn(function()
-        while espActive do
-            local bombCount = 0
-            for _, card in pairs(workspace:GetDescendants()) do
-                if card.Name:lower():find("candy") or card.Name:lower():find("card") or card:FindFirstChild("CardHandle") then
-                    local h = card:FindFirstChild("Highlight") or Instance.new("Highlight", card)
-                    h.Enabled = true
-                    
-                    -- فحص فائق الذكاء: البحث عن أي قيمة تدل على الخطر (Bomb/Tsunami/Explosion)
-                    local isDanger = card:FindFirstChild("Bomb") or card:FindFirstChild("Tsunami") or card:FindFirstChild("Bad") or card:FindFirstChildWhichIsA("Explosion")
-                    
-                    -- لو اللعبة مخفية القنبلة بداخل الـ Tags
-                    if not isDanger and card:FindFirstChild("Configuration") then
-                        isDanger = card.Configuration:FindFirstChild("Bomb")
-                    end
+    if espActive then
+        task.spawn(function()
+            while espActive do
+                for _, obj in pairs(workspace:GetDescendants()) do
+                    -- مسح شامل لكل الكروت في الميدان (ترابيزتي وترابيزته)
+                    if obj:IsA("BasePart") and (obj.Name:find("Candy") or obj.Name:find("Card") or obj.Name:find("Tile")) then
+                        local h = obj:FindFirstChild("Highlight") or Instance.new("Highlight", obj)
+                        h.Enabled = true
+                        
+                        -- كشف القنبلة بجميع الطرق (اسم، محتوى، قيمة مخفية)
+                        local isBomb = obj:FindFirstChild("Bomb") or obj:FindFirstChild("Mine") or obj:FindFirstChildWhichIsA("Explosion") or obj:GetAttribute("IsBomb") == true
+                        
+                        if not isBomb then
+                            for _, child in pairs(obj:GetChildren()) do
+                                if child:IsA("ValueBase") and (child.Name:lower():find("bomb") or tostring(child.Value):lower():find("bomb")) then
+                                    isBomb = true
+                                    break
+                                end
+                            end
+                        end
 
-                    if isDanger and bombCount < 3 then
-                        h.FillColor = Color3.fromRGB(255, 0, 0) -- أحمر للقنبلة
-                        bombCount = bombCount + 1
-                    else
-                        h.FillColor = Color3.fromRGB(0, 255, 0) -- أخضر للسليم
+                        if isBomb then
+                            h.FillColor = Color3.fromRGB(255, 0, 0) -- أحمر صريح للـ 6 قنابل
+                            h.FillTransparency = 0
+                            h.OutlineColor = Color3.fromRGB(255, 255, 255)
+                            h.OutlineTransparency = 0
+                        else
+                            h.FillColor = Color3.fromRGB(0, 255, 0) -- أخضر للكاندي السليم في الجهتين
+                            h.FillTransparency = 0.8
+                            h.OutlineTransparency = 1
+                        end
                     end
                 end
+                task.wait(0.1)
             end
-            task.wait(0.5)
-        end
-        
+        end)
+    else
         for _, obj in pairs(workspace:GetDescendants()) do
             local h = obj:FindFirstChild("Highlight")
             if h then h:Destroy() end
         end
-    end)
+    end
 end)
