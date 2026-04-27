@@ -11,6 +11,17 @@ local UnderLineGlow = Instance.new("Frame")
 local BigBtn = Instance.new("TextButton")
 local MenuButton = Instance.new("TextButton")
 
+-- [ إعدادات الأصوات SFX ] --
+local function playSound(id, pitch)
+    local s = Instance.new("Sound")
+    s.SoundId = "rbxassetid://" .. id
+    s.Pitch = pitch or 1
+    s.Volume = 0.5
+    s.Parent = game:GetService("SoundService")
+    s:Play()
+    s.Ended:Connect(function() s:Destroy() end)
+end
+
 -- [ إعدادات الشاشة ] --
 ScreenGui.Parent = game:GetService("CoreGui")
 ScreenGui.ResetOnSpawn = false
@@ -59,7 +70,6 @@ Title.BackgroundTransparency = 1
 Title.TextSize = 20
 Title.Font = Enum.Font.GothamBold
 
--- الخط الأساسي (نحيف وانسيابي)
 UnderLine.Parent = MainFrame
 UnderLine.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
 UnderLine.BorderSizePixel = 0
@@ -67,7 +77,6 @@ UnderLine.Position = UDim2.new(0.5, -45, 0, 36)
 UnderLine.Size = UDim2.new(0, 90, 0, 2)
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 
--- تأثير التوهج الهادئ للخط
 UnderLineGlow.Parent = UnderLine
 UnderLineGlow.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
 UnderLineGlow.BackgroundTransparency = 0.6
@@ -90,12 +99,15 @@ BigBtn.BorderSizePixel = 0
 BigBtn.AutoButtonColor = false
 Instance.new("UICorner", BigBtn).CornerRadius = UDim.new(0, 10)
 
--- [ منطق السحب والشفط بسلاسة ] --
+-- [ منطق السحب والشفط ] --
 local dragging, dragStart, startPos, dragDistance = false, nil, nil, 0
 local menuOpen = false
 
 local function toggleMenu()
     menuOpen = not menuOpen
+    -- تشغيل صوت عند فتح/غلق القائمة
+    playSound(12221967, 1.2) -- صوت كليك خفيف
+    
     if menuOpen then
         MainFrame.Visible = true
         MainFrame:TweenSizeAndPosition(
@@ -137,11 +149,18 @@ end)
 
 UserInputService.InputEnded:Connect(function() dragging = false end)
 
--- [ تفعيل الزر ] --
+-- [ تفعيل الزر مع الصوت ] --
 local espActive = false
 BigBtn.MouseButton1Click:Connect(function()
     espActive = not espActive
-    local targetColor = espActive and Color3.fromRGB(50, 120, 80) or Color3.fromRGB(140, 50, 50)
-    BigBtn.Text = espActive and "Esp Active" or "Esp Disable"
-    TweenService:Create(BigBtn, TweenInfo.new(0.4, Enum.EasingStyle.Sine), {BackgroundColor3 = targetColor}):Play()
+    
+    if espActive then
+        playSound(12222016, 1.5) -- صوت تفعيل (نغمة للأعلى)
+        BigBtn.Text = "Esp Active"
+        TweenService:Create(BigBtn, TweenInfo.new(0.4), {BackgroundColor3 = Color3.fromRGB(50, 120, 80)}):Play()
+    else
+        playSound(12222016, 0.8) -- صوت إيقاف (نغمة للأسفل)
+        BigBtn.Text = "Esp Disable"
+        TweenService:Create(BigBtn, TweenInfo.new(0.4), {BackgroundColor3 = Color3.fromRGB(140, 50, 50)}):Play()
+    end
 end)
