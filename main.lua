@@ -1,4 +1,4 @@
--- [ Auto-Clean: تنظيف النسخ القديمة ]
+-- [ 1. نظام التنظيف التلقائي ]
 local OldGui = game:GetService("CoreGui"):FindFirstChild("CrystalProject")
 if OldGui then OldGui:Destroy() end
 
@@ -22,7 +22,7 @@ ScreenGui.Name = "CrystalProject"
 ScreenGui.Parent = CoreGui
 ScreenGui.ResetOnSpawn = false
 
--- [ Menu Icon Design ]
+-- [ 2. تصميم الأيقونة ]
 MenuButton.Name = "MenuIcon"
 MenuButton.Parent = ScreenGui
 MenuButton.Size = UDim2.new(0, 55, 0, 55)
@@ -30,8 +30,8 @@ MenuButton.Position = UDim2.new(0.05, 0, 0.15, 0)
 MenuButton.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
 MenuButton.BorderSizePixel = 0
 MenuButton.AutoButtonColor = false 
-MenuButton.Text = "" -- التأكد أن النص فارغ تماماً لحل مشكلة النقطة
-MenuButton.ClipsDescendants = false
+MenuButton.Text = "" -- فارغ تماماً لمنع ظهور أي نقط
+MenuButton.ZIndex = 10
 
 local Lines = Instance.new("Frame", MenuButton)
 Lines.Size = UDim2.new(0, 28, 0, 22)
@@ -49,7 +49,7 @@ end
 
 Instance.new("UICorner", MenuButton).CornerRadius = UDim.new(0, 14)
 
--- [ Main Frame Design ]
+-- [ 3. تصميم القائمة الرئيسية ]
 MainFrame.Name = "MainHub"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 30, 45)
@@ -58,11 +58,11 @@ MainFrame.ClipsDescendants = true
 MainFrame.Visible = false
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
 MainFrame.Position = MenuButton.Position
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 
 local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Color3.fromRGB(45, 85, 160)
 MainStroke.Thickness = 1.5
+MainStroke.Enabled = false -- لا يعمل إلا والقائمة مفتوحة لمنع "النقطة الزرقاء"
 
 local Layout = Instance.new("UIListLayout", MainFrame)
 Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -86,7 +86,6 @@ UnderLine.Size = UDim2.new(0, 90, 0, 2)
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 
 UnderLineGlow.Parent = UnderLine
-UnderLineGlow.Name = "Glow"
 UnderLineGlow.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
 UnderLineGlow.BackgroundTransparency = 0.5
 UnderLineGlow.BorderSizePixel = 0
@@ -110,16 +109,17 @@ end
 
 ConfigBtn(EspBtn, "Esp Bomb", 2)
 ConfigBtn(PopBtn, "Auto Pop", 3)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 
--- [ Smart Movement Logic ]
+-- [ 4. نظام الحركة والفتح الذكي ]
 local dragging = false
 local dragStart, startPos
-local wasDragged = false 
+local wasDragged = false
 
 MenuButton.InputBegan:Connect(function(input)
     if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
         dragging = true
-        wasDragged = false -- إعادة التصفير عند كل لمسة جديدة
+        wasDragged = false
         dragStart = input.Position
         startPos = MenuButton.Position
     end
@@ -128,10 +128,9 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
-        if delta.Magnitude > 7 then -- مسافة الأمان للتفرقة بين الضغط والسحب
+        if delta.Magnitude > 10 then -- مسافة الأمان للسحب
             wasDragged = true
         end
-        
         MenuButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         
         if MainFrame.Visible then
@@ -142,27 +141,25 @@ end)
 
 UserInputService.InputEnded:Connect(function(input)
     if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
-        dragging = false
-    end
-end)
-
--- فتح وإغلاق القائمة
-MenuButton.MouseButton1Down:Connect(function()
-    task.wait(0.05) -- انتظار بسيط للتأكد من حالة السحب
-    if not wasDragged then
-        local open = not MainFrame.Visible
-        if open then
-            MainFrame.Visible = true
-            MainFrame:TweenSizeAndPosition(UDim2.new(0, 190, 0, 175), UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65), "Out", "Back", 0.3, true)
-        else
-            MainFrame:TweenSizeAndPosition(UDim2.new(0, 0, 0, 0), MenuButton.Position, "In", "Back", 0.2, true, function() 
-                if not MainFrame.Visible then MainFrame.Visible = false end 
-            end)
+        if not wasDragged then -- إذا لم يتم السحب، نعتبرها كليك لفتح القائمة
+            local open = not MainFrame.Visible
+            if open then
+                MainFrame.Visible = true
+                MainStroke.Enabled = true
+                MainFrame:TweenSizeAndPosition(UDim2.new(0, 190, 0, 175), UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65), "Out", "Back", 0.3, true)
+            else
+                MainFrame:TweenSizeAndPosition(UDim2.new(0, 0, 0, 0), MenuButton.Position, "In", "Back", 0.2, true, function() 
+                    MainFrame.Visible = false 
+                    MainStroke.Enabled = false -- إخفاء الستروك تماماً لمنع النقطة الزرقاء
+                end)
+            end
         end
+        dragging = false
+        wasDragged = false -- تصفير الحالة دائماً عند الانتهاء
     end
 end)
 
--- [ Features Logic ]
+-- [ 5. تشغيل الميزات ]
 local espActive = false
 EspBtn.MouseButton1Click:Connect(function()
     espActive = not espActive
