@@ -30,8 +30,8 @@ MenuButton.Position = UDim2.new(0.05, 0, 0.15, 0)
 MenuButton.BackgroundColor3 = Color3.fromRGB(45, 85, 160)
 MenuButton.BorderSizePixel = 0
 MenuButton.AutoButtonColor = false 
-MenuButton.Text = ""
-Instance.new("UICorner", MenuButton).CornerRadius = UDim.new(0, 14)
+MenuButton.Text = "" -- التأكد أن النص فارغ تماماً لحل مشكلة النقطة
+MenuButton.ClipsDescendants = false
 
 local Lines = Instance.new("Frame", MenuButton)
 Lines.Size = UDim2.new(0, 28, 0, 22)
@@ -46,6 +46,8 @@ for i = 0, 2 do
     line.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     line.BorderSizePixel = 0 
 end
+
+Instance.new("UICorner", MenuButton).CornerRadius = UDim.new(0, 14)
 
 -- [ Main Frame Design ]
 MainFrame.Name = "MainHub"
@@ -109,45 +111,44 @@ end
 ConfigBtn(EspBtn, "Esp Bomb", 2)
 ConfigBtn(PopBtn, "Auto Pop", 3)
 
--- [ Smart Movement Logic: منع الفتح العشوائي أثناء السحب ]
+-- [ Smart Movement Logic ]
 local dragging = false
-local dragInput, dragStart, startPos
-local wasDragged = false -- متغير مهم جداً لمعرفة هل قمنا بالسحب أم لا
+local dragStart, startPos
+local wasDragged = false 
 
 MenuButton.InputBegan:Connect(function(input)
     if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
         dragging = true
-        wasDragged = false -- في بداية اللمس نعتبر أنه لم يتم السحب بعد
+        wasDragged = false -- إعادة التصفير عند كل لمسة جديدة
         dragStart = input.Position
         startPos = MenuButton.Position
-        
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
     end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
-        -- إذا تحرك الإصبع أكثر من 5 بيكسل، نعتبر العملية "سحب" وليست "كليك"
-        if delta.Magnitude > 5 then
+        if delta.Magnitude > 7 then -- مسافة الأمان للتفرقة بين الضغط والسحب
             wasDragged = true
         end
         
         MenuButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         
-        -- القائمة تتبع الأيقونة فوراً وهي مفتوحة
         if MainFrame.Visible then
             MainFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65)
         end
     end
 end)
 
--- هذا هو المكان الوحيد المسؤول عن فتح المنيو (فقط إذا لم يتم السحب)
-MenuButton.MouseButton1Click:Connect(function()
+UserInputService.InputEnded:Connect(function(input)
+    if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+        dragging = false
+    end
+end)
+
+-- فتح وإغلاق القائمة
+MenuButton.MouseButton1Down:Connect(function()
+    task.wait(0.05) -- انتظار بسيط للتأكد من حالة السحب
     if not wasDragged then
         local open = not MainFrame.Visible
         if open then
