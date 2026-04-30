@@ -12,28 +12,37 @@ local CrystalGui = Instance.new("ScreenGui", CoreGui)
 CrystalGui.Name = "CrystalProject"
 CrystalGui.IgnoreGuiInset = true
 
+-- [ لوحة الألوان الموحدة ]
+local Theme = {
+    Bg = Color3.fromRGB(15, 15, 20),
+    MainBlue = Color3.fromRGB(45, 85, 160), -- الأزرق الملكي السلس
+    White = Color3.new(1, 1, 1),
+    OffRed = Color3.fromRGB(175, 55, 55),
+    OnGreen = Color3.fromRGB(55, 165, 95)
+}
+
 local CrystalToggles = {
     AutoFourRow = false,
     AutoPopcorn = false,
     AutoShips = false
 }
 
--- [ الأيقونة الزرقاء ]
+-- [ الأيقونة ]
 local MenuButton = Instance.new("TextButton", CrystalGui)
 MenuButton.Name = "MenuButton"
-MenuButton.Size = UDim2.new(0, 55, 0, 55)
+MenuButton.Size = UDim2.new(0, 52, 0, 52)
 MenuButton.Position = UDim2.new(0.05, 0, 0.25, 0)
-MenuButton.BackgroundColor3 = Color3.fromRGB(35, 65, 135)
+MenuButton.BackgroundColor3 = Theme.MainBlue
 MenuButton.Text = ""
 MenuButton.AutoButtonColor = false
 MenuButton.ZIndex = 10
-Instance.new("UICorner", MenuButton).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", MenuButton).CornerRadius = UDim.new(0, 10)
 
 for Index = -1, 1 do
     local Line = Instance.new("Frame", MenuButton)
     Line.Size = UDim2.new(0, 26, 0, 4)
     Line.Position = UDim2.new(0.5, -13, 0.5, (Index * 10) - 2)
-    Line.BackgroundColor3 = Color3.new(1, 1, 1)
+    Line.BackgroundColor3 = Theme.White
     Line.BorderSizePixel = 0
     Line.ZIndex = 11
     Instance.new("UICorner", Line).CornerRadius = UDim.new(1, 0)
@@ -42,57 +51,64 @@ end
 -- [ القائمة الرئيسية ]
 local MainFrame = Instance.new("Frame", CrystalGui)
 MainFrame.Name = "MainFrame"
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+MainFrame.BackgroundColor3 = Theme.Bg
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
-MainFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65)
+MainFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 60)
 MainFrame.ClipsDescendants = true
 MainFrame.Visible = false
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 15)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 
+-- [ تأثير الـ Animated Gradient على الحواف ]
 local FrameStroke = Instance.new("UIStroke", MainFrame)
-FrameStroke.Color = Color3.fromRGB(45, 90, 200)
 FrameStroke.Thickness = 2
 FrameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
--- [ الجزء العلوي: الاسم والخط (ثابت فوق) ]
-local Header = Instance.new("Frame", MainFrame)
-Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 60)
-Header.BackgroundTransparency = 1
+local BorderGradient = Instance.new("UIGradient", FrameStroke)
+BorderGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Theme.MainBlue),
+    ColorSequenceKeypoint.new(0.5, Theme.White), -- تداخل أبيض سلس
+    ColorSequenceKeypoint.new(1, Theme.MainBlue)
+})
 
-local Title = Instance.new("TextLabel", Header)
+local ListLayout = Instance.new("UIListLayout", MainFrame)
+ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+ListLayout.Padding = UDim.new(0, 10)
+
+-- [ العنوان متحرك اللون - فوق خالص ]
+local Title = Instance.new("TextLabel", MainFrame)
 Title.Size = UDim2.new(1, 0, 0, 45)
-Title.Position = UDim2.new(0, 0, 0, 5)
 Title.Text = "Crystal Hub"
-Title.TextColor3 = Color3.fromRGB(65, 130, 255)
+Title.TextColor3 = Theme.White -- جعل اللون الأساسي أبيض ليظهر التأثير
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.BackgroundTransparency = 1
 
-local UnderLine = Instance.new("Frame", Header)
-UnderLine.Size = UDim2.new(0.7, 0, 0, 2)
-UnderLine.Position = UDim2.new(0.15, 0, 0, 50)
-UnderLine.BackgroundColor3 = Color3.fromRGB(65, 130, 255)
+local TitleGradient = Instance.new("UIGradient", Title)
+TitleGradient.Color = BorderGradient.Color -- نفس تأثير الحواف
+
+local UnderLine = Instance.new("Frame", MainFrame)
+UnderLine.Size = UDim2.new(0.8, 0, 0, 2)
+UnderLine.BackgroundColor3 = Theme.White -- أبيض ثابت
 UnderLine.BorderSizePixel = 0
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 
--- [ حاوية الأزرار ]
-local ButtonContainer = Instance.new("Frame", MainFrame)
-ButtonContainer.Name = "ButtonContainer"
-ButtonContainer.Size = UDim2.new(1, 0, 1, -65)
-ButtonContainer.Position = UDim2.new(0, 0, 0, 65)
-ButtonContainer.BackgroundTransparency = 1
+-- [ تشغيل الأنيميشن السلس (محاكاة LUNI) ]
+task.spawn(function()
+    local Rotation = 0
+    while task.wait(0.01) do -- سرعة عالية لانسيابية تامة
+        Rotation = (Rotation + 3) % 360 -- سرعة الدوران
+        BorderGradient.Rotation = Rotation
+        TitleGradient.Rotation = Rotation
+    end
+end)
 
-local ListLayout = Instance.new("UIListLayout", ButtonContainer)
-ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-ListLayout.Padding = UDim.new(0, 8)
-
+-- [ وظيفة صنع الأزرار ]
 local function CreateButton(Text, Key, Logic)
-    local Btn = Instance.new("TextButton", ButtonContainer)
+    local Btn = Instance.new("TextButton", MainFrame)
     Btn.Size = UDim2.new(0, 185, 0, 42)
-    Btn.BackgroundColor3 = Color3.fromRGB(175, 55, 55)
+    Btn.BackgroundColor3 = Theme.OffRed
     Btn.Text = Text .. " [Disable]"
-    Btn.TextColor3 = Color3.new(1, 1, 1)
+    Btn.TextColor3 = Theme.White
     Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 14
     Btn.AutoButtonColor = false
@@ -101,9 +117,11 @@ local function CreateButton(Text, Key, Logic)
     Btn.MouseButton1Click:Connect(function()
         CrystalToggles[Key] = not CrystalToggles[Key]
         Btn.Text = Text .. (CrystalToggles[Key] and " [Active]" or " [Disable]")
+        
         TweenService:Create(Btn, TweenInfo.new(0.3), {
-            BackgroundColor3 = CrystalToggles[Key] and Color3.fromRGB(55, 165, 95) or Color3.fromRGB(175, 55, 55)
+            BackgroundColor3 = CrystalToggles[Key] and Theme.OnGreen or Theme.OffRed
         }):Play()
+        
         if CrystalToggles[Key] then task.spawn(Logic) end
     end)
 end
@@ -112,7 +130,7 @@ CreateButton("Auto 4-Row", "AutoFourRow", function() while CrystalToggles.AutoFo
 CreateButton("Auto Popcorn", "AutoPopcorn", function() while CrystalToggles.AutoPopcorn do task.wait(0.01) end end)
 CreateButton("Auto Ships", "AutoShips", function() while CrystalToggles.AutoShips do task.wait(0.1) end end)
 
--- [ نظام السحب والربط ]
+-- [ نظام الحركة والفتح الموحد ]
 local Dragging, DragStart, StartPos
 local IsDragged = false
 
@@ -126,24 +144,28 @@ UserInputService.InputChanged:Connect(function(Input)
     if Dragging and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
         local Delta = Input.Position - DragStart
         if Delta.Magnitude > 3 then IsDragged = true end
+        
         local NewPos = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
         MenuButton.Position = NewPos
+        
         if MainFrame.Visible then
-            MainFrame.Position = UDim2.new(NewPos.X.Scale, NewPos.X.Offset, NewPos.Y.Scale, NewPos.Y.Offset + 65)
+            MainFrame.Position = UDim2.new(NewPos.X.Scale, NewPos.X.Offset, NewPos.Y.Scale, NewPos.Y.Offset + 60)
         end
     end
 end)
 
 UserInputService.InputEnded:Connect(function(Input)
-    if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then Dragging = false end
+    if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+        Dragging = false
+    end
 end)
 
 MenuButton.MouseButton1Click:Connect(function()
     if not IsDragged then
         if not MainFrame.Visible then
             MainFrame.Visible = true
-            MainFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65)
-            MainFrame:TweenSize(UDim2.new(0, 215, 0, 240), "Out", "Back", 0.4, true)
+            MainFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 60)
+            MainFrame:TweenSize(UDim2.new(0, 215, 0, 265), "Out", "Back", 0.4, true)
         else
             MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.3, true, function() MainFrame.Visible = false end)
         end
