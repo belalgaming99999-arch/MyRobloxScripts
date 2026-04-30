@@ -18,12 +18,12 @@ local CrystalToggles = {
     AutoShips = false
 }
 
--- [ الأيقونة الزرقاء السلسة ]
+-- [ الأيقونة الزرقاء ]
 local MenuButton = Instance.new("TextButton", CrystalGui)
 MenuButton.Name = "MenuButton"
 MenuButton.Size = UDim2.new(0, 55, 0, 55)
 MenuButton.Position = UDim2.new(0.05, 0, 0.25, 0)
-MenuButton.BackgroundColor3 = Color3.fromRGB(35, 65, 135) -- أزرق سلس
+MenuButton.BackgroundColor3 = Color3.fromRGB(35, 65, 135)
 MenuButton.Text = ""
 MenuButton.AutoButtonColor = false
 MenuButton.ZIndex = 10
@@ -50,34 +50,47 @@ MainFrame.Visible = false
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 15)
 
 local FrameStroke = Instance.new("UIStroke", MainFrame)
-FrameStroke.Color = Color3.fromRGB(45, 90, 200) -- حواف زرقاء سلسة
+FrameStroke.Color = Color3.fromRGB(45, 90, 200)
 FrameStroke.Thickness = 2
 FrameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-local ListLayout = Instance.new("UIListLayout", MainFrame)
-ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-ListLayout.Padding = UDim.new(0, 10)
+-- [ الجزء العلوي: الاسم والخط (ثابت فوق) ]
+local Header = Instance.new("Frame", MainFrame)
+Header.Name = "Header"
+Header.Size = UDim2.new(1, 0, 0, 60)
+Header.BackgroundTransparency = 1
 
--- [ العنوان والخط - فوق خالص ]
-local Title = Instance.new("TextLabel", MainFrame)
+local Title = Instance.new("TextLabel", Header)
 Title.Size = UDim2.new(1, 0, 0, 45)
+Title.Position = UDim2.new(0, 0, 0, 5)
 Title.Text = "Crystal Hub"
-Title.TextColor3 = Color3.fromRGB(65, 130, 255) -- أزرق كريستالي سلس
+Title.TextColor3 = Color3.fromRGB(65, 130, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.BackgroundTransparency = 1
 
-local UnderLine = Instance.new("Frame", MainFrame)
-UnderLine.Size = UDim2.new(0.8, 0, 0, 2)
+local UnderLine = Instance.new("Frame", Header)
+UnderLine.Size = UDim2.new(0.7, 0, 0, 2)
+UnderLine.Position = UDim2.new(0.15, 0, 0, 50)
 UnderLine.BackgroundColor3 = Color3.fromRGB(65, 130, 255)
 UnderLine.BorderSizePixel = 0
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 
--- [ وظيفة صنع الأزرار بالألوان السلسة ]
+-- [ حاوية الأزرار ]
+local ButtonContainer = Instance.new("Frame", MainFrame)
+ButtonContainer.Name = "ButtonContainer"
+ButtonContainer.Size = UDim2.new(1, 0, 1, -65)
+ButtonContainer.Position = UDim2.new(0, 0, 0, 65)
+ButtonContainer.BackgroundTransparency = 1
+
+local ListLayout = Instance.new("UIListLayout", ButtonContainer)
+ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+ListLayout.Padding = UDim.new(0, 8)
+
 local function CreateButton(Text, Key, Logic)
-    local Btn = Instance.new("TextButton", MainFrame)
+    local Btn = Instance.new("TextButton", ButtonContainer)
     Btn.Size = UDim2.new(0, 185, 0, 42)
-    Btn.BackgroundColor3 = Color3.fromRGB(175, 55, 55) -- أحمر سلس
+    Btn.BackgroundColor3 = Color3.fromRGB(175, 55, 55)
     Btn.Text = Text .. " [Disable]"
     Btn.TextColor3 = Color3.new(1, 1, 1)
     Btn.Font = Enum.Font.GothamBold
@@ -88,12 +101,9 @@ local function CreateButton(Text, Key, Logic)
     Btn.MouseButton1Click:Connect(function()
         CrystalToggles[Key] = not CrystalToggles[Key]
         Btn.Text = Text .. (CrystalToggles[Key] and " [Active]" or " [Disable]")
-        
-        -- أنيميشن تغيير اللون للأخضر السلس
         TweenService:Create(Btn, TweenInfo.new(0.3), {
             BackgroundColor3 = CrystalToggles[Key] and Color3.fromRGB(55, 165, 95) or Color3.fromRGB(175, 55, 55)
         }):Play()
-        
         if CrystalToggles[Key] then task.spawn(Logic) end
     end)
 end
@@ -108,10 +118,7 @@ local IsDragged = false
 
 MenuButton.InputBegan:Connect(function(Input)
     if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-        Dragging = true
-        IsDragged = false
-        DragStart = Input.Position
-        StartPos = MenuButton.Position
+        Dragging = true; IsDragged = false; DragStart = Input.Position; StartPos = MenuButton.Position
     end
 end)
 
@@ -119,10 +126,8 @@ UserInputService.InputChanged:Connect(function(Input)
     if Dragging and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
         local Delta = Input.Position - DragStart
         if Delta.Magnitude > 3 then IsDragged = true end
-        
         local NewPos = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
         MenuButton.Position = NewPos
-        
         if MainFrame.Visible then
             MainFrame.Position = UDim2.new(NewPos.X.Scale, NewPos.X.Offset, NewPos.Y.Scale, NewPos.Y.Offset + 65)
         end
@@ -130,9 +135,7 @@ UserInputService.InputChanged:Connect(function(Input)
 end)
 
 UserInputService.InputEnded:Connect(function(Input)
-    if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-        Dragging = false
-    end
+    if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then Dragging = false end
 end)
 
 MenuButton.MouseButton1Click:Connect(function()
@@ -140,7 +143,7 @@ MenuButton.MouseButton1Click:Connect(function()
         if not MainFrame.Visible then
             MainFrame.Visible = true
             MainFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 65)
-            MainFrame:TweenSize(UDim2.new(0, 215, 0, 265), "Out", "Back", 0.4, true)
+            MainFrame:TweenSize(UDim2.new(0, 215, 0, 240), "Out", "Back", 0.4, true)
         else
             MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.3, true, function() MainFrame.Visible = false end)
         end
