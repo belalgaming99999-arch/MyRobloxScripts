@@ -11,9 +11,10 @@ local CrystalGui = Instance.new("ScreenGui", CoreGui)
 CrystalGui.Name = "CrystalProject"
 CrystalGui.IgnoreGuiInset = true
 
+-- [ قاعدة الألوان والمقاسات الموحدة ]
+local MainBlue = Color3.fromRGB(45, 85, 160) -- اللون الأزرق الموحد لكل الكود
 local Theme = {
-    Bg = Color3.fromRGB(15, 15, 20),
-    MainBlue = Color3.fromRGB(45, 85, 160),
+    Bg = Color3.fromRGB(12, 12, 15),
     White = Color3.new(1, 1, 1),
     OffRed = Color3.fromRGB(175, 55, 55),
     OnGreen = Color3.fromRGB(55, 165, 95)
@@ -21,82 +22,82 @@ local Theme = {
 
 local CrystalToggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 
--- [ الأيقونة ]
+-- [ الأيقونة - متناسقة مع القائمة ]
 local MenuButton = Instance.new("TextButton", CrystalGui)
-MenuButton.Name = "MenuButton"
 MenuButton.Size = UDim2.new(0, 52, 0, 52)
 MenuButton.Position = UDim2.new(0.05, 0, 0.25, 0)
-MenuButton.BackgroundColor3 = Theme.MainBlue
+MenuButton.BackgroundColor3 = MainBlue
 MenuButton.Text = ""
 MenuButton.AutoButtonColor = false
 MenuButton.ZIndex = 10
 Instance.new("UICorner", MenuButton).CornerRadius = UDim.new(0, 10)
 
-for Index = -1, 1 do
+for i = -1, 1 do
     local Line = Instance.new("Frame", MenuButton)
     Line.Size = UDim2.new(0, 24, 0, 3)
-    Line.Position = UDim2.new(0.5, -12, 0.5, (Index * 9) - 1.5)
+    Line.Position = UDim2.new(0.5, -12, 0.5, (i * 9) - 1.5)
     Line.BackgroundColor3 = Theme.White
-    Line.BorderSizePixel = 0
     Line.ZIndex = 11
     Instance.new("UICorner", Line).CornerRadius = UDim.new(1, 0)
 end
 
 -- [ القائمة الرئيسية ]
 local MainFrame = Instance.new("Frame", CrystalGui)
-MainFrame.Name = "MainFrame"
 MainFrame.BackgroundColor3 = Theme.Bg
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
 MainFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 60)
 MainFrame.ClipsDescendants = true
 MainFrame.Visible = false
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
+-- حواف متناسقة تماماً مع الألوان
 local FrameStroke = Instance.new("UIStroke", MainFrame)
-FrameStroke.Thickness = 1.8
+FrameStroke.Thickness = 1.5
 FrameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-local BorderGradient = Instance.new("UIGradient", FrameStroke)
-BorderGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Theme.MainBlue),
+local GlobalGradient = Instance.new("UIGradient", FrameStroke)
+GlobalGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, MainBlue),
     ColorSequenceKeypoint.new(0.5, Theme.White),
-    ColorSequenceKeypoint.new(1, Theme.MainBlue)
+    ColorSequenceKeypoint.new(1, MainBlue)
 })
 
--- [ العنوان الفوق خالص ]
+-- [ العنوان - ثابت وموحد ]
 local Title = Instance.new("TextLabel", MainFrame)
-Title.Name = "Title"
 Title.Size = UDim2.new(1, 0, 0, 45)
-Title.Position = UDim2.new(0, 0, 0, 5)
+Title.Position = UDim2.new(0, 0, 0, 0)
 Title.Text = "Crystal Hub"
 Title.TextColor3 = Theme.White
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 20
+Title.TextSize = 16 -- مقاس خط موحد
 Title.BackgroundTransparency = 1
 
 local TitleGradient = Instance.new("UIGradient", Title)
-TitleGradient.Color = BorderGradient.Color
+TitleGradient.Color = GlobalGradient.Color
 
+-- خط تحت الاسم متناسق
 local UnderLine = Instance.new("Frame", MainFrame)
-UnderLine.Name = "UnderLine"
-UnderLine.Size = UDim2.new(0.7, 0, 0, 2)
-UnderLine.Position = UDim2.new(0.15, 0, 0, 45)
+UnderLine.Size = UDim2.new(0, 120, 0, 2)
+UnderLine.Position = UDim2.new(0.5, -60, 0, 40)
 UnderLine.BackgroundColor3 = Theme.White
 UnderLine.BorderSizePixel = 0
+local LineGradient = Instance.new("UIGradient", UnderLine)
+LineGradient.Color = GlobalGradient.Color
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 
--- [ أنيميشن التدوير ]
+-- أنيميشن التدوير الموحد
 task.spawn(function()
-    local Rotation = 0
+    local rot = 0
     while task.wait(0.01) do
-        Rotation = (Rotation + 3) % 360
-        BorderGradient.Rotation = Rotation
-        TitleGradient.Rotation = Rotation
+        rot = (rot + 3) % 360
+        GlobalGradient.Rotation = rot
+        TitleGradient.Rotation = rot
+        LineGradient.Rotation = rot
     end
 end)
 
--- [ أزرار التفعيل بمواقع ثابتة ]
-local function CreateButton(Text, Key, PosY, Logic)
+-- [ أزرار بتنسيق ومسافات موحدة ]
+local function CreateButton(Text, Key, PosY)
     local Btn = Instance.new("TextButton", MainFrame)
     Btn.Size = UDim2.new(0, 180, 0, 38)
     Btn.Position = UDim2.new(0.5, -90, 0, PosY)
@@ -104,7 +105,7 @@ local function CreateButton(Text, Key, PosY, Logic)
     Btn.Text = Text .. " [Disable]"
     Btn.TextColor3 = Theme.White
     Btn.Font = Enum.Font.GothamBold
-    Btn.TextSize = 13
+    Btn.TextSize = 13 -- حجم خط متناسق
     Btn.AutoButtonColor = false
     Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
 
@@ -114,16 +115,15 @@ local function CreateButton(Text, Key, PosY, Logic)
         TweenService:Create(Btn, TweenInfo.new(0.3), {
             BackgroundColor3 = CrystalToggles[Key] and Theme.OnGreen or Theme.OffRed
         }):Play()
-        if CrystalToggles[Key] then task.spawn(Logic) end
     end)
 end
 
--- توزيع يدوي دقيق للمسافات
-CreateButton("Auto 4-Row", "AutoFourRow", 60, function() end)
-CreateButton("Auto Popcorn", "AutoPopcorn", 105, function() end)
-CreateButton("Auto Ships", "AutoShips", 150, function() end)
+-- مسافات ثابتة (بين كل عنصر والآخر 8 بكسل)
+CreateButton("Auto 4-Row", "AutoFourRow", 55)
+CreateButton("Auto Popcorn", "AutoPopcorn", 101)
+CreateButton("Auto Ships", "AutoShips", 147)
 
--- [ نظام السحب ]
+-- [ نظام السحب والفتح ]
 local Dragging, DragStart, StartPos
 local IsDragged = false
 
@@ -153,8 +153,7 @@ MenuButton.MouseButton1Click:Connect(function()
     if not IsDragged then
         if not MainFrame.Visible then
             MainFrame.Visible = true
-            MainFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 60)
-            MainFrame:TweenSize(UDim2.new(0, 205, 0, 200), "Out", "Back", 0.4, true)
+            MainFrame:TweenSize(UDim2.new(0, 200, 0, 195), "Out", "Back", 0.4, true)
         else
             MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.3, true, function() MainFrame.Visible = false end)
         end
