@@ -33,18 +33,36 @@ local function ExecuteLogic(key)
         while Toggles[key] do
             pcall(function()
                 if key == "AutoPopcorn" then
-                    for _, v in ipairs(workspace:GetDescendants()) do
+                    local items = workspace:GetDescendants()
+                    for i = 1, #items do
+                        local v = items[i]
                         if v:IsA("ClickDetector") and Toggles.AutoPopcorn then
                             local plate = v.Parent
-                            local val = plate:FindFirstChild("Value") or plate:FindFirstChildOfClass("NumberValue") or plate:FindFirstChildOfClass("IntValue")
+                            local isWin = false
                             
-                            if val and val.Value > 0 then
-                                fireclickdetector(v)
-                            elseif plate.Name == "Popcorn" or plate.Name:find("Plate") or plate:FindFirstChild("Food") then
-                                local model = plate:FindFirstChildOfClass("Model") or plate:FindFirstChild("Food")
-                                if model and model.Transparency < 1 then
-                                    fireclickdetector(v)
+                            if plate:GetAttribute("Winning") or (plate:GetAttribute("Multiplier") and plate:GetAttribute("Multiplier") > 0) then
+                                isWin = true
+                            end
+                            
+                            if not isWin then
+                                local val = plate:FindFirstChild("Value") or plate:FindFirstChildOfClass("IntValue")
+                                if val and val.Value > 0 then
+                                    isWin = true
                                 end
+                            end
+                            
+                            if not isWin then
+                                local target = plate:FindFirstChild("Popcorn") or plate:FindFirstChild("Food") or plate:FindFirstChild("Model")
+                                if target then
+                                    local part = target:IsA("BasePart") and target or target:FindFirstChildOfClass("BasePart")
+                                    if part and part.Transparency < 0.6 then
+                                        isWin = true
+                                    end
+                                end
+                            end
+
+                            if isWin then
+                                fireclickdetector(v)
                             end
                         end
                     end
@@ -62,7 +80,7 @@ local function ExecuteLogic(key)
                     end
                 end
             end)
-            task.wait(0.01)
+            task.wait(0.003)
         end
     end)
 end
@@ -110,7 +128,7 @@ GlobalGradient.Color = ColorSequence.new({
 
 local Title = Instance.new("TextLabel", MainFrame)
 Title.Size = UDim2.new(1, 0, 0, 45)
-Title.Text = "Crystal Hub"
+Title.Text = "Crystal Hub AI"
 Title.TextColor3 = Theme.White
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
@@ -143,18 +161,18 @@ local function CreateButton(text, key, posY)
     Btn.Size = UDim2.new(0, 180, 0, 38)
     Btn.Position = UDim2.new(0.5, -90, 0, posY)
     Btn.BackgroundColor3 = Theme.OffRed
-    Btn.Text = text .. " [Disable]"
+    Btn.Text = text .. " [OFF]"
     Btn.TextColor3 = Theme.White
     Btn.Font = Enum.Font.GothamBold
-    Btn.TextSize = 13
+    Btn.TextSize = 12
     Btn.AutoButtonColor = false
     Btn.ZIndex = 93
     Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
 
     Btn.MouseButton1Click:Connect(function()
         Toggles[key] = not Toggles[key]
-        Btn.Text = text .. (Toggles[key] and " [Active]" or " [Disable]")
-        TweenService:Create(Btn, TweenInfo.new(0.4), {BackgroundColor3 = Toggles[key] and Theme.OnGreen or Theme.OffRed}):Play()
+        Btn.Text = text .. (Toggles[key] and " [AI ACTIVE]" or " [OFF]")
+        TweenService:Create(Btn, TweenInfo.new(0.3), {BackgroundColor3 = Toggles[key] and Theme.OnGreen or Theme.OffRed}):Play()
         if Toggles[key] then ExecuteLogic(key) end
     end)
 end
@@ -194,4 +212,3 @@ MenuButton.MouseButton1Click:Connect(function()
         end
     end
 end)
-
