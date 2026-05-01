@@ -1,8 +1,28 @@
--- A&B Hub (Cracked Version)
--- Protection Removed by E
+-- [[ ULTRA PROTECTION & GHOST MODE 2026 ]]
+local mt = getrawmetatable(game)
+local old = mt.__namecall
+setreadonly(mt, false)
 
---
+-- منع الكيك نهائياً
+mt.__namecall = newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+    if method == "Kick" or method == "kick" then 
+        return nil 
+    end
+    return old(self, ...)
+end)
 
+-- نظام التمويه ضد كشف السكربت
+local oldIdx
+oldIdx = hookmetamethod(game, "__index", newcclosure(function(t, k)
+    if not checkcaller() and (k == "Kick" or k == "kick") then 
+        return function() end 
+    end
+    return oldIdx(t, k)
+end))
+setreadonly(mt, true)
+
+-- تعريف الخدمات (مرة واحدة فقط لسرعة الأداء)
 local Players = game:GetService('Players')
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local UserInputService = game:GetService('UserInputService')
@@ -11,15 +31,15 @@ local TweenService = game:GetService('TweenService')
 local Stats = game:GetService('Stats')
 local Debris = game:GetService('Debris')
 local CoreGui = game:GetService('CoreGui')
-local Runtime = workspace:FindFirstChild("Runtime") or workspace:WaitForChild("Runtime", 10)
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local player = LocalPlayer
+local Runtime = workspace:FindFirstChild("Runtime") or workspace:WaitForChild("Runtime", 10)
 
--- GUI
+-- [1] واجهة الـ MS والـ Ping
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "A&B Hub GUI"
+ScreenGui.Name = "CrystalProject"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = CoreGui
 
@@ -42,185 +62,77 @@ Text.Font = Enum.Font.Code
 Text.TextColor3 = Color3.fromRGB(255, 165, 0)
 Text.Text = "MS: 0"
 
--- PING FUNCTION
 task.spawn(function()
-	while task.wait(0.5) do
-		pcall(function()
-			local ping = Stats.Network.ServerStatsItem["Data Ping"]:GetValueString()
-			Text.Text = "MS: " .. ping
-		end)
-	end
+    while task.wait(0.5) do
+        pcall(function()
+            local ping = Stats.Network.ServerStatsItem["Data Ping"]:GetValueString()
+            Text.Text = "MS: " .. ping
+        end)
+    end
 end)
 
--- DRAG PC + MOBILE
-local dragging = false
-local dragStart, startPos
-
+-- نظام السحب (Drag) للـ GUI
+local dragging, dragStart, startPos
 Frame.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 
-	or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = true
-		dragStart = input.Position
-		startPos = Frame.Position
-	end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = Frame.Position
+    end
 end)
-
 Frame.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 
-	or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = false
-	end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
 end)
-
 UserInputService.InputChanged:Connect(function(input)
-	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement 
-	or input.UserInputType == Enum.UserInputType.Touch) then
-		local delta = input.Position - dragStart
-		Frame.Position = UDim2.new(
-			startPos.X.Scale,
-			startPos.X.Offset + delta.X,
-			startPos.Y.Scale,
-			startPos.Y.Offset + delta.Y
-		)
-	end
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        Frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
 end)
 
 setfflag("TaskSchedulerTargetFps", "5099990")
 
-local Players = game:GetService("Players")
-local targetName = "A&B Hub Admin"
-local labelText = "A&B Hub Admin - Hot AF"
-
-local function createESP(head)
-	if head:FindFirstChild("A&B_HUB_MANAGER_ESP") then return end
-
-	local billboard = Instance.new("BillboardGui")
-	billboard.Name = "A&B_HUB_MANAGER_ESP"
-	billboard.AlwaysOnTop = true
-	billboard.Size = UDim2.new(0, 100, 0, 30)
-	billboard.Adornee = head
-	billboard.StudsOffset = Vector3.new(0, 5, 0)
-
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(1, 0, 1, 0)
-	label.BackgroundTransparency = 1
-	label.TextScaled = true
-	label.Font = Enum.Font.GothamBold
-	label.TextColor3 = Color3.fromRGB(255, 165, 0)
-	label.Text = labelText
-	label.Parent = billboard
-
-	billboard.Parent = head
+-- [2] نظام الـ ESP (Admin & Owner)
+local function createESP(head, labelTxt)
+    if head:FindFirstChild(labelTxt.."_ESP") then return end
+    local billboard = Instance.new("BillboardGui", head)
+    billboard.Name = labelTxt.."_ESP"
+    billboard.AlwaysOnTop = true
+    billboard.Size = UDim2.new(0, 100, 0, 30)
+    billboard.StudsOffset = Vector3.new(0, 5, 0)
+    local label = Instance.new("TextLabel", billboard)
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.TextScaled = true
+    label.Font = Enum.Font.GothamBold
+    label.TextColor3 = Color3.fromRGB(255, 165, 0)
+    label.Text = labelTxt
 end
 
-local function applyOnPlayer(plr)
-	if plr.Name ~= targetName then return end
-
-	plr.CharacterAdded:Connect(function(char)
-		local head = char:WaitForChild("Head", 5)
-		if head then
-			createESP(head)
-		end
-	end)
-
-	if plr.Character and plr.Character:FindFirstChild("Head") then
-		createESP(plr.Character.Head)
-	end
+local function applyESP(plr)
+    plr.CharacterAdded:Connect(function(char)
+        local head = char:WaitForChild("Head", 5)
+        if plr.Name == "A&B Hub Admin" then createESP(head, "A&B Hub Admin - Hot AF") end
+        if plr.Name == "A&B Hub Owner" then createESP(head, "A&B Hub Owner") end
+    end)
 end
+for _, plr in ipairs(Players:GetPlayers()) do applyESP(plr) end
+Players.PlayerAdded:Connect(applyESP)
 
-for _, plr in ipairs(Players:GetPlayers()) do
-	applyOnPlayer(plr)
-end
-
-Players.PlayerAdded:Connect(applyOnPlayer)
-
-local Players = game:GetService("Players")
-local targetName = "A&B Hub Owner"
-local labelText = "A&B Hub Owner"
-
-local function createESP(head)
-	if head:FindFirstChild("A&B_HUB_OWNER_ESP") then return end
-
-	local billboard = Instance.new("BillboardGui")
-	billboard.Name = "A&B_HUB_OWNER_ESP"
-	billboard.AlwaysOnTop = true
-	billboard.Size = UDim2.new(0, 100, 0, 30)
-	billboard.Adornee = head
-	billboard.StudsOffset = Vector3.new(0, 5, 0)
-
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(1, 0, 1, 0)
-	label.BackgroundTransparency = 1
-	label.TextScaled = true
-	label.Font = Enum.Font.GothamBold
-	label.TextColor3 = Color3.fromRGB(255, 165, 0)
-	label.Text = labelText
-	label.Parent = billboard
-
-	billboard.Parent = head
-end
-
-local function applyOnPlayer(plr)
-	if plr.Name ~= targetName then return end
-
-	plr.CharacterAdded:Connect(function(char)
-		local head = char:WaitForChild("Head", 5)
-		if head then
-			createESP(head)
-		end
-	end)
-
-	if plr.Character and plr.Character:FindFirstChild("Head") then
-		createESP(plr.Character.Head)
-	end
-end
-
-for _, plr in ipairs(Players:GetPlayers()) do
-	applyOnPlayer(plr)
-end
-
-Players.PlayerAdded:Connect(applyOnPlayer)
-
-local RS = game:GetService("RunService")
-
-local Smooth = {}
-Smooth.last = os.clock()
-Smooth.avgDelta = 1/60
-Smooth.alpha = 0.15
-
-local function clampSpike(delta)
-    if delta > 0.08 then
-        return Smooth.avgDelta
-    end
-    return delta
-end
-
-RS.Heartbeat:Connect(function()
+-- [3] نظام الـ Smoothing ونعومة الحركة
+local Smooth = {last = os.clock(), avgDelta = 1/60, alpha = 0.15}
+RunService.Heartbeat:Connect(function()
     local now = os.clock()
     local delta = now - Smooth.last
     Smooth.last = now
-
-    delta = clampSpike(delta)
+    if delta > 0.08 then delta = Smooth.avgDelta end
     Smooth.avgDelta = Smooth.avgDelta + (delta - Smooth.avgDelta) * Smooth.alpha
 end)
 
-RS.RenderStepped:Connect(function(delta)
-    local smoothDelta = Smooth.avgDelta
-    local drift = math.abs(delta - smoothDelta)
-    if drift > 0.012 then
-        smoothDelta = (smoothDelta + delta) * 0.5
-        Smooth.avgDelta = smoothDelta
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(0.017)
-    end
-end)
-
+-- [4] تحميل المكتبة والقوائم
 local Library = loadstring(game:HttpGet("https://pastebin.com/raw/fUMMY2Kz"))()
-
 local main = Library.new()
 local rage = main:create_tab('Autoparry', 'rbxassetid://76499042599127')
 local detectionstab = main:create_tab('Detection', 'rbxassetid://10734951847')
@@ -229,377 +141,48 @@ local pl = main:create_tab('Player', 'rbxassetid://126017907477623')
 local visuals = main:create_tab('Visuals', 'rbxassetid://10723346959')
 local misc = main:create_tab('Misc', 'rbxassetid://132243429647479')
 local devuwu = main:create_tab('Exclusive', 'rbxassetid://10734966248')
--- A&B Hub UI Patch
+
+-- [5] A&B Hub UI Patch (التحويل للون البرتقالي والبراندينج)
 task.spawn(function()
     local ORANGE = Color3.fromRGB(255, 165, 0)
-
     local function is_blueish(c)
-        if typeof(c) ~= "Color3" then
-            return false
-        end
-        if c.B > 0.25 and c.B > (c.R + 0.08) and c.B > (c.G + 0.08) then
-            return true
-        end
-        local h, s, v = c:ToHSV()
-        return v > 0.15 and h > 0.45 and h < 0.80
+        if typeof(c) ~= "Color3" then return false end
+        return c.B > 0.25 and c.B > (c.R + 0.08)
     end
-
-    local function replace_text(str)
-        if type(str) ~= "string" then
-            return str
+    local function patch(d)
+        if (d:IsA("TextLabel") or d:IsA("TextButton")) and d.Text:lower():find("river") then
+            d.Text = d.Text:gsub("[Rr][Ii][Vv][Ee][Rr]", "A&B Hub")
         end
-        if str:find("River") or str:find("RIVER") or str:find("river") then
-            return str:gsub("[Rr][Ii][Vv][Ee][Rr]", "A&B Hub")
-        end
-        return str
+        if d:IsA("GuiObject") and is_blueish(d.BackgroundColor3) then d.BackgroundColor3 = ORANGE end
+        if (d:IsA("TextLabel") or d:IsA("TextButton")) and is_blueish(d.TextColor3) then d.TextColor3 = ORANGE end
     end
-
-    local hooked = setmetatable({}, {__mode = "k"})
-    local INDICATOR_Y_OFFSET = -2
-
-    local function enforce_orange(d)
-        if not d then
-            return
-        end
-
-        if d:IsA("TextLabel") or d:IsA("TextButton") or d:IsA("TextBox") then
-            if type(d.Text) == "string" then
-                local new_text = replace_text(d.Text)
-                if new_text ~= d.Text then
-                    d.Text = new_text
-                end
-            end
-
-            if is_blueish(d.TextColor3) then
-                d.TextColor3 = ORANGE
-            end
-            if d.TextStrokeTransparency < 1 and is_blueish(d.TextStrokeColor3) then
-                d.TextStrokeColor3 = ORANGE
-            end
-
-            if d:IsA("TextBox") and is_blueish(d.PlaceholderColor3) then
-                d.PlaceholderColor3 = ORANGE
-            end
-        end
-
-        if d:IsA("UIStroke") and is_blueish(d.Color) then
-            d.Color = ORANGE
-        end
-
-        if (d:IsA("ImageLabel") or d:IsA("ImageButton")) and is_blueish(d.ImageColor3) then
-            d.ImageColor3 = ORANGE
-        end
-
-        if d:IsA("GuiObject") then
-            if is_blueish(d.BackgroundColor3) then
-                d.BackgroundColor3 = ORANGE
-            end
-            if d.BorderSizePixel and d.BorderSizePixel > 0 and is_blueish(d.BorderColor3) then
-                d.BorderColor3 = ORANGE
-            end
-        end
-
-        if d:IsA("ScrollingFrame") and is_blueish(d.ScrollBarImageColor3) then
-            d.ScrollBarImageColor3 = ORANGE
-        end
-
-        if d:IsA("UIGradient") then
-            local seq = d.Color
-            for _, kp in ipairs(seq.Keypoints) do
-                if is_blueish(kp.Value) then
-                    d.Color = ColorSequence.new(ORANGE, ORANGE)
-                    break
-                end
-            end
-        end
-    end
-
-    local function is_probable_tab_indicator(d)
-        if not d or not d:IsA("Frame") then
-            return false
-        end
-        if d.BackgroundTransparency >= 0.9 then
-            return false
-        end
-
-        local okSize, size = pcall(function()
-            return d.Size
-        end)
-        if not okSize or not size then
-            return false
-        end
-
-        local thin = (size.X.Scale > 0 and size.X.Scale <= 0.02) or (size.X.Offset > 0 and size.X.Offset <= 6)
-        local tall = (size.Y.Scale == 0 and size.Y.Offset >= 16 and size.Y.Offset <= 80) or (size.Y.Scale > 0.02 and size.Y.Scale <= 0.25)
-        if not (thin and tall) then
-            return false
-        end
-
-        local okColor, bg = pcall(function()
-            return d.BackgroundColor3
-        end)
-        if okColor and bg and not is_blueish(bg) and bg ~= ORANGE then
-            return false
-        end
-
-        return true
-    end
-
-    local function hook_indicator_alignment(indicator)
-        if not indicator or hooked[indicator] then
-            return
-        end
-        hooked[indicator] = true
-
-        local adjusting = false
-        local function adjust()
-            if adjusting then
-                return
-            end
-            adjusting = true
-            pcall(function()
-                local pos = indicator.Position
-                indicator.Position = UDim2.new(pos.X.Scale, pos.X.Offset, pos.Y.Scale, pos.Y.Offset + INDICATOR_Y_OFFSET)
-            end)
-            adjusting = false
-        end
-
-        adjust()
-        pcall(function()
-            indicator:GetPropertyChangedSignal("Position"):Connect(adjust)
-        end)
-    end
-
-    local function hook_color_changes(d)
-        if not d or hooked[d] then
-            return
-        end
-        hooked[d] = true
-
-        local function safe_connect(prop)
-            local ok, signal = pcall(function()
-                return d:GetPropertyChangedSignal(prop)
-            end)
-            if ok and signal then
-                signal:Connect(function()
-                    pcall(function()
-                        enforce_orange(d)
-                    end)
-                end)
-            end
-        end
-
-        if d:IsA("GuiObject") then
-            safe_connect("BackgroundColor3")
-            safe_connect("BorderColor3")
-        end
-        if d:IsA("TextLabel") or d:IsA("TextButton") or d:IsA("TextBox") then
-            safe_connect("Text")
-            safe_connect("TextColor3")
-            safe_connect("TextStrokeColor3")
-            if d:IsA("TextBox") then
-                safe_connect("PlaceholderColor3")
-            end
-        end
-        if d:IsA("UIStroke") then
-            safe_connect("Color")
-        end
-        if d:IsA("ImageLabel") or d:IsA("ImageButton") then
-            safe_connect("ImageColor3")
-        end
-        if d:IsA("ScrollingFrame") then
-            safe_connect("ScrollBarImageColor3")
-        end
-        if d:IsA("UIGradient") then
-            safe_connect("Color")
-        end
-    end
-
-    local function apply_branding(root)
-        if not root then
-            return
-        end
-
-        pcall(function()
-            if root:IsA("ScreenGui") then
-                root.Name = "A&B Hub"
-            end
-        end)
-
-        for _, d in ipairs(root:GetDescendants()) do
-            enforce_orange(d)
-            hook_color_changes(d)
-        end
-    end
-
-    local function find_candidate_ui()
-        for _, child in ipairs(CoreGui:GetChildren()) do
-            if child:IsA("ScreenGui") then
-                if child.Name:lower():find("river") or child.Name == "A&B Hub" then
-                    return child
-                end
-                local ok, descendants = pcall(function()
-                    return child:GetDescendants()
-                end)
-                if ok then
-                    for _, d in ipairs(descendants) do
-                        if (d:IsA("TextLabel") or d:IsA("TextButton")) and type(d.Text) == "string" then
-                            if d.Text:lower():find("river") then
-                                return child
-                            end
-                        end
-                    end
-                end
-            end
-        end
-        return nil
-    end
-
-    local t0 = tick()
-    while tick() - t0 < 15 do
-        local ui = find_candidate_ui()
-        if ui then
-            local t1 = tick()
-            while tick() - t1 < 10 do
-                apply_branding(ui)
-                task.wait(0.5)
-            end
-
-            for _, d in ipairs(ui:GetDescendants()) do
-                if is_probable_tab_indicator(d) then
-                    hook_indicator_alignment(d)
-                    break
-                end
-            end
-
-            pcall(function()
-                ui.DescendantAdded:Connect(function(d)
-                    pcall(function()
-                        enforce_orange(d)
-                        hook_color_changes(d)
-                        if is_probable_tab_indicator(d) then
-                            hook_indicator_alignment(d)
-                        end
-                    end)
-                end)
-            end)
-            break
-        end
-        task.wait(0.25)
-    end
+    RunService.RenderStepped:Connect(function()
+        local ui = CoreGui:FindFirstChild("A&B Hub") or CoreGui:FindFirstChild("River")
+        if ui then for _, d in ipairs(ui:GetDescendants()) do patch(d) end end
+    end)
 end)
 
--- DUAL BYPASS SYSTEM (A&B Hub + TEST)
-local DualBypassSystem = {
-    __properties = {
-        __captured_data = nil, -- Captured data from the first parry (from Test)
-        __first_parry_done = false,
-        __test_bypass_enabled = true,
-        __use_virtual_input_once = true,
-        __virtual_input_used = false,
-        __original_metatables = {},
-        __active_hooks = {}
-    }
-}
-
--- Function to validate remote args (from Test)
-function DualBypassSystem.isValidRemoteArgs(args)
-    return #args == 7 and
-        type(args[2]) == "string" and
-        type(args[3]) == "number" and
-        typeof(args[4]) == "CFrame" and
-        type(args[5]) == "table" and
-        type(args[6]) == "table" and
-        type(args[7]) == "boolean"
-end
-
--- Hook remotes to capture the first parry (from Test)
-function DualBypassSystem.hookRemote(remote)
-    if not DualBypassSystem.__properties.__original_metatables[getrawmetatable(remote)] then
-        DualBypassSystem.__properties.__original_metatables[getrawmetatable(remote)] = true
-        local meta = getrawmetatable(remote)
-        setreadonly(meta, false)
-
-        local oldIndex = meta.__index
-        meta.__index = function(self, key)
-            if (key == "FireServer" and self:IsA("RemoteEvent")) or
-               (key == "InvokeServer" and self:IsA("RemoteFunction")) then
-                return function(obj, ...)
-                    local args = {...}
-                    -- Capture data from the first valid parry
-                    if DualBypassSystem.isValidRemoteArgs(args) and not DualBypassSystem.__properties.__captured_data then
-                        DualBypassSystem.__properties.__captured_data = {
-                            remote = obj,
-                            args = args
-                        }
-                        print("Parry data captured (Test Bypass)")
-                    end
-                    return oldIndex(self, key)(obj, unpack(args))
+-- [6] Dual Bypass System (Test & A&B Hub)
+local DualBypass = {captured = nil}
+local function hookRemote(remote)
+    local meta = getrawmetatable(remote)
+    local oldIdx = meta.__index
+    setreadonly(meta, false)
+    meta.__index = function(self, key)
+        if key == "FireServer" and self:IsA("RemoteEvent") then
+            return function(obj, ...)
+                local args = {...}
+                if #args == 7 and not DualBypass.captured then
+                    DualBypass.captured = {remote = obj, args = args}
                 end
-            end
-            return oldIndex(self, key)
-        end
-        setreadonly(meta, true)
-    end
-end
-
--- Apply hook to remotes
-for _, remote in pairs(ReplicatedStorage:GetChildren()) do
-    if remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction") then
-        DualBypassSystem.hookRemote(remote)
-    end
-end
-
-ReplicatedStorage.ChildAdded:Connect(function(child)
-    if child:IsA("RemoteEvent") or child:IsA("RemoteFunction") then
-        DualBypassSystem.hookRemote(child)
-    end
-end)
-
--- Executar bypass do Test (send ball to camera)
-function DualBypassSystem.execute_test_bypass()
-    if not DualBypassSystem.__properties.__captured_data or not DualBypassSystem.__properties.__test_bypass_enabled then
-        return
-    end
-
-    local captured = DualBypassSystem.__properties.__captured_data
-    local remote = captured.remote
-    local original_args = captured.args
-    
-    -- Prepare data to maintain functionality
-    local camera = workspace.CurrentCamera
-    local event_data = {}
-    
-    if Alive then
-        for _, entity in pairs(Alive:GetChildren()) do
-            if entity.PrimaryPart then
-                local success, screen_point = pcall(function()
-                    return camera:WorldToScreenPoint(entity.PrimaryPart.Position)
-                end)
-                if success then
-                    event_data[entity.Name] = screen_point
-                end
+                return oldIdx(self, key)(obj, unpack(args))
             end
         end
+        return oldIdx(self, key)
     end
-    
-    -- Use camera position as target (send ball to camera)
-    local is_mobile = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
-    local final_aim_target
-    
-    if is_mobile then
-        local viewport = camera.ViewportSize
-        final_aim_target = {viewport.X / 2, viewport.Y / 2}
-    else
-        local success, mouse = pcall(function()
-            return UserInputService:GetMouseLocation()
-        end)
-        if success then
-            final_aim_target = {mouse.X, mouse.Y}
-        else
-            final_aim_target = {0, 0}
-        end
-    end
+    setreadonly(meta, true)
+end
+for _, r in pairs(ReplicatedStorage:GetChildren()) do if r:IsA("RemoteEvent") then hookRemote(r) end end
     
     -- Replicate parry using captured structure
     local modified_args = {
