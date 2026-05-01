@@ -24,13 +24,13 @@ local Toggles = {State1 = false, State2 = false, State3 = false}
 local TargetPos = UDim2.new(0.05, 0, 0.25, 0)
 local UI_Open, Dragging = false, false
 
+-- الأيقونة الأساسية
 local MenuBtn = Instance.new("TextButton", CrystalGui)
 MenuBtn.Size = UDim2.new(0, 52, 0, 52)
 MenuBtn.Position = TargetPos
 MenuBtn.BackgroundColor3 = Theme.MainBlue
 MenuBtn.Text = ""
-MenuBtn.AutoButtonColor = false
-MenuBtn.ZIndex = 100
+MenuBtn.AutoButtonColor = false -- حل مشكلة اللون الرمادي
 Instance.new("UICorner", MenuBtn).CornerRadius = UDim.new(0, 10)
 
 for i = -1, 1 do
@@ -38,24 +38,21 @@ for i = -1, 1 do
     L.Size = UDim2.new(0, 26, 0, 4)
     L.Position = UDim2.new(0.5, -13, 0.5, (i * 10) - 2)
     L.BackgroundColor3 = Theme.White
-    L.ZIndex = 101
     Instance.new("UICorner", L).CornerRadius = UDim.new(1, 0)
 end
 
+-- إطار القائمة
 local Border = Instance.new("Frame", CrystalGui)
 Border.Size = UDim2.new(0, 0, 0, 0)
 Border.BackgroundColor3 = Theme.White
-Border.Position = UDim2.new(TargetPos.X.Scale, TargetPos.X.Offset, TargetPos.Y.Scale, TargetPos.Y.Offset + 62)
 Border.ClipsDescendants = true
 Border.Visible = false
-Border.ZIndex = 90
 Instance.new("UICorner", Border).CornerRadius = UDim.new(0, 12)
 
 local Main = Instance.new("Frame", Border)
 Main.Size = UDim2.new(1, -4, 1, -4)
 Main.Position = UDim2.new(0, 2, 0, 2)
 Main.BackgroundColor3 = Theme.Bg
-Main.ZIndex = 91
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 
 local GlobalGrad = Instance.new("UIGradient", Border)
@@ -72,30 +69,21 @@ Title.TextColor3 = Theme.White
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
 Title.BackgroundTransparency = 1
-Title.ZIndex = 92
 
 local TitleGrad = Instance.new("UIGradient", Title)
 TitleGrad.Color = GlobalGrad.Color
 
-local UnderLine = Instance.new("Frame", Main)
-UnderLine.Size = UDim2.new(0, 120, 0, 4)
-UnderLine.Position = UDim2.new(0.5, -60, 0, 40)
-UnderLine.BackgroundColor3 = Theme.White
-UnderLine.ZIndex = 92
-Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
-
-local LineGrad = Instance.new("UIGradient", UnderLine)
-LineGrad.Color = GlobalGrad.Color
-
+-- محرك الحركة اللحظية (حل مشكلة السحب)
 RunService.RenderStepped:Connect(function(dt)
     if not Dragging then 
-        MenuBtn.Position = MenuBtn.Position:Lerp(TargetPos, 0.2) 
+        MenuBtn.Position = MenuBtn.Position:Lerp(TargetPos, 0.25) 
+    else
+        MenuBtn.Position = TargetPos -- يتبع الصباع فوراً أثناء السحب
     end
     Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
-    local rot = (GlobalGrad.Rotation + 180 * dt) % 360
+    local rot = (GlobalGrad.Rotation + 150 * dt) % 360
     GlobalGrad.Rotation = rot
     TitleGrad.Rotation = rot
-    LineGrad.Rotation = rot
 end)
 
 local function AddBtn(txt, key, y)
@@ -107,13 +95,13 @@ local function AddBtn(txt, key, y)
     B.TextColor3 = Theme.White
     B.Font = Enum.Font.GothamBold
     B.TextSize = 13
-    B.ZIndex = 93
+    B.AutoButtonColor = false -- حل مشكلة اللون الرمادي هنا أيضاً
     Instance.new("UICorner", B).CornerRadius = UDim.new(0, 8)
 
     B.MouseButton1Click:Connect(function()
         Toggles[key] = not Toggles[key]
         B.Text = txt .. (Toggles[key] and " [Active]" or " [Disable]")
-        TweenService:Create(B, TweenInfo.new(0.4, Enum.EasingStyle.Quart), {
+        TweenService:Create(B, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
             BackgroundColor3 = Toggles[key] and Theme.OnGreen or Theme.OffRed
         }):Play()
     end)
@@ -123,19 +111,25 @@ AddBtn("Feature 1", "State1", 55)
 AddBtn("Feature 2", "State2", 101)
 AddBtn("Feature 3", "State3", 147)
 
+-- نظام السحب المطور (Real-time)
 local dStart, sPos, isDragged
 MenuBtn.InputBegan:Connect(function(i)
     if (i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch) then
         Dragging = true; isDragged = false; dStart = i.Position; sPos = MenuBtn.Position
-        i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then Dragging = false end end)
     end
 end)
 
 UserInputService.InputChanged:Connect(function(i)
     if Dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
         local delta = i.Position - dStart
-        if delta.Magnitude > 5 then isDragged = true end
+        if delta.Magnitude > 2 then isDragged = true end
         TargetPos = UDim2.new(sPos.X.Scale, sPos.X.Offset + delta.X, sPos.Y.Scale, sPos.Y.Offset + delta.Y)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(i)
+    if (i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch) then
+        Dragging = false
     end
 end)
 
@@ -144,10 +138,9 @@ MenuBtn.MouseButton1Click:Connect(function()
         UI_Open = not UI_Open
         if UI_Open then
             Border.Visible = true
-            Border:TweenSize(UDim2.new(0, 204, 0, 201), "Out", "Quint", 0.5, true)
+            Border:TweenSize(UDim2.new(0, 204, 0, 201), "Out", "Quint", 0.4, true)
         else
-            Border:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.4, true, function() Border.Visible = false end)
+            Border:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.3, true, function() Border.Visible = false end)
         end
     end
 end)
-
