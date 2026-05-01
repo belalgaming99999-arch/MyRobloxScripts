@@ -28,27 +28,21 @@ local Theme = {
 
 local Toggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 
--- [[ Mystrix Winner Logic Injection ]] --
 local function ExecuteLogic(key)
     task.spawn(function()
         while Toggles[key] do
             pcall(function()
                 if key == "AutoPopcorn" then
-                    -- محرك كشف المكسب المضمون 100%
                     for _, v in ipairs(workspace:GetDescendants()) do
                         if v:IsA("ClickDetector") and Toggles.AutoPopcorn then
                             local plate = v.Parent
-                            -- فحص القيمة البرمجية العميقة (Deep Data Check)
                             local val = plate:FindFirstChild("Value") or plate:FindFirstChildOfClass("NumberValue") or plate:FindFirstChildOfClass("IntValue")
                             
-                            -- إذا كان هناك قيمة مكسب حقيقية (أكبر من 0)
                             if val and val.Value > 0 then
                                 fireclickdetector(v)
-                            -- فحص الأهداف المرئية المشفرة (Visual Encryption Bypass)
-                            elseif plate.Name == "Popcorn" or plate:FindFirstChild("Food") then
-                                -- التأكد أن الطبق ليس فارغاً (Transparency Check)
-                                local visual = plate:FindFirstChild("Food") or plate:FindFirstChild("Model")
-                                if visual and visual.Transparency < 1 then
+                            elseif plate.Name == "Popcorn" or plate.Name:find("Plate") or plate:FindFirstChild("Food") then
+                                local model = plate:FindFirstChildOfClass("Model") or plate:FindFirstChild("Food")
+                                if model and model.Transparency < 1 then
                                     fireclickdetector(v)
                                 end
                             end
@@ -68,7 +62,7 @@ local function ExecuteLogic(key)
                     end
                 end
             end)
-            task.wait(0.01) -- السرعة القصوى 10ms
+            task.wait(0.01)
         end
     end)
 end
@@ -200,3 +194,4 @@ MenuButton.MouseButton1Click:Connect(function()
         end
     end
 end)
+
