@@ -4,11 +4,16 @@ local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 
-for _, child in ipairs(CoreGui:GetChildren()) do
-    if child.Name == "CrystalProject" or child.Name == "CrystalHub" then
-        child:Destroy()
+-- وظيفة التنظيف لمسح أي قائمة تانية (اللي على اليمين أو القديمة)
+local function CleanUI()
+    for _, child in ipairs(CoreGui:GetChildren()) do
+        -- بيمسح القائمة بناءً على الأسماء المحتملة أو لو كانت واجهة متكررة
+        if child.Name == "CrystalProject" or child.Name == "CrystalHub" or child.Name == "ScreenGui" then
+            child:Destroy()
+        end
     end
 end
+CleanUI()
 
 local CrystalGui = Instance.new("ScreenGui", CoreGui)
 CrystalGui.Name = "CrystalProject"
@@ -25,45 +30,33 @@ local Theme = {
 
 local Toggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 
+-- محرك التفعيلات (الذكاء الخارق للفشار)
 local function ExecuteLogic(key)
     task.spawn(function()
         while Toggles[key] do
             pcall(function()
                 if key == "AutoPopcorn" then
-                    -- نظام الذكاء الخارق للفشار: يختار المكسب فقط
                     for _, v in ipairs(workspace:GetDescendants()) do
                         if v:IsA("ClickDetector") then
                             local p = v.Parent
                             local isWin = false
-                            
-                            -- فحص القيمة المخفية للمكسب
+                            -- فحص المكسب المضمون
                             local val = p:FindFirstChild("Value") or p:FindFirstChildOfClass("IntValue")
-                            if val and val.Value > 0 then
-                                isWin = true
-                            end
-                            
-                            -- فحص المحتوى البصري تحت الأطباق
+                            if val and val.Value > 0 then isWin = true end
                             if not isWin then
                                 local food = p:FindFirstChild("Food") or p:FindFirstChild("Popcorn")
-                                if food and food.Transparency < 1 then
-                                    isWin = true
-                                end
+                                if food and food.Transparency < 1 then isWin = true end
                             end
-                            
-                            if isWin then
-                                fireclickdetector(v)
-                            end
+                            if isWin then fireclickdetector(v) end
                         end
                     end
                 elseif key == "AutoShips" then
-                    -- منطق السفن الأصلي
                     for _, v in ipairs(workspace:GetDescendants()) do
                         if v:IsA("ClickDetector") and v.Parent.Name:find("Ship") then
                             fireclickdetector(v)
                         end
                     end
                 elseif key == "AutoFourRow" then
-                    -- منطق 4-Row الأصلي
                     for _, v in ipairs(workspace:GetDescendants()) do
                         if v:IsA("ClickDetector") and v.Parent.Name == "Slot" then
                             fireclickdetector(v)
@@ -71,11 +64,12 @@ local function ExecuteLogic(key)
                     end
                 end
             end)
-            task.wait(0.01) -- السرعة العالمية 10ms
+            task.wait(0.01) -- سرعة 10ms
         end
     end)
 end
 
+-- زر المنيو العائم (الأزرق)
 local MenuButton = Instance.new("TextButton", CrystalGui)
 MenuButton.Size = UDim2.new(0, 52, 0, 52)
 MenuButton.Position = UDim2.new(0.05, 0, 0.25, 0)
@@ -203,4 +197,3 @@ MenuButton.MouseButton1Click:Connect(function()
         end
     end
 end)
-
