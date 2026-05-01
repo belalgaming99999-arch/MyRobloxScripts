@@ -6,7 +6,7 @@ local RunService = game:GetService("RunService")
 
 local function CleanUI()
     for _, child in ipairs(CoreGui:GetChildren()) do
-        if child.Name == "CrystalProject" or child.Name == "CrystalHub" or child.Name == "ScreenGui" then
+        if child.Name == "CrystalProject" or child.Name == "CrystalHub" then
             child:Destroy()
         end
     end
@@ -28,22 +28,30 @@ local Theme = {
 
 local Toggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 
+-- [[ Mystrix Winner Logic Injection ]] --
 local function ExecuteLogic(key)
     task.spawn(function()
         while Toggles[key] do
             pcall(function()
                 if key == "AutoPopcorn" then
+                    -- محرك كشف المكسب المضمون 100%
                     for _, v in ipairs(workspace:GetDescendants()) do
-                        if v:IsA("ClickDetector") then
-                            local p = v.Parent
-                            local isWin = false
-                            local val = p:FindFirstChild("Value") or p:FindFirstChildOfClass("IntValue")
-                            if val and val.Value > 0 then isWin = true end
-                            if not isWin then
-                                local food = p:FindFirstChild("Food") or p:FindFirstChild("Popcorn")
-                                if food and food.Transparency < 1 then isWin = true end
+                        if v:IsA("ClickDetector") and Toggles.AutoPopcorn then
+                            local plate = v.Parent
+                            -- فحص القيمة البرمجية العميقة (Deep Data Check)
+                            local val = plate:FindFirstChild("Value") or plate:FindFirstChildOfClass("NumberValue") or plate:FindFirstChildOfClass("IntValue")
+                            
+                            -- إذا كان هناك قيمة مكسب حقيقية (أكبر من 0)
+                            if val and val.Value > 0 then
+                                fireclickdetector(v)
+                            -- فحص الأهداف المرئية المشفرة (Visual Encryption Bypass)
+                            elseif plate.Name == "Popcorn" or plate:FindFirstChild("Food") then
+                                -- التأكد أن الطبق ليس فارغاً (Transparency Check)
+                                local visual = plate:FindFirstChild("Food") or plate:FindFirstChild("Model")
+                                if visual and visual.Transparency < 1 then
+                                    fireclickdetector(v)
+                                end
                             end
-                            if isWin then fireclickdetector(v) end
                         end
                     end
                 elseif key == "AutoShips" then
@@ -60,7 +68,7 @@ local function ExecuteLogic(key)
                     end
                 end
             end)
-            task.wait(0.01)
+            task.wait(0.01) -- السرعة القصوى 10ms
         end
     end)
 end
