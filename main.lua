@@ -11,22 +11,23 @@ local CrystalGui = Instance.new("ScreenGui", CoreGui)
 CrystalGui.Name = "CrystalProject"
 CrystalGui.IgnoreGuiInset = true
 
--- [ الإعدادات اللونية الموحدة ]
-local MainBlue = Color3.fromRGB(45, 85, 160)
+-- [ إعدادات الألوان المقتبسة من Velocity Controller ]
 local Theme = {
-    Bg = Color3.fromRGB(12, 12, 15),
+    Bg = Color3.fromRGB(25, 35, 55),    -- نفس خلفية السكربت الذي أرسلته
+    MainBlue = Color3.fromRGB(45, 85, 160), -- الأزرق الملكي المتطابق
     White = Color3.new(1, 1, 1),
-    OffRed = Color3.fromRGB(175, 55, 55),
-    OnGreen = Color3.fromRGB(55, 165, 95)
+    -- ألوان هادئة ومتناسقة مع الأزرق
+    OffRed = Color3.fromRGB(160, 70, 70),  -- أحمر هادئ صلب
+    OnGreen = Color3.fromRGB(55, 180, 120), -- أخضر هادئ صلب (نفس درجة الـ ON)
 }
 
 local CrystalToggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 
--- [ الأيقونة ]
+-- [ الأيقونة - زرقاء متطابقة ]
 local MenuButton = Instance.new("TextButton", CrystalGui)
 MenuButton.Size = UDim2.new(0, 52, 0, 52)
 MenuButton.Position = UDim2.new(0.05, 0, 0.25, 0)
-MenuButton.BackgroundColor3 = MainBlue
+MenuButton.BackgroundColor3 = Theme.MainBlue
 MenuButton.Text = ""
 MenuButton.AutoButtonColor = false
 MenuButton.ZIndex = 10
@@ -41,32 +42,33 @@ for i = -1, 1 do
     Instance.new("UICorner", Line).CornerRadius = UDim.new(1, 0)
 end
 
--- [ القائمة الرئيسية - نظام الإطار المزدوج لضمان الحواف ]
-local BorderFrame = Instance.new("Frame", CrystalGui) -- هذا هو إطار الحافة
+-- [ القائمة الرئيسية - نظام الحواف المتحركة ]
+local BorderFrame = Instance.new("Frame", CrystalGui)
 BorderFrame.Name = "BorderFrame"
 BorderFrame.BackgroundColor3 = Theme.White
-BorderFrame.Size = UDim2.new(0, 0, 0, 0) -- سيبدأ من الصفر
+BorderFrame.Size = UDim2.new(0, 0, 0, 0)
 BorderFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 60)
 BorderFrame.ClipsDescendants = true
 BorderFrame.Visible = false
-Instance.new("UICorner", BorderFrame).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", BorderFrame).CornerRadius = UDim.new(0, 12)
 
-local MainFrame = Instance.new("Frame", BorderFrame) -- القائمة الفعلية بالداخل
+local MainFrame = Instance.new("Frame", BorderFrame)
 MainFrame.Name = "MainFrame"
 MainFrame.BackgroundColor3 = Theme.Bg
-MainFrame.Size = UDim2.new(1, -4, 1, -4) -- ترك مسافة 2 بكسل لكل حافة
+MainFrame.BackgroundTransparency = 0
+MainFrame.Size = UDim2.new(1, -4, 1, -4) 
 MainFrame.Position = UDim2.new(0, 2, 0, 2)
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 9)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
--- [ التدرج اللوني الموحد للحواف والخط ]
+-- [ التدرج اللوني (أزرق وأبيض انسيابي) ]
 local GlobalGradient = Instance.new("UIGradient", BorderFrame)
 GlobalGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, MainBlue),
-    ColorSequenceKeypoint.new(0.5, Theme.White),
-    ColorSequenceKeypoint.new(1, MainBlue)
+    ColorSequenceKeypoint.new(0, Theme.MainBlue),
+    ColorSequenceKeypoint.new(0.5, Theme.White), -- الشيء الأبيض الذي يمر بسلاسة
+    ColorSequenceKeypoint.new(1, Theme.MainBlue)
 })
 
--- [ العنوان ]
+-- [ العنوان فوق ]
 local Title = Instance.new("TextLabel", MainFrame)
 Title.Size = UDim2.new(1, 0, 0, 45)
 Title.Position = UDim2.new(0, 0, 0, 0)
@@ -75,22 +77,20 @@ Title.TextColor3 = Theme.White
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
 Title.BackgroundTransparency = 1
-
 local TitleGradient = Instance.new("UIGradient", Title)
 TitleGradient.Color = GlobalGradient.Color
 
--- [ الخط تحت الاسم - سُمك مطابق للحافة ]
+-- [ الخط تحت الاسم - نفس سُمك الحواف ]
 local UnderLine = Instance.new("Frame", MainFrame)
-UnderLine.Size = UDim2.new(0, 120, 0, 2) -- سُمك 2 بكسل
+UnderLine.Size = UDim2.new(0, 120, 0, 2) 
 UnderLine.Position = UDim2.new(0.5, -60, 0, 40)
 UnderLine.BackgroundColor3 = Theme.White
 UnderLine.BorderSizePixel = 0
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
-
 local LineGradient = Instance.new("UIGradient", UnderLine)
 LineGradient.Color = GlobalGradient.Color
 
--- [ أنيميشن التدوير المستمر ]
+-- [ أنيميشن الدوران السلس ]
 task.spawn(function()
     local rot = 0
     while task.wait(0.01) do
@@ -101,12 +101,13 @@ task.spawn(function()
     end
 end)
 
--- [ صنع الأزرار ]
+-- [ وظيفة صنع الأزرار بالألوان الهادئة ]
 local function CreateButton(Text, Key, PosY)
     local Btn = Instance.new("TextButton", MainFrame)
     Btn.Size = UDim2.new(0, 180, 0, 38)
     Btn.Position = UDim2.new(0.5, -90, 0, PosY)
     Btn.BackgroundColor3 = Theme.OffRed
+    Btn.BackgroundTransparency = 0
     Btn.Text = Text .. " [Disable]"
     Btn.TextColor3 = Theme.White
     Btn.Font = Enum.Font.GothamBold
@@ -117,7 +118,8 @@ local function CreateButton(Text, Key, PosY)
     Btn.MouseButton1Click:Connect(function()
         CrystalToggles[Key] = not CrystalToggles[Key]
         Btn.Text = Text .. (CrystalToggles[Key] and " [Active]" or " [Disable]")
-        TweenService:Create(Btn, TweenInfo.new(0.3), {
+        
+        TweenService:Create(Btn, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
             BackgroundColor3 = CrystalToggles[Key] and Theme.OnGreen or Theme.OffRed
         }):Play()
     end)
@@ -127,7 +129,7 @@ CreateButton("Auto 4-Row", "AutoFourRow", 55)
 CreateButton("Auto Popcorn", "AutoPopcorn", 101)
 CreateButton("Auto Ships", "AutoShips", 147)
 
--- [ نظام السحب والفتح ]
+-- [ نظام السحب والفتح الموحد ]
 local Dragging, DragStart, StartPos
 local IsDragged = false
 
@@ -163,4 +165,3 @@ MenuButton.MouseButton1Click:Connect(function()
         end
     end
 end)
-
