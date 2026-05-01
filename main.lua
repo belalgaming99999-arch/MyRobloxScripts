@@ -25,6 +25,21 @@ local Theme = {
 
 local CrystalToggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 
+local function ExecuteLogic(key)
+    task.spawn(function()
+        while CrystalToggles[key] do
+            if key == "AutoPopcorn" then
+                -- [ منطق تشغيل طاولة الفشار التلقائي ]
+            elseif key == "AutoShips" then
+                -- [ منطق تشغيل طاولة السفن التلقائي ]
+            elseif key == "AutoFourRow" then
+                -- [ منطق تشغيل طاولة 4 صفوف التلقائي ]
+            end
+            task.wait(0.05)
+        end
+    end)
+end
+
 local MenuButton = Instance.new("TextButton")
 MenuButton.Name = "MenuButton"
 MenuButton.Size = UDim2.new(0, 52, 0, 52)
@@ -41,14 +56,12 @@ ButtonCorner.Parent = MenuButton
 
 for i = -1, 1 do
     local Line = Instance.new("Frame")
-    Line.Name = "Line" .. i
     Line.Size = UDim2.new(0, 26, 0, 4)
     Line.Position = UDim2.new(0.5, -13, 0.5, (i * 10) - 2)
     Line.BackgroundColor3 = Theme.White
     Line.BorderSizePixel = 0
     Line.ZIndex = 101
     Line.Parent = MenuButton
-    
     local LineCorner = Instance.new("UICorner")
     LineCorner.CornerRadius = UDim.new(1, 0)
     LineCorner.Parent = Line
@@ -69,7 +82,6 @@ BorderCorner.CornerRadius = UDim.new(0, 12)
 BorderCorner.Parent = BorderFrame
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
 MainFrame.BackgroundColor3 = Theme.Bg
 MainFrame.Size = UDim2.new(1, -4, 1, -4) 
 MainFrame.Position = UDim2.new(0, 2, 0, 2)
@@ -90,7 +102,6 @@ GlobalGradient.Color = ColorSequence.new({
 GlobalGradient.Parent = BorderFrame
 
 local Title = Instance.new("TextLabel")
-Title.Name = "Title"
 Title.Size = UDim2.new(1, 0, 0, 45)
 Title.Text = "Crystal Hub"
 Title.TextColor3 = Theme.White
@@ -105,7 +116,6 @@ TitleGradient.Color = GlobalGradient.Color
 TitleGradient.Parent = Title
 
 local UnderLine = Instance.new("Frame")
-UnderLine.Name = "UnderLine"
 UnderLine.Size = UDim2.new(0, 120, 0, 4)
 UnderLine.Position = UDim2.new(0.5, -60, 0, 40)
 UnderLine.BackgroundColor3 = Theme.White
@@ -133,7 +143,6 @@ end)
 
 local function CreateButton(text, key, posY)
     local Btn = Instance.new("TextButton")
-    Btn.Name = key .. "Button"
     Btn.Size = UDim2.new(0, 180, 0, 38)
     Btn.Position = UDim2.new(0.5, -90, 0, posY)
     Btn.BackgroundColor3 = Theme.OffRed
@@ -142,7 +151,6 @@ local function CreateButton(text, key, posY)
     Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 13
     Btn.AutoButtonColor = false
-    Btn.BorderSizePixel = 0
     Btn.ZIndex = 93
     Btn.Parent = MainFrame
 
@@ -157,6 +165,10 @@ local function CreateButton(text, key, posY)
         TweenService:Create(Btn, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
             BackgroundColor3 = CrystalToggles[key] and Theme.OnGreen or Theme.OffRed
         }):Play()
+
+        if CrystalToggles[key] then
+            ExecuteLogic(key)
+        end
     end)
 end
 
@@ -169,10 +181,7 @@ local isDragged = false
 
 MenuButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        isDragged = false
-        dragStart = input.Position
-        startPos = MenuButton.Position
+        dragging = true; isDragged = false; dragStart = input.Position; startPos = MenuButton.Position
     end
 end)
 
@@ -180,10 +189,8 @@ UserInputService.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
         if delta.Magnitude > 5 then isDragged = true end
-        
         local newPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         MenuButton.Position = newPos
-        
         if BorderFrame.Visible then
             BorderFrame.Position = UDim2.new(newPos.X.Scale, newPos.X.Offset, newPos.Y.Scale, newPos.Y.Offset + 62)
         end
@@ -191,9 +198,7 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = false
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
 end)
 
 MenuButton.MouseButton1Click:Connect(function()
@@ -202,9 +207,7 @@ MenuButton.MouseButton1Click:Connect(function()
             BorderFrame.Visible = true
             BorderFrame:TweenSize(UDim2.new(0, 204, 0, 201), Enum.EasingDirection.Out, Enum.EasingStyle.Back, 0.5, true)
         else
-            BorderFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.In, Enum.EasingStyle.Back, 0.4, true, function()
-                BorderFrame.Visible = false
-            end)
+            BorderFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.In, Enum.EasingStyle.Back, 0.4, true, function() BorderFrame.Visible = false end)
         end
     end
 end)
