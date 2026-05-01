@@ -11,7 +11,7 @@ local CrystalGui = Instance.new("ScreenGui", CoreGui)
 CrystalGui.Name = "CrystalProject"
 CrystalGui.IgnoreGuiInset = true
 
--- [ إعدادات التصميم الموحدة ]
+-- [ الإعدادات اللونية الموحدة ]
 local MainBlue = Color3.fromRGB(45, 85, 160)
 local Theme = {
     Bg = Color3.fromRGB(12, 12, 15),
@@ -41,21 +41,25 @@ for i = -1, 1 do
     Instance.new("UICorner", Line).CornerRadius = UDim.new(1, 0)
 end
 
--- [ القائمة الرئيسية ]
-local MainFrame = Instance.new("Frame", CrystalGui)
+-- [ القائمة الرئيسية - نظام الإطار المزدوج لضمان الحواف ]
+local BorderFrame = Instance.new("Frame", CrystalGui) -- هذا هو إطار الحافة
+BorderFrame.Name = "BorderFrame"
+BorderFrame.BackgroundColor3 = Theme.White
+BorderFrame.Size = UDim2.new(0, 0, 0, 0) -- سيبدأ من الصفر
+BorderFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 60)
+BorderFrame.ClipsDescendants = true
+BorderFrame.Visible = false
+Instance.new("UICorner", BorderFrame).CornerRadius = UDim.new(0, 10)
+
+local MainFrame = Instance.new("Frame", BorderFrame) -- القائمة الفعلية بالداخل
+MainFrame.Name = "MainFrame"
 MainFrame.BackgroundColor3 = Theme.Bg
-MainFrame.Size = UDim2.new(0, 0, 0, 0)
-MainFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 60)
-MainFrame.ClipsDescendants = true
-MainFrame.Visible = false
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+MainFrame.Size = UDim2.new(1, -4, 1, -4) -- ترك مسافة 2 بكسل لكل حافة
+MainFrame.Position = UDim2.new(0, 2, 0, 2)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 9)
 
--- [ الحواف الموحدة ]
-local FrameStroke = Instance.new("UIStroke", MainFrame)
-FrameStroke.Thickness = 2 -- نفس سمك الخط تحت الاسم
-FrameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-local GlobalGradient = Instance.new("UIGradient", FrameStroke)
+-- [ التدرج اللوني الموحد للحواف والخط ]
+local GlobalGradient = Instance.new("UIGradient", BorderFrame)
 GlobalGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, MainBlue),
     ColorSequenceKeypoint.new(0.5, Theme.White),
@@ -75,9 +79,9 @@ Title.BackgroundTransparency = 1
 local TitleGradient = Instance.new("UIGradient", Title)
 TitleGradient.Color = GlobalGradient.Color
 
--- [ الخط تحت الاسم - مطابق للحواف ]
+-- [ الخط تحت الاسم - سُمك مطابق للحافة ]
 local UnderLine = Instance.new("Frame", MainFrame)
-UnderLine.Size = UDim2.new(0, 120, 0, 2) -- Thickness = 2 مطابق للـ Stroke
+UnderLine.Size = UDim2.new(0, 120, 0, 2) -- سُمك 2 بكسل
 UnderLine.Position = UDim2.new(0.5, -60, 0, 40)
 UnderLine.BackgroundColor3 = Theme.White
 UnderLine.BorderSizePixel = 0
@@ -86,7 +90,7 @@ Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 local LineGradient = Instance.new("UIGradient", UnderLine)
 LineGradient.Color = GlobalGradient.Color
 
--- [ أنيميشن موحد لكل العناصر ]
+-- [ أنيميشن التدوير المستمر ]
 task.spawn(function()
     local rot = 0
     while task.wait(0.01) do
@@ -123,7 +127,7 @@ CreateButton("Auto 4-Row", "AutoFourRow", 55)
 CreateButton("Auto Popcorn", "AutoPopcorn", 101)
 CreateButton("Auto Ships", "AutoShips", 147)
 
--- [ السحب والفتح ]
+-- [ نظام السحب والفتح ]
 local Dragging, DragStart, StartPos
 local IsDragged = false
 
@@ -139,8 +143,8 @@ UserInputService.InputChanged:Connect(function(Input)
         if Delta.Magnitude > 3 then IsDragged = true end
         local NewPos = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
         MenuButton.Position = NewPos
-        if MainFrame.Visible then
-            MainFrame.Position = UDim2.new(NewPos.X.Scale, NewPos.X.Offset, NewPos.Y.Scale, NewPos.Y.Offset + 60)
+        if BorderFrame.Visible then
+            BorderFrame.Position = UDim2.new(NewPos.X.Scale, NewPos.X.Offset, NewPos.Y.Scale, NewPos.Y.Offset + 60)
         end
     end
 end)
@@ -151,11 +155,12 @@ end)
 
 MenuButton.MouseButton1Click:Connect(function()
     if not IsDragged then
-        if not MainFrame.Visible then
-            MainFrame.Visible = true
-            MainFrame:TweenSize(UDim2.new(0, 200, 0, 195), "Out", "Back", 0.4, true)
+        if not BorderFrame.Visible then
+            BorderFrame.Visible = true
+            BorderFrame:TweenSize(UDim2.new(0, 204, 0, 199), "Out", "Back", 0.4, true)
         else
-            MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.3, true, function() MainFrame.Visible = false end)
+            BorderFrame:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.3, true, function() BorderFrame.Visible = false end)
         end
     end
 end)
+
