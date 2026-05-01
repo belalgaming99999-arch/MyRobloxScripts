@@ -3,6 +3,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 if CoreGui:FindFirstChild("CrystalProject") then 
     CoreGui.CrystalProject:Destroy() 
@@ -12,6 +13,7 @@ local CrystalGui = Instance.new("ScreenGui", CoreGui)
 CrystalGui.Name = "CrystalProject"
 CrystalGui.IgnoreGuiInset = true
 CrystalGui.ResetOnSpawn = false
+CrystalGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local Theme = {
     Bg = Color3.fromRGB(25, 35, 55),
@@ -23,17 +25,17 @@ local Theme = {
 
 local CrystalToggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 
-local function ExecuteLogic(key)
+local function ExecuteMasterLogic(key)
     task.spawn(function()
         while CrystalToggles[key] do
             pcall(function()
                 if key == "AutoPopcorn" then
                     for _, v in pairs(workspace:GetDescendants()) do
-                        if v:IsA("ClickDetector") and v.Parent.Name == "Popcorn" then
+                        if v:IsA("ClickDetector") and CrystalToggles.AutoPopcorn then
                             fireclickdetector(v)
                         end
                     end
-                    task.wait(10/1000) 
+                    task.wait() 
 
                 elseif key == "AutoShips" then
                     task.wait(0.25)
@@ -49,6 +51,7 @@ local function ExecuteLogic(key)
 end
 
 local MenuButton = Instance.new("TextButton", CrystalGui)
+MenuButton.Name = "MenuButton"
 MenuButton.Size = UDim2.new(0, 52, 0, 52)
 MenuButton.Position = UDim2.new(0.05, 0, 0.25, 0)
 MenuButton.BackgroundColor3 = Theme.MainBlue
@@ -62,12 +65,14 @@ for i = -1, 1 do
     Line.Size = UDim2.new(0, 26, 0, 4)
     Line.Position = UDim2.new(0.5, -13, 0.5, (i * 10) - 2)
     Line.BackgroundColor3 = Theme.White
+    Line.BorderSizePixel = 0
     Line.ZIndex = 101
     Instance.new("UICorner", Line).CornerRadius = UDim.new(1, 0)
 end
 
 local BorderFrame = Instance.new("Frame", CrystalGui)
-BorderFrame.BackgroundColor3 = Theme.White
+BorderFrame.Name = "BorderFrame"
+BorderFrame.BackgroundColor3 = Theme.White 
 BorderFrame.Size = UDim2.new(0, 0, 0, 0)
 BorderFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 62)
 BorderFrame.ClipsDescendants = true
@@ -76,9 +81,11 @@ BorderFrame.ZIndex = 90
 Instance.new("UICorner", BorderFrame).CornerRadius = UDim.new(0, 12)
 
 local MainFrame = Instance.new("Frame", BorderFrame)
+MainFrame.Name = "MainFrame"
 MainFrame.BackgroundColor3 = Theme.Bg
 MainFrame.Size = UDim2.new(1, -4, 1, -4) 
 MainFrame.Position = UDim2.new(0, 2, 0, 2)
+MainFrame.BorderSizePixel = 0
 MainFrame.ZIndex = 91
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
@@ -90,6 +97,7 @@ GlobalGradient.Color = ColorSequence.new({
 })
 
 local Title = Instance.new("TextLabel", MainFrame)
+Title.Name = "Title"
 Title.Size = UDim2.new(1, 0, 0, 45)
 Title.Text = "Crystal Hub"
 Title.TextColor3 = Theme.White
@@ -101,9 +109,11 @@ local TitleGradient = Instance.new("UIGradient", Title)
 TitleGradient.Color = GlobalGradient.Color
 
 local UnderLine = Instance.new("Frame", MainFrame)
+UnderLine.Name = "UnderLine"
 UnderLine.Size = UDim2.new(0, 120, 0, 4)
 UnderLine.Position = UDim2.new(0.5, -60, 0, 40)
 UnderLine.BackgroundColor3 = Theme.White
+UnderLine.BorderSizePixel = 0
 UnderLine.ZIndex = 92
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 local LineGradient = Instance.new("UIGradient", UnderLine)
@@ -121,6 +131,7 @@ end)
 
 local function CreateButton(text, key, posY)
     local Btn = Instance.new("TextButton", MainFrame)
+    Btn.Name = key .. "Button"
     Btn.Size = UDim2.new(0, 180, 0, 38)
     Btn.Position = UDim2.new(0.5, -90, 0, posY)
     Btn.BackgroundColor3 = Theme.OffRed
@@ -141,7 +152,7 @@ local function CreateButton(text, key, posY)
         }):Play()
 
         if CrystalToggles[key] then
-            ExecuteLogic(key)
+            ExecuteMasterLogic(key)
         end
     end)
 end
@@ -162,7 +173,7 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
-        if delta.Magnitude > 5 then isDragged = true end
+        if delta.Magnitude > 5 then isDragged = true end 
         local newPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         MenuButton.Position = newPos
         if BorderFrame.Visible then
@@ -179,10 +190,9 @@ MenuButton.MouseButton1Click:Connect(function()
     if not isDragged then
         if not BorderFrame.Visible then
             BorderFrame.Visible = true
-            BorderFrame:TweenSize(UDim2.new(0, 204, 0, 201), "Out", "Back", 0.5, true)
+            BorderFrame:TweenSize(UDim2.new(0, 204, 0, 201), Enum.EasingDirection.Out, Enum.EasingStyle.Back, 0.5, true)
         else
-            BorderFrame:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.4, true, function() BorderFrame.Visible = false end)
+            BorderFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.In, Enum.EasingStyle.Back, 0.4, true, function() BorderFrame.Visible = false end)
         end
     end
 end)
-
