@@ -1,4 +1,3 @@
--- [[ CRYSTAL HUB - 2026 MODERN EDITION ]] --
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -6,12 +5,10 @@ local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- 1. Anti-Duplicate: Cleanup old versions
 if CoreGui:FindFirstChild("CrystalProject") then 
     CoreGui.CrystalProject:Destroy() 
 end
 
--- 2. Setup Base GUI
 local CrystalGui = Instance.new("ScreenGui", CoreGui)
 CrystalGui.Name = "CrystalProject"
 CrystalGui.IgnoreGuiInset = true
@@ -29,19 +26,17 @@ local Theme = {
 local CrystalToggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 local Net = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Networking")
 
--- 3. Modern 2026 Logic Engine
 local function ExecuteLogic(key)
     task.spawn(function()
         if key == "AutoPopcorn" then
             local authKey = "iI\5\7\6Q\3\12\30]\1\7"
             pcall(function() game:GetService("GamepadService"):FindFirstChild(""):FireServer(authKey) end)
-            
             local actionRemote = Net:FindFirstChild("RE/Minigame/MinigameGameAction")
             while CrystalToggles.AutoPopcorn do
                 if actionRemote then
                     actionRemote:FireServer("AttemptPop", workspace:GetServerTimeNow())
                 end
-                task.wait(0.005) -- Speed 10 Performance
+                task.wait(0.005)
             end
         else
             while CrystalToggles[key] do
@@ -59,7 +54,6 @@ local function ExecuteLogic(key)
     end)
 end
 
--- 4. Menu Icon (Same as your request)
 local MenuButton = Instance.new("TextButton", CrystalGui)
 MenuButton.Size = UDim2.new(0, 52, 0, 52)
 MenuButton.Position = UDim2.new(0.05, 0, 0.25, 0)
@@ -78,7 +72,6 @@ for i = -1, 1 do
     Instance.new("UICorner", Line).CornerRadius = UDim.new(1, 0)
 end
 
--- 5. Main UI Frame
 local BorderFrame = Instance.new("Frame", CrystalGui)
 BorderFrame.BackgroundColor3 = Theme.White
 BorderFrame.Size = UDim2.new(0, 0, 0, 0)
@@ -95,7 +88,6 @@ MainFrame.Position = UDim2.new(0, 2, 0, 2)
 MainFrame.ZIndex = 91
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
--- Animated Gradient
 local GlobalGradient = Instance.new("UIGradient", BorderFrame)
 GlobalGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Theme.MainBlue),
@@ -123,7 +115,6 @@ Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 local LineGradient = Instance.new("UIGradient", UnderLine)
 LineGradient.Color = GlobalGradient.Color
 
--- Rotation Animation Loop
 task.spawn(function()
     local rot = 0
     RunService.RenderStepped:Connect(function(dt)
@@ -134,7 +125,6 @@ task.spawn(function()
     end)
 end)
 
--- 6. Buttons Construction
 local function CreateButton(text, key, posY)
     local Btn = Instance.new("TextButton", MainFrame)
     Btn.Size = UDim2.new(0, 180, 0, 38)
@@ -151,11 +141,9 @@ local function CreateButton(text, key, posY)
     Btn.MouseButton1Click:Connect(function()
         CrystalToggles[key] = not CrystalToggles[key]
         Btn.Text = text .. (CrystalToggles[key] and " [Active]" or " [Disable]")
-        
         TweenService:Create(Btn, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
             BackgroundColor3 = CrystalToggles[key] and Theme.OnGreen or Theme.OffRed
         }):Play()
-
         if CrystalToggles[key] then ExecuteLogic(key) end
     end)
 end
@@ -164,7 +152,6 @@ CreateButton("Auto 4-Row", "AutoFourRow", 55)
 CreateButton("Auto Popcorn", "AutoPopcorn", 101)
 CreateButton("Auto Ships", "AutoShips", 147)
 
--- 7. Dragging & Toggle Logic (Standard 2026)
 local dragging, dragStart, startPos, isDragged = false, nil, nil, false
 
 MenuButton.InputBegan:Connect(function(input)
@@ -179,9 +166,7 @@ UserInputService.InputChanged:Connect(function(input)
         if delta.Magnitude > 5 then isDragged = true end
         local newPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         MenuButton.Position = newPos
-        if BorderFrame.Visible then
-            BorderFrame.Position = UDim2.new(newPos.X.Scale, newPos.X.Offset, newPos.Y.Scale, newPos.Y.Offset + 62)
-        end
+        BorderFrame.Position = UDim2.new(newPos.X.Scale, newPos.X.Offset, newPos.Y.Scale, newPos.Y.Offset + 62)
     end
 end)
 
