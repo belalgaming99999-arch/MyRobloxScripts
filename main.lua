@@ -24,13 +24,12 @@ local Toggles = {State1 = false, State2 = false, State3 = false}
 local TargetPos = UDim2.new(0.05, 0, 0.25, 0)
 local UI_Open, Dragging = false, false
 
--- الأيقونة الأساسية
 local MenuBtn = Instance.new("TextButton", CrystalGui)
 MenuBtn.Size = UDim2.new(0, 52, 0, 52)
 MenuBtn.Position = TargetPos
 MenuBtn.BackgroundColor3 = Theme.MainBlue
 MenuBtn.Text = ""
-MenuBtn.AutoButtonColor = false -- حل مشكلة اللون الرمادي
+MenuBtn.AutoButtonColor = false
 Instance.new("UICorner", MenuBtn).CornerRadius = UDim.new(0, 10)
 
 for i = -1, 1 do
@@ -41,7 +40,6 @@ for i = -1, 1 do
     Instance.new("UICorner", L).CornerRadius = UDim.new(1, 0)
 end
 
--- إطار القائمة
 local Border = Instance.new("Frame", CrystalGui)
 Border.Size = UDim2.new(0, 0, 0, 0)
 Border.BackgroundColor3 = Theme.White
@@ -73,17 +71,27 @@ Title.BackgroundTransparency = 1
 local TitleGrad = Instance.new("UIGradient", Title)
 TitleGrad.Color = GlobalGrad.Color
 
--- محرك الحركة اللحظية (حل مشكلة السحب)
+-- إضافة الخط السفلي (Underline)
+local UnderLine = Instance.new("Frame", Main)
+UnderLine.Size = UDim2.new(0, 120, 0, 4)
+UnderLine.Position = UDim2.new(0.5, -60, 0, 40)
+UnderLine.BackgroundColor3 = Theme.White
+Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
+
+local LineGrad = Instance.new("UIGradient", UnderLine)
+LineGrad.Color = GlobalGrad.Color
+
 RunService.RenderStepped:Connect(function(dt)
     if not Dragging then 
         MenuBtn.Position = MenuBtn.Position:Lerp(TargetPos, 0.25) 
     else
-        MenuBtn.Position = TargetPos -- يتبع الصباع فوراً أثناء السحب
+        MenuBtn.Position = TargetPos 
     end
     Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
     local rot = (GlobalGrad.Rotation + 150 * dt) % 360
     GlobalGrad.Rotation = rot
     TitleGrad.Rotation = rot
+    LineGrad.Rotation = rot
 end)
 
 local function AddBtn(txt, key, y)
@@ -95,7 +103,7 @@ local function AddBtn(txt, key, y)
     B.TextColor3 = Theme.White
     B.Font = Enum.Font.GothamBold
     B.TextSize = 13
-    B.AutoButtonColor = false -- حل مشكلة اللون الرمادي هنا أيضاً
+    B.AutoButtonColor = false
     Instance.new("UICorner", B).CornerRadius = UDim.new(0, 8)
 
     B.MouseButton1Click:Connect(function()
@@ -111,7 +119,6 @@ AddBtn("Feature 1", "State1", 55)
 AddBtn("Feature 2", "State2", 101)
 AddBtn("Feature 3", "State3", 147)
 
--- نظام السحب المطور (Real-time)
 local dStart, sPos, isDragged
 MenuBtn.InputBegan:Connect(function(i)
     if (i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch) then
