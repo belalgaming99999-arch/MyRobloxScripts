@@ -4,10 +4,8 @@ local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 
--- وظيفة التنظيف لمسح أي قائمة تانية (اللي على اليمين أو القديمة)
 local function CleanUI()
     for _, child in ipairs(CoreGui:GetChildren()) do
-        -- بيمسح القائمة بناءً على الأسماء المحتملة أو لو كانت واجهة متكررة
         if child.Name == "CrystalProject" or child.Name == "CrystalHub" or child.Name == "ScreenGui" then
             child:Destroy()
         end
@@ -30,7 +28,6 @@ local Theme = {
 
 local Toggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 
--- محرك التفعيلات (الذكاء الخارق للفشار)
 local function ExecuteLogic(key)
     task.spawn(function()
         while Toggles[key] do
@@ -40,7 +37,6 @@ local function ExecuteLogic(key)
                         if v:IsA("ClickDetector") then
                             local p = v.Parent
                             local isWin = false
-                            -- فحص المكسب المضمون
                             local val = p:FindFirstChild("Value") or p:FindFirstChildOfClass("IntValue")
                             if val and val.Value > 0 then isWin = true end
                             if not isWin then
@@ -64,12 +60,11 @@ local function ExecuteLogic(key)
                     end
                 end
             end)
-            task.wait(0.01) -- سرعة 10ms
+            task.wait(0.01)
         end
     end)
 end
 
--- زر المنيو العائم (الأزرق)
 local MenuButton = Instance.new("TextButton", CrystalGui)
 MenuButton.Size = UDim2.new(0, 52, 0, 52)
 MenuButton.Position = UDim2.new(0.05, 0, 0.25, 0)
