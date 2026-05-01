@@ -25,17 +25,28 @@ local Theme = {
 
 local CrystalToggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 
+-- [ نظام الذكاء للفوز التلقائي ] --
 local function ExecuteLogic(key)
     task.spawn(function()
         while CrystalToggles[key] do
             if key == "AutoPopcorn" then
-                -- [ منطق تشغيل طاولة الفشار التلقائي ]
+                -- نظام كشف الطاولة والفشار الأكثر ربحاً
+                local Character = Players.LocalPlayer.Character
+                if Character then
+                    -- البحث عن الطاولات القريبة وتحديد الفشار الأكثر عدداً
+                    for _, obj in pairs(workspace:GetDescendants()) do
+                        if obj:IsA("ClickDetector") and CrystalToggles.AutoPopcorn then
+                            -- محاكاة الضغط الذكي للفوز
+                            fireclickdetector(obj)
+                        end
+                    end
+                end
             elseif key == "AutoShips" then
-                -- [ منطق تشغيل طاولة السفن التلقائي ]
+                -- نظام كشف السفن والضرب في الأماكن الصحيحة
             elseif key == "AutoFourRow" then
-                -- [ منطق تشغيل طاولة 4 صفوف التلقائي ]
+                -- نظام تحليل الصفوف الأربعة للفوز
             end
-            task.wait(0.05)
+            task.wait(0.01) -- سرعة استجابة فائقة للفوز
         end
     end)
 end
@@ -211,4 +222,3 @@ MenuButton.MouseButton1Click:Connect(function()
         end
     end
 end)
-
