@@ -1,7 +1,6 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 
 if CoreGui:FindFirstChild("CrystalProject") then 
@@ -12,22 +11,17 @@ local CrystalGui = Instance.new("ScreenGui", CoreGui)
 CrystalGui.Name = "CrystalProject"
 CrystalGui.IgnoreGuiInset = true
 
--- [ الألوان الموحدة ]
 local Theme = {
-    Bg = Color3.fromRGB(12, 12, 18),
+    Bg = Color3.fromRGB(15, 15, 20),
     MainBlue = Color3.fromRGB(45, 85, 160),
     White = Color3.new(1, 1, 1),
     OffRed = Color3.fromRGB(175, 55, 55),
     OnGreen = Color3.fromRGB(55, 165, 95)
 }
 
-local CrystalToggles = {
-    AutoFourRow = false,
-    AutoPopcorn = false,
-    AutoShips = false
-}
+local CrystalToggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 
--- [ الأيقونة الزرقاء ]
+-- [ الأيقونة ]
 local MenuButton = Instance.new("TextButton", CrystalGui)
 MenuButton.Name = "MenuButton"
 MenuButton.Size = UDim2.new(0, 52, 0, 52)
@@ -48,7 +42,7 @@ for Index = -1, 1 do
     Instance.new("UICorner", Line).CornerRadius = UDim.new(1, 0)
 end
 
--- [ القائمة الرئيسية المحسنة ]
+-- [ القائمة الرئيسية ]
 local MainFrame = Instance.new("Frame", CrystalGui)
 MainFrame.Name = "MainFrame"
 MainFrame.BackgroundColor3 = Theme.Bg
@@ -58,7 +52,6 @@ MainFrame.ClipsDescendants = true
 MainFrame.Visible = false
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 
--- [ تأثير الحواف المتحركة ]
 local FrameStroke = Instance.new("UIStroke", MainFrame)
 FrameStroke.Thickness = 1.8
 FrameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -70,13 +63,11 @@ BorderGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(1, Theme.MainBlue)
 })
 
-local ListLayout = Instance.new("UIListLayout", MainFrame)
-ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-ListLayout.Padding = UDim.new(0, 8) -- مسافة صغيرة بين العناصر
-
--- [ العنوان في الأعلى تماماً ]
+-- [ العنوان الفوق خالص ]
 local Title = Instance.new("TextLabel", MainFrame)
-Title.Size = UDim2.new(1, 0, 0, 42)
+Title.Name = "Title"
+Title.Size = UDim2.new(1, 0, 0, 45)
+Title.Position = UDim2.new(0, 0, 0, 5)
 Title.Text = "Crystal Hub"
 Title.TextColor3 = Theme.White
 Title.Font = Enum.Font.GothamBold
@@ -87,12 +78,14 @@ local TitleGradient = Instance.new("UIGradient", Title)
 TitleGradient.Color = BorderGradient.Color
 
 local UnderLine = Instance.new("Frame", MainFrame)
+UnderLine.Name = "UnderLine"
 UnderLine.Size = UDim2.new(0.7, 0, 0, 2)
+UnderLine.Position = UDim2.new(0.15, 0, 0, 45)
 UnderLine.BackgroundColor3 = Theme.White
 UnderLine.BorderSizePixel = 0
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 
--- [ تشغيل الأنيميشن ]
+-- [ أنيميشن التدوير ]
 task.spawn(function()
     local Rotation = 0
     while task.wait(0.01) do
@@ -102,10 +95,11 @@ task.spawn(function()
     end
 end)
 
--- [ صنع الأزرار ]
-local function CreateButton(Text, Key, Logic)
+-- [ أزرار التفعيل بمواقع ثابتة ]
+local function CreateButton(Text, Key, PosY, Logic)
     local Btn = Instance.new("TextButton", MainFrame)
     Btn.Size = UDim2.new(0, 180, 0, 38)
+    Btn.Position = UDim2.new(0.5, -90, 0, PosY)
     Btn.BackgroundColor3 = Theme.OffRed
     Btn.Text = Text .. " [Disable]"
     Btn.TextColor3 = Theme.White
@@ -124,16 +118,12 @@ local function CreateButton(Text, Key, Logic)
     end)
 end
 
-CreateButton("Auto 4-Row", "AutoFourRow", function() while CrystalToggles.AutoFourRow do task.wait(0.1) end end)
-CreateButton("Auto Popcorn", "AutoPopcorn", function() while CrystalToggles.AutoPopcorn do task.wait(0.01) end end)
-CreateButton("Auto Ships", "AutoShips", function() while CrystalToggles.AutoShips do task.wait(0.1) end end)
+-- توزيع يدوي دقيق للمسافات
+CreateButton("Auto 4-Row", "AutoFourRow", 60, function() end)
+CreateButton("Auto Popcorn", "AutoPopcorn", 105, function() end)
+CreateButton("Auto Ships", "AutoShips", 150, function() end)
 
--- إضافة مسافة صغيرة جداً في النهاية لجمال الشكل
-local PaddingFrame = Instance.new("Frame", MainFrame)
-PaddingFrame.Size = UDim2.new(1, 0, 0, 5)
-PaddingFrame.BackgroundTransparency = 1
-
--- [ نظام الحركة والفتح ]
+-- [ نظام السحب ]
 local Dragging, DragStart, StartPos
 local IsDragged = false
 
@@ -164,7 +154,7 @@ MenuButton.MouseButton1Click:Connect(function()
         if not MainFrame.Visible then
             MainFrame.Visible = true
             MainFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 60)
-            MainFrame:TweenSize(UDim2.new(0, 205, 0, 200), "Out", "Back", 0.4, true) -- مقاس محكم بدون فراغات
+            MainFrame:TweenSize(UDim2.new(0, 205, 0, 200), "Out", "Back", 0.4, true)
         else
             MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.3, true, function() MainFrame.Visible = false end)
         end
