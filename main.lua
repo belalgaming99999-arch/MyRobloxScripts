@@ -11,19 +11,19 @@ local CrystalGui = Instance.new("ScreenGui", CoreGui)
 CrystalGui.Name = "CrystalProject"
 CrystalGui.IgnoreGuiInset = true
 
--- [ إعدادات الألوان المقتبسة من Velocity Controller ]
+-- [ إعدادات الألوان الهادئة والمشبعة ]
 local Theme = {
-    Bg = Color3.fromRGB(25, 35, 55),    -- نفس خلفية السكربت الذي أرسلته
-    MainBlue = Color3.fromRGB(45, 85, 160), -- الأزرق الملكي المتطابق
+    Bg = Color3.fromRGB(25, 35, 55), -- لون الخلفية من الكود السابق
+    MainBlue = Color3.fromRGB(45, 85, 160), -- الأزرق الملكي الهادئ
     White = Color3.new(1, 1, 1),
-    -- ألوان هادئة ومتناسقة مع الأزرق
-    OffRed = Color3.fromRGB(160, 70, 70),  -- أحمر هادئ صلب
-    OnGreen = Color3.fromRGB(55, 180, 120), -- أخضر هادئ صلب (نفس درجة الـ ON)
+    -- ألوان مشبعة لكن هادئة (Muted) لتناسب العين
+    OffRed = Color3.fromRGB(135, 55, 55), -- أحمر هادئ جداً ومشبع
+    OnGreen = Color3.fromRGB(55, 120, 85), -- أخضر هادئ وراقي
 }
 
 local CrystalToggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 
--- [ الأيقونة - زرقاء متطابقة ]
+-- [ الأيقونة - مسافات دقيقة ]
 local MenuButton = Instance.new("TextButton", CrystalGui)
 MenuButton.Size = UDim2.new(0, 52, 0, 52)
 MenuButton.Position = UDim2.new(0.05, 0, 0.25, 0)
@@ -35,19 +35,20 @@ Instance.new("UICorner", MenuButton).CornerRadius = UDim.new(0, 10)
 
 for i = -1, 1 do
     local Line = Instance.new("Frame", MenuButton)
-    Line.Size = UDim2.new(0, 24, 0, 3)
-    Line.Position = UDim2.new(0.5, -12, 0.5, (i * 9) - 1.5)
+    Line.Size = UDim2.new(0, 26, 0, 3)
+    Line.Position = UDim2.new(0.5, -13, 0.5, (i * 9) - 1.5)
     Line.BackgroundColor3 = Theme.White
     Line.ZIndex = 11
+    Line.BorderSizePixel = 0
     Instance.new("UICorner", Line).CornerRadius = UDim.new(1, 0)
 end
 
--- [ القائمة الرئيسية - نظام الحواف المتحركة ]
+-- [ القائمة الرئيسية ]
 local BorderFrame = Instance.new("Frame", CrystalGui)
 BorderFrame.Name = "BorderFrame"
 BorderFrame.BackgroundColor3 = Theme.White
 BorderFrame.Size = UDim2.new(0, 0, 0, 0)
-BorderFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 60)
+BorderFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 62)
 BorderFrame.ClipsDescendants = true
 BorderFrame.Visible = false
 Instance.new("UICorner", BorderFrame).CornerRadius = UDim.new(0, 12)
@@ -55,20 +56,19 @@ Instance.new("UICorner", BorderFrame).CornerRadius = UDim.new(0, 12)
 local MainFrame = Instance.new("Frame", BorderFrame)
 MainFrame.Name = "MainFrame"
 MainFrame.BackgroundColor3 = Theme.Bg
-MainFrame.BackgroundTransparency = 0
 MainFrame.Size = UDim2.new(1, -4, 1, -4) 
 MainFrame.Position = UDim2.new(0, 2, 0, 2)
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
--- [ التدرج اللوني (أزرق وأبيض انسيابي) ]
+-- [ تدرج الحواف المتحرك ]
 local GlobalGradient = Instance.new("UIGradient", BorderFrame)
 GlobalGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Theme.MainBlue),
-    ColorSequenceKeypoint.new(0.5, Theme.White), -- الشيء الأبيض الذي يمر بسلاسة
+    ColorSequenceKeypoint.new(0.5, Theme.White),
     ColorSequenceKeypoint.new(1, Theme.MainBlue)
 })
 
--- [ العنوان فوق ]
+-- [ العنوان ]
 local Title = Instance.new("TextLabel", MainFrame)
 Title.Size = UDim2.new(1, 0, 0, 45)
 Title.Position = UDim2.new(0, 0, 0, 0)
@@ -80,7 +80,7 @@ Title.BackgroundTransparency = 1
 local TitleGradient = Instance.new("UIGradient", Title)
 TitleGradient.Color = GlobalGradient.Color
 
--- [ الخط تحت الاسم - نفس سُمك الحواف ]
+-- [ الخط تحت الاسم ]
 local UnderLine = Instance.new("Frame", MainFrame)
 UnderLine.Size = UDim2.new(0, 120, 0, 2) 
 UnderLine.Position = UDim2.new(0.5, -60, 0, 40)
@@ -90,7 +90,7 @@ Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 local LineGradient = Instance.new("UIGradient", UnderLine)
 LineGradient.Color = GlobalGradient.Color
 
--- [ أنيميشن الدوران السلس ]
+-- [ أنيميشن التدوير ]
 task.spawn(function()
     local rot = 0
     while task.wait(0.01) do
@@ -101,25 +101,25 @@ task.spawn(function()
     end
 end)
 
--- [ وظيفة صنع الأزرار بالألوان الهادئة ]
+-- [ الأزرار بالألوان الهادئة الجديدة ]
 local function CreateButton(Text, Key, PosY)
     local Btn = Instance.new("TextButton", MainFrame)
     Btn.Size = UDim2.new(0, 180, 0, 38)
     Btn.Position = UDim2.new(0.5, -90, 0, PosY)
     Btn.BackgroundColor3 = Theme.OffRed
-    Btn.BackgroundTransparency = 0
     Btn.Text = Text .. " [Disable]"
     Btn.TextColor3 = Theme.White
     Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 13
     Btn.AutoButtonColor = false
+    Btn.BorderSizePixel = 0
     Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
 
     Btn.MouseButton1Click:Connect(function()
         CrystalToggles[Key] = not CrystalToggles[Key]
         Btn.Text = Text .. (CrystalToggles[Key] and " [Active]" or " [Disable]")
         
-        TweenService:Create(Btn, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+        TweenService:Create(Btn, TweenInfo.new(0.4, Enum.EasingStyle.Quart), {
             BackgroundColor3 = CrystalToggles[Key] and Theme.OnGreen or Theme.OffRed
         }):Play()
     end)
@@ -129,7 +129,7 @@ CreateButton("Auto 4-Row", "AutoFourRow", 55)
 CreateButton("Auto Popcorn", "AutoPopcorn", 101)
 CreateButton("Auto Ships", "AutoShips", 147)
 
--- [ نظام السحب والفتح الموحد ]
+-- [ نظام السحب والفتح ]
 local Dragging, DragStart, StartPos
 local IsDragged = false
 
@@ -146,7 +146,7 @@ UserInputService.InputChanged:Connect(function(Input)
         local NewPos = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
         MenuButton.Position = NewPos
         if BorderFrame.Visible then
-            BorderFrame.Position = UDim2.new(NewPos.X.Scale, NewPos.X.Offset, NewPos.Y.Scale, NewPos.Y.Offset + 60)
+            BorderFrame.Position = UDim2.new(NewPos.X.Scale, NewPos.X.Offset, NewPos.Y.Scale, NewPos.Y.Offset + 62)
         end
     end
 end)
@@ -159,7 +159,7 @@ MenuButton.MouseButton1Click:Connect(function()
     if not IsDragged then
         if not BorderFrame.Visible then
             BorderFrame.Visible = true
-            BorderFrame:TweenSize(UDim2.new(0, 204, 0, 199), "Out", "Back", 0.4, true)
+            BorderFrame:TweenSize(UDim2.new(0, 204, 0, 201), "Out", "Back", 0.4, true)
         else
             BorderFrame:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.3, true, function() BorderFrame.Visible = false end)
         end
