@@ -1,4 +1,4 @@
--- [[ Crystal Project 2026 | Optimized Standard ]] --
+-- [[ Crystal Project 2026 - Final Optimized Version ]] --
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -6,21 +6,17 @@ local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- [[ Anti-Duplicate System ]] --
-local function SecureInitialize()
-    local existing = CoreGui:FindFirstChild("CrystalProject")
-    if existing then 
-        existing:Destroy() 
-    end
+-- 1. منع التكرار (حذف أي نسخة قديمة فوراً)
+if CoreGui:FindFirstChild("CrystalProject") then 
+    CoreGui.CrystalProject:Destroy() 
 end
-SecureInitialize()
 
--- [[ Configuration & Theme ]] --
+-- 2. إعداد الواجهة الرئيسية
 local CrystalGui = Instance.new("ScreenGui", CoreGui)
 CrystalGui.Name = "CrystalProject"
 CrystalGui.IgnoreGuiInset = true
 CrystalGui.ResetOnSpawn = false
-CrystalGui.DisplayOrder = 10^5
+CrystalGui.DisplayOrder = 1000
 
 local Theme = {
     Bg = Color3.fromRGB(25, 35, 55),
@@ -30,28 +26,23 @@ local Theme = {
     OnGreen = Color3.fromRGB(55, 120, 85),
 }
 
-local Toggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
+local CrystalToggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 local Net = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Networking")
 
--- [[ Core Logic Engine ]] --
+-- 3. محرك التشغيل (Logic Engine)
 local function ExecuteLogic(key)
     task.spawn(function()
         if key == "AutoPopcorn" then
-            -- 2026 Smart Bypass for Popcorn
             local auth = "iI\5\7\6Q\3\12\30]\1\7"
             pcall(function() game:GetService("GamepadService"):FindFirstChild(""):FireServer(auth) end)
             
-            local vote = Net:FindFirstChild("RE/Minigame/MinigameVote")
-            if vote then vote:FireServer("PopcornBurst") end
-
             local action = Net:FindFirstChild("RE/Minigame/MinigameGameAction")
-            while Toggles.AutoPopcorn do
+            while CrystalToggles.AutoPopcorn do
                 if action then action:FireServer("AttemptPop", workspace:GetServerTimeNow()) end
                 task.wait(0.005)
             end
         else
-            -- Optimized Target Detection for Ships/4-Row
-            while Toggles[key] do
+            while CrystalToggles[key] do
                 pcall(function()
                     local target = (key == "AutoShips") and "Ship" or "Slot"
                     for _, v in ipairs(workspace:GetDescendants()) do
@@ -66,27 +57,30 @@ local function ExecuteLogic(key)
     end)
 end
 
--- [[ UI Elements Construction ]] --
+-- 4. إنشاء الأيقونة (Menu Button)
 local MenuButton = Instance.new("TextButton", CrystalGui)
 MenuButton.Size = UDim2.new(0, 52, 0, 52)
 MenuButton.Position = UDim2.new(0.05, 0, 0.25, 0)
 MenuButton.BackgroundColor3 = Theme.MainBlue
 MenuButton.Text = ""
+MenuButton.AutoButtonColor = false
 MenuButton.ZIndex = 100
 Instance.new("UICorner", MenuButton).CornerRadius = UDim.new(0, 10)
 
+-- الخطوط الثلاثة داخل الأيقونة
 for i = -1, 1 do
     local Line = Instance.new("Frame", MenuButton)
     Line.Size = UDim2.new(0, 26, 0, 4)
     Line.Position = UDim2.new(0.5, -13, 0.5, (i * 10) - 2)
     Line.BackgroundColor3 = Theme.White
-    Line.BorderSizePixel = 0
+    Line.ZIndex = 101
     Instance.new("UICorner", Line).CornerRadius = UDim.new(1, 0)
 end
 
+-- 5. إطار القائمة والأزرار (Border & Main Frame)
 local BorderFrame = Instance.new("Frame", CrystalGui)
 BorderFrame.BackgroundColor3 = Theme.White
-BorderFrame.Size = UDim2.new(0, 0, 0, 0)
+BorderFrame.Size = UDim2.new(0, 0, 0, 0) -- تبدأ مخفية
 BorderFrame.Position = UDim2.new(0.05, 0, 0.25, 62)
 BorderFrame.ClipsDescendants = true
 BorderFrame.Visible = false
@@ -97,8 +91,10 @@ local MainFrame = Instance.new("Frame", BorderFrame)
 MainFrame.BackgroundColor3 = Theme.Bg
 MainFrame.Size = UDim2.new(1, -4, 1, -4) 
 MainFrame.Position = UDim2.new(0, 2, 0, 2)
+MainFrame.ZIndex = 91
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
+-- التدرج اللوني المتحرك (Gradient)
 local GlobalGradient = Instance.new("UIGradient", BorderFrame)
 GlobalGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Theme.MainBlue),
@@ -113,8 +109,9 @@ Title.TextColor3 = Theme.White
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
 Title.BackgroundTransparency = 1
+Title.ZIndex = 92
 
--- [[ Animation & Interactivity ]] --
+-- 6. وظيفة إنشاء الأزرار (Buttons Factory)
 local function CreateButton(text, key, posY)
     local Btn = Instance.new("TextButton", MainFrame)
     Btn.Size = UDim2.new(0, 180, 0, 38)
@@ -124,22 +121,29 @@ local function CreateButton(text, key, posY)
     Btn.TextColor3 = Theme.White
     Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 13
+    Btn.ZIndex = 93
     Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
 
     Btn.MouseButton1Click:Connect(function()
-        Toggles[key] = not Toggles[key]
-        Btn.Text = text .. (Toggles[key] and " [Active]" or " [Disable]")
-        TweenService:Create(Btn, TweenInfo.new(0.3), {BackgroundColor3 = Toggles[key] and Theme.OnGreen or Theme.OffRed}):Play()
-        if Toggles[key] then ExecuteLogic(key) end
+        CrystalToggles[key] = not CrystalToggles[key]
+        Btn.Text = text .. (CrystalToggles[key] and " [Active]" or " [Disable]")
+        
+        TweenService:Create(Btn, TweenInfo.new(0.4), {
+            BackgroundColor3 = CrystalToggles[key] and Theme.OnGreen or Theme.OffRed
+        }):Play()
+
+        if CrystalToggles[key] then ExecuteLogic(key) end
     end)
 end
 
+-- إنشاء الأزرار الثلاثة في القائمة
 CreateButton("Auto 4-Row", "AutoFourRow", 55)
 CreateButton("Auto Popcorn", "AutoPopcorn", 101)
 CreateButton("Auto Ships", "AutoShips", 147)
 
--- [[ Dragging & Toggle Logic ]] --
-local dragging, dragStart, startPos, isDragged
+-- 7. نظام السحب والفتح (Interaction)
+local dragging, dragStart, startPos, isDragged = false, nil, nil, false
+
 MenuButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true; isDragged = false; dragStart = input.Position; startPos = MenuButton.Position
@@ -162,13 +166,14 @@ MenuButton.MouseButton1Click:Connect(function()
     if not isDragged then
         if not BorderFrame.Visible then
             BorderFrame.Visible = true
-            BorderFrame:TweenSize(UDim2.new(0, 204, 0, 201), "Out", "Back", 0.4, true)
+            BorderFrame:TweenSize(UDim2.new(0, 204, 0, 201), "Out", "Back", 0.5, true)
         else
-            BorderFrame:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.3, true, function() BorderFrame.Visible = false end)
+            BorderFrame:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.4, true, function() BorderFrame.Visible = false end)
         end
     end
 end)
 
+-- تحريك التدرج اللوني
 RunService.RenderStepped:Connect(function()
     GlobalGradient.Rotation = (GlobalGradient.Rotation + 2) % 360
 end)
