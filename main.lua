@@ -11,8 +11,8 @@ local CrystalGui = Instance.new("ScreenGui", CoreGui)
 CrystalGui.Name = "CrystalProject"
 CrystalGui.IgnoreGuiInset = true
 
--- [ قاعدة الألوان والمقاسات الموحدة ]
-local MainBlue = Color3.fromRGB(45, 85, 160) -- اللون الأزرق الموحد لكل الكود
+-- [ إعدادات التصميم الموحدة ]
+local MainBlue = Color3.fromRGB(45, 85, 160)
 local Theme = {
     Bg = Color3.fromRGB(12, 12, 15),
     White = Color3.new(1, 1, 1),
@@ -22,7 +22,7 @@ local Theme = {
 
 local CrystalToggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 
--- [ الأيقونة - متناسقة مع القائمة ]
+-- [ الأيقونة ]
 local MenuButton = Instance.new("TextButton", CrystalGui)
 MenuButton.Size = UDim2.new(0, 52, 0, 52)
 MenuButton.Position = UDim2.new(0.05, 0, 0.25, 0)
@@ -50,9 +50,9 @@ MainFrame.ClipsDescendants = true
 MainFrame.Visible = false
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
--- حواف متناسقة تماماً مع الألوان
+-- [ الحواف الموحدة ]
 local FrameStroke = Instance.new("UIStroke", MainFrame)
-FrameStroke.Thickness = 1.5
+FrameStroke.Thickness = 2 -- نفس سمك الخط تحت الاسم
 FrameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 local GlobalGradient = Instance.new("UIGradient", FrameStroke)
@@ -62,30 +62,31 @@ GlobalGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(1, MainBlue)
 })
 
--- [ العنوان - ثابت وموحد ]
+-- [ العنوان ]
 local Title = Instance.new("TextLabel", MainFrame)
 Title.Size = UDim2.new(1, 0, 0, 45)
 Title.Position = UDim2.new(0, 0, 0, 0)
 Title.Text = "Crystal Hub"
 Title.TextColor3 = Theme.White
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 16 -- مقاس خط موحد
+Title.TextSize = 16
 Title.BackgroundTransparency = 1
 
 local TitleGradient = Instance.new("UIGradient", Title)
 TitleGradient.Color = GlobalGradient.Color
 
--- خط تحت الاسم متناسق
+-- [ الخط تحت الاسم - مطابق للحواف ]
 local UnderLine = Instance.new("Frame", MainFrame)
-UnderLine.Size = UDim2.new(0, 120, 0, 2)
+UnderLine.Size = UDim2.new(0, 120, 0, 2) -- Thickness = 2 مطابق للـ Stroke
 UnderLine.Position = UDim2.new(0.5, -60, 0, 40)
 UnderLine.BackgroundColor3 = Theme.White
 UnderLine.BorderSizePixel = 0
-local LineGradient = Instance.new("UIGradient", UnderLine)
-LineGradient.Color = GlobalGradient.Color
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 
--- أنيميشن التدوير الموحد
+local LineGradient = Instance.new("UIGradient", UnderLine)
+LineGradient.Color = GlobalGradient.Color
+
+-- [ أنيميشن موحد لكل العناصر ]
 task.spawn(function()
     local rot = 0
     while task.wait(0.01) do
@@ -96,7 +97,7 @@ task.spawn(function()
     end
 end)
 
--- [ أزرار بتنسيق ومسافات موحدة ]
+-- [ صنع الأزرار ]
 local function CreateButton(Text, Key, PosY)
     local Btn = Instance.new("TextButton", MainFrame)
     Btn.Size = UDim2.new(0, 180, 0, 38)
@@ -105,7 +106,7 @@ local function CreateButton(Text, Key, PosY)
     Btn.Text = Text .. " [Disable]"
     Btn.TextColor3 = Theme.White
     Btn.Font = Enum.Font.GothamBold
-    Btn.TextSize = 13 -- حجم خط متناسق
+    Btn.TextSize = 13
     Btn.AutoButtonColor = false
     Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
 
@@ -118,12 +119,11 @@ local function CreateButton(Text, Key, PosY)
     end)
 end
 
--- مسافات ثابتة (بين كل عنصر والآخر 8 بكسل)
 CreateButton("Auto 4-Row", "AutoFourRow", 55)
 CreateButton("Auto Popcorn", "AutoPopcorn", 101)
 CreateButton("Auto Ships", "AutoShips", 147)
 
--- [ نظام السحب والفتح ]
+-- [ السحب والفتح ]
 local Dragging, DragStart, StartPos
 local IsDragged = false
 
