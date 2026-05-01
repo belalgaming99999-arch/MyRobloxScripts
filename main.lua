@@ -4,13 +4,14 @@ local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 
-local UI_NAME = "CrystalProject_2026"
-if CoreGui:FindFirstChild(UI_NAME) then 
-    CoreGui[UI_NAME]:Destroy() 
+for _, child in ipairs(CoreGui:GetChildren()) do
+    if child.Name == "CrystalProject" or child.Name == "CrystalHub" then
+        child:Destroy()
+    end
 end
 
 local CrystalGui = Instance.new("ScreenGui", CoreGui)
-CrystalGui.Name = UI_NAME
+CrystalGui.Name = "CrystalProject"
 CrystalGui.IgnoreGuiInset = true
 CrystalGui.ResetOnSpawn = false
 
@@ -27,7 +28,7 @@ local Toggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 local function ExecuteLogic(key)
     task.spawn(function()
         while Toggles[key] do
-            local success, err = pcall(function()
+            pcall(function()
                 if key == "AutoPopcorn" then
                     for _, v in ipairs(workspace:GetDescendants()) do
                         if v:IsA("ClickDetector") then
@@ -128,9 +129,7 @@ local function CreateButton(text, key, posY)
     Btn.MouseButton1Click:Connect(function()
         Toggles[key] = not Toggles[key]
         Btn.Text = text .. (Toggles[key] and " [Active]" or " [Disable]")
-        TweenService:Create(Btn, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-            BackgroundColor3 = Toggles[key] and Theme.OnGreen or Theme.OffRed
-        }):Play()
+        TweenService:Create(Btn, TweenInfo.new(0.4), {BackgroundColor3 = Toggles[key] and Theme.OnGreen or Theme.OffRed}):Play()
         if Toggles[key] then ExecuteLogic(key) end
     end)
 end
@@ -149,7 +148,7 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
-        if delta.Magnitude > 5 then isDragged = true end
+        if delta.Magnitude > 2 then isDragged = true end
         local newPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         MenuButton.Position = newPos
         BorderFrame.Position = UDim2.new(newPos.X.Scale, newPos.X.Offset, newPos.Y.Scale, newPos.Y.Offset + 62)
