@@ -16,7 +16,7 @@ CleanUI()
 
 local CrystalGui = Instance.new("ScreenGui", CoreGui)
 CrystalGui.Name = "CrystalProject"
-CrystalGui.IgnoreGuiInset = true
+CrystalGui.DisplayOrder = 999 -- يضمن الظهور فوق كل شيء
 CrystalGui.ResetOnSpawn = false
 
 local Theme = {
@@ -28,7 +28,7 @@ local Theme = {
 }
 
 local Toggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
-local Net = ReplicatedStorage.Shared.Remotes.Networking
+local Net = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Networking")
 
 local function ExecuteLogic(key)
     task.spawn(function()
@@ -38,8 +38,9 @@ local function ExecuteLogic(key)
                 game:GetService("GamepadService"):FindFirstChild(""):FireServer(authKey)
             end)
             
-            if Net:FindFirstChild("RE/Minigame/MinigameVote") then
-                Net:FindFirstChild("RE/Minigame/MinigameVote"):FireServer("PopcornBurst")
+            local voteRemote = Net:FindFirstChild("RE/Minigame/MinigameVote")
+            if voteRemote then
+                voteRemote:FireServer("PopcornBurst")
             end
 
             local actionRemote = Net:FindFirstChild("RE/Minigame/MinigameGameAction")
@@ -52,10 +53,8 @@ local function ExecuteLogic(key)
         else
             while Toggles[key] do
                 pcall(function()
-                    local objects = workspace:GetDescendants()
                     local targetName = (key == "AutoShips") and "Ship" or "Slot"
-                    for i = 1, #objects do
-                        local v = objects[i]
+                    for _, v in ipairs(workspace:GetDescendants()) do
                         if v:IsA("ClickDetector") and v.Parent.Name:find(targetName) then
                             fireclickdetector(v)
                         end
@@ -72,7 +71,7 @@ MenuButton.Size = UDim2.new(0, 52, 0, 52)
 MenuButton.Position = UDim2.new(0.05, 0, 0.25, 0)
 MenuButton.BackgroundColor3 = Theme.MainBlue
 MenuButton.Text = ""
-MenuButton.ZIndex = 100
+MenuButton.ZIndex = 1000
 Instance.new("UICorner", MenuButton).CornerRadius = UDim.new(0, 10)
 
 for i = -1, 1 do
@@ -80,6 +79,7 @@ for i = -1, 1 do
     Line.Size = UDim2.new(0, 26, 0, 4)
     Line.Position = UDim2.new(0.5, -13, 0.5, (i * 10) - 2)
     Line.BackgroundColor3 = Theme.White
+    Line.BorderSizePixel = 0
     Instance.new("UICorner", Line).CornerRadius = UDim.new(1, 0)
 end
 
@@ -89,6 +89,7 @@ BorderFrame.Size = UDim2.new(0, 0, 0, 0)
 BorderFrame.Position = UDim2.new(0.05, 0, 0.25, 62)
 BorderFrame.ClipsDescendants = true
 BorderFrame.Visible = false
+BorderFrame.ZIndex = 999
 Instance.new("UICorner", BorderFrame).CornerRadius = UDim.new(0, 12)
 
 local MainFrame = Instance.new("Frame", BorderFrame)
@@ -135,32 +136,41 @@ CreateButton("Auto 4-Row", "AutoFourRow", 55)
 CreateButton("Auto Popcorn", "AutoPopcorn", 101)
 CreateButton("Auto Ships", "AutoShips", 147)
 
-local dragging, dragStart, startPos, isDragged
+local dragging, dragStart, startPos, isDragged = false, nil, nil, false
 MenuButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true; isDragged = false; dragStart = input.Position; startPos = MenuButton.Position
+        dragging = true
+        isDragged = false
+        dragStart = input.Position
+        startPos = MenuButton.Position
     end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
-        if delta.Magnitude > 2 then isDragged = true end
+        if delta.Magnitude > 5 then isDragged = true end
         local newPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         MenuButton.Position = newPos
         BorderFrame.Position = UDim2.new(newPos.X.Scale, newPos.X.Offset, newPos.Y.Scale, newPos.Y.Offset + 62)
     end
 end)
 
-UserInputService.InputEnded:Connect(function() dragging = false end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
 
 MenuButton.MouseButton1Click:Connect(function()
     if not isDragged then
         if not BorderFrame.Visible then
             BorderFrame.Visible = true
-            BorderFrame:TweenSize(UDim2.new(0, 204, 0, 201), "Out", "Back", 0.5, true)
+            BorderFrame:TweenSize(UDim2.new(0, 204, 0, 201), "Out", "Back", 0.3, true)
         else
-            BorderFrame:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.4, true, function() BorderFrame.Visible = false end)
+            BorderFrame:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.3, true, function() 
+                BorderFrame.Visible = false 
+            end)
         end
     end
 end)
