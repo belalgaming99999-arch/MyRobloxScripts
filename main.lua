@@ -1,171 +1,111 @@
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
 
-for _, child in ipairs(CoreGui:GetChildren()) do
-    if child.Name == "CrystalProject" or child.Name == "CrystalHub" then
-        child:Destroy()
-    end
-end
+-- إزالة أي نسخة سابقة لضمان عدم التداخل
+if CoreGui:FindFirstChild("Crystal_GodMode") then CoreGui.Crystal_GodMode:Destroy() end
 
-local CrystalGui = Instance.new("ScreenGui", CoreGui)
-CrystalGui.Name = "CrystalProject"
-CrystalGui.IgnoreGuiInset = true
-CrystalGui.ResetOnSpawn = false
+local Crystal = Instance.new("ScreenGui", CoreGui)
+Crystal.Name = "Crystal_GodMode"
 
-local Theme = {
-    Bg = Color3.fromRGB(25, 35, 55),
-    MainBlue = Color3.fromRGB(45, 85, 160),
-    White = Color3.new(1, 1, 1),
-    OffRed = Color3.fromRGB(135, 55, 55), 
-    OnGreen = Color3.fromRGB(55, 120, 85),
-}
+local Toggles = {AutoPop = false}
 
-local Toggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
-
-local function ExecuteLogic(key)
-    task.spawn(function()
-        while Toggles[key] do
+-- [[ محرك الذكاء الخارق: نظام كشف المكسب المسبق ]] --
+task.spawn(function()
+    while true do
+        if Toggles.AutoPop then
             pcall(function()
-                if key == "AutoPopcorn" then
-                    for _, v in ipairs(workspace:GetDescendants()) do
-                        if v:IsA("ClickDetector") then
-                            fireclickdetector(v)
+                -- المسح الشامل لكل العناصر التفاعلية في الخريطة
+                for _, obj in ipairs(workspace:GetDescendants()) do
+                    if not Toggles.AutoPop then break end
+                    
+                    if obj:IsA("ClickDetector") then
+                        local parent = obj.Parent
+                        local isWinner = false
+                        
+                        -- 1. فحص القيم المخفية (الحالة الأكثر شيوعاً للمكسب المضمون)
+                        local val = parent:FindFirstChildOfClass("NumberValue") or parent:FindFirstChildOfClass("IntValue") or parent:FindFirstChild("Value")
+                        if val and val.Value > 0 then
+                            isWinner = true
+                        end
+                        
+                        -- 2. نظام الكشف البصري البرمجي (للأطباق المتشقلبة)
+                        -- إذا كان هناك عنصر "Food" أو "Popcorn" مرئي تحت الطبق الشفاف
+                        if not isWinner then
+                            local visual = parent:FindFirstChild("Food") or parent:FindFirstChild("Popcorn") or parent:FindFirstChild("Model")
+                            if visual and visual.Transparency < 1 then
+                                isWinner = true
+                            end
+                        end
+                        
+                        -- 3. نظام "صيد" المكسب (التنفيذ بسرعة 10ms)
+                        if isWinner then
+                            fireclickdetector(obj)
+                            -- تجميد مؤقت لمنع الـ Kick بسبب السرعة الزائدة بعد المكسب
+                            task.wait(0.01) 
                         end
                     end
                 end
             end)
-            task.wait(0.01)
         end
-    end)
-end
+        task.wait(0.01) -- التردد العالمي 10ms
+    end
+end)
 
-local MenuButton = Instance.new("TextButton", CrystalGui)
-MenuButton.Size = UDim2.new(0, 52, 0, 52)
-MenuButton.Position = UDim2.new(0.05, 0, 0.25, 0)
-MenuButton.BackgroundColor3 = Theme.MainBlue
-MenuButton.Text = ""
-MenuButton.AutoButtonColor = false
-MenuButton.ZIndex = 100
-Instance.new("UICorner", MenuButton).CornerRadius = UDim.new(0, 10)
+-- [[ واجهة المستخدم الحديثة 2026 ]] --
+local Main = Instance.new("Frame", Crystal)
+Main.Size = UDim2.new(0, 240, 0, 140)
+Main.Position = UDim2.new(0.5, -120, 0.4, -70)
+Main.BackgroundColor3 = Color3.fromRGB(15, 20, 30)
+Main.BorderSizePixel = 0
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 15)
 
-for i = -1, 1 do
-    local Line = Instance.new("Frame", MenuButton)
-    Line.Size = UDim2.new(0, 26, 0, 4)
-    Line.Position = UDim2.new(0.5, -13, 0.5, (i * 10) - 2)
-    Line.BackgroundColor3 = Theme.White
-    Line.ZIndex = 101
-    Instance.new("UICorner", Line).CornerRadius = UDim.new(1, 0)
-end
+-- تأثير التوهج (Glow)
+local UIStroke = Instance.new("UIStroke", Main)
+UIStroke.Color = Color3.fromRGB(45, 85, 160)
+UIStroke.Thickness = 2
+UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-local BorderFrame = Instance.new("Frame", CrystalGui)
-BorderFrame.BackgroundColor3 = Theme.White
-BorderFrame.Size = UDim2.new(0, 0, 0, 0)
-BorderFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 62)
-BorderFrame.ClipsDescendants = true
-BorderFrame.Visible = false
-BorderFrame.ZIndex = 90
-Instance.new("UICorner", BorderFrame).CornerRadius = UDim.new(0, 12)
-
-local MainFrame = Instance.new("Frame", BorderFrame)
-MainFrame.BackgroundColor3 = Theme.Bg
-MainFrame.Size = UDim2.new(1, -4, 1, -4) 
-MainFrame.Position = UDim2.new(0, 2, 0, 2)
-MainFrame.ZIndex = 91
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
-
-local GlobalGradient = Instance.new("UIGradient", BorderFrame)
-GlobalGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Theme.MainBlue),
-    ColorSequenceKeypoint.new(0.5, Theme.White),
-    ColorSequenceKeypoint.new(1, Theme.MainBlue)
-})
-
-local Title = Instance.new("TextLabel", MainFrame)
-Title.Size = UDim2.new(1, 0, 0, 45)
-Title.Text = "Crystal Hub"
-Title.TextColor3 = Theme.White
-Title.Font = Enum.Font.GothamBold
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, 0, 0, 50)
+Title.Text = "CRYSTAL AI - GOD MODE"
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.Font = Enum.Font.Orbitron -- خط مستقبلي
 Title.TextSize = 16
 Title.BackgroundTransparency = 1
-Title.ZIndex = 92
-local TitleGradient = Instance.new("UIGradient", Title)
-TitleGradient.Color = GlobalGradient.Color
 
-local UnderLine = Instance.new("Frame", MainFrame)
-UnderLine.Size = UDim2.new(0, 120, 0, 4)
-UnderLine.Position = UDim2.new(0.5, -60, 0, 40)
-UnderLine.BackgroundColor3 = Theme.White
-UnderLine.ZIndex = 92
-Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
-local LineGradient = Instance.new("UIGradient", UnderLine)
-LineGradient.Color = GlobalGradient.Color
+local StartBtn = Instance.new("TextButton", Main)
+StartBtn.Size = UDim2.new(0, 200, 0, 50)
+StartBtn.Position = UDim2.new(0.5, -100, 0.5, 0)
+StartBtn.BackgroundColor3 = Color3.fromRGB(135, 55, 55)
+StartBtn.Text = "ACTIVATE WINNER MODE"
+StartBtn.TextColor3 = Color3.new(1, 1, 1)
+StartBtn.Font = Enum.Font.GothamBold
+StartBtn.TextSize = 14
+StartBtn.AutoButtonColor = false
+Instance.new("UICorner", StartBtn).CornerRadius = UDim.new(0, 10)
 
-task.spawn(function()
-    local rot = 0
-    RunService.RenderStepped:Connect(function(dt)
-        rot = (rot + 180 * dt) % 360
-        GlobalGradient.Rotation = rot
-        TitleGradient.Rotation = rot
-        LineGradient.Rotation = rot
-    end)
+StartBtn.MouseButton1Click:Connect(function()
+    Toggles.AutoPop = not Toggles.AutoPop
+    StartBtn.Text = Toggles.AutoPop and "SYSTEM ONLINE" or "ACTIVATE WINNER MODE"
+    
+    local targetColor = Toggles.AutoPop and Color3.fromRGB(55, 120, 85) or Color3.fromRGB(135, 55, 55)
+    TweenService:Create(StartBtn, TweenInfo.new(0.4), {BackgroundColor3 = targetColor}):Play()
+    TweenService:Create(UIStroke, TweenInfo.new(0.4), {Color = targetColor}):Play()
 end)
 
-local function CreateButton(text, key, posY)
-    local Btn = Instance.new("TextButton", MainFrame)
-    Btn.Size = UDim2.new(0, 180, 0, 38)
-    Btn.Position = UDim2.new(0.5, -90, 0, posY)
-    Btn.BackgroundColor3 = Theme.OffRed
-    Btn.Text = text .. " [Disable]"
-    Btn.TextColor3 = Theme.White
-    Btn.Font = Enum.Font.GothamBold
-    Btn.TextSize = 13
-    Btn.AutoButtonColor = false
-    Btn.ZIndex = 93
-    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
-
-    Btn.MouseButton1Click:Connect(function()
-        Toggles[key] = not Toggles[key]
-        Btn.Text = text .. (Toggles[key] and " [Active]" or " [Disable]")
-        TweenService:Create(Btn, TweenInfo.new(0.4), {BackgroundColor3 = Toggles[key] and Theme.OnGreen or Theme.OffRed}):Play()
-        if Toggles[key] then ExecuteLogic(key) end
-    end)
-end
-
-CreateButton("Auto 4-Row", "AutoFourRow", 55)
-CreateButton("Auto Popcorn", "AutoPopcorn", 101)
-CreateButton("Auto Ships", "AutoShips", 147)
-
-local dragging, dragStart, startPos, isDragged
-MenuButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true; isDragged = false; dragStart = input.Position; startPos = MenuButton.Position
+-- نظام السحب الذكي
+local dragging, dragStart, startPos
+Main.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true dragStart = i.Position startPos = Main.Position
     end
 end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        if delta.Magnitude > 2 then isDragged = true end
-        local newPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        MenuButton.Position = newPos
-        BorderFrame.Position = UDim2.new(newPos.X.Scale, newPos.X.Offset, newPos.Y.Scale, newPos.Y.Offset + 62)
+UserInputService.InputChanged:Connect(function(i)
+    if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+        local d = i.Position - dragStart
+        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
     end
 end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
-end)
-
-MenuButton.MouseButton1Click:Connect(function()
-    if not isDragged then
-        if not BorderFrame.Visible then
-            BorderFrame.Visible = true
-            BorderFrame:TweenSize(UDim2.new(0, 204, 0, 201), "Out", "Back", 0.5, true)
-        else
-            BorderFrame:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.4, true, function() BorderFrame.Visible = false end)
-        end
-    end
-end)
+UserInputService.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
