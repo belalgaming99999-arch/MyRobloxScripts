@@ -8,12 +8,10 @@ if CoreGui:FindFirstChild("CrystalProject") then
     CoreGui.CrystalProject:Destroy() 
 end
 
-local CrystalGui = Instance.new("ScreenGui")
+local CrystalGui = Instance.new("ScreenGui", CoreGui)
 CrystalGui.Name = "CrystalProject"
 CrystalGui.IgnoreGuiInset = true
 CrystalGui.ResetOnSpawn = false
-CrystalGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-CrystalGui.Parent = CoreGui
 
 local Theme = {
     Bg = Color3.fromRGB(25, 35, 55),
@@ -25,94 +23,73 @@ local Theme = {
 
 local CrystalToggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 
--- [ نظام الذكاء للفوز التلقائي ] --
 local function ExecuteLogic(key)
     task.spawn(function()
         while CrystalToggles[key] do
-            if key == "AutoPopcorn" then
-                -- نظام كشف الطاولة والفشار الأكثر ربحاً
-                local Character = Players.LocalPlayer.Character
-                if Character then
-                    -- البحث عن الطاولات القريبة وتحديد الفشار الأكثر عدداً
-                    for _, obj in pairs(workspace:GetDescendants()) do
-                        if obj:IsA("ClickDetector") and CrystalToggles.AutoPopcorn then
-                            -- محاكاة الضغط الذكي للفوز
-                            fireclickdetector(obj)
+            pcall(function()
+                if key == "AutoPopcorn" then
+                    for _, v in pairs(workspace:GetDescendants()) do
+                        if v:IsA("ClickDetector") and v.Parent.Name == "Popcorn" then
+                            fireclickdetector(v)
                         end
                     end
+                    task.wait(10/1000) 
+
+                elseif key == "AutoShips" then
+                    task.wait(0.25)
+                    task.wait(0.5)
+
+                elseif key == "AutoFourRow" then
+                    task.wait(0.1)
                 end
-            elseif key == "AutoShips" then
-                -- نظام كشف السفن والضرب في الأماكن الصحيحة
-            elseif key == "AutoFourRow" then
-                -- نظام تحليل الصفوف الأربعة للفوز
-            end
-            task.wait(0.01) -- سرعة استجابة فائقة للفوز
+            end)
+            task.wait() 
         end
     end)
 end
 
-local MenuButton = Instance.new("TextButton")
-MenuButton.Name = "MenuButton"
+local MenuButton = Instance.new("TextButton", CrystalGui)
 MenuButton.Size = UDim2.new(0, 52, 0, 52)
 MenuButton.Position = UDim2.new(0.05, 0, 0.25, 0)
 MenuButton.BackgroundColor3 = Theme.MainBlue
 MenuButton.Text = ""
 MenuButton.AutoButtonColor = false
 MenuButton.ZIndex = 100
-MenuButton.Parent = CrystalGui
-
-local ButtonCorner = Instance.new("UICorner")
-ButtonCorner.CornerRadius = UDim.new(0, 10)
-ButtonCorner.Parent = MenuButton
+Instance.new("UICorner", MenuButton).CornerRadius = UDim.new(0, 10)
 
 for i = -1, 1 do
-    local Line = Instance.new("Frame")
+    local Line = Instance.new("Frame", MenuButton)
     Line.Size = UDim2.new(0, 26, 0, 4)
     Line.Position = UDim2.new(0.5, -13, 0.5, (i * 10) - 2)
     Line.BackgroundColor3 = Theme.White
-    Line.BorderSizePixel = 0
     Line.ZIndex = 101
-    Line.Parent = MenuButton
-    local LineCorner = Instance.new("UICorner")
-    LineCorner.CornerRadius = UDim.new(1, 0)
-    LineCorner.Parent = Line
+    Instance.new("UICorner", Line).CornerRadius = UDim.new(1, 0)
 end
 
-local BorderFrame = Instance.new("Frame")
-BorderFrame.Name = "BorderFrame"
+local BorderFrame = Instance.new("Frame", CrystalGui)
 BorderFrame.BackgroundColor3 = Theme.White
 BorderFrame.Size = UDim2.new(0, 0, 0, 0)
 BorderFrame.Position = UDim2.new(MenuButton.Position.X.Scale, MenuButton.Position.X.Offset, MenuButton.Position.Y.Scale, MenuButton.Position.Y.Offset + 62)
 BorderFrame.ClipsDescendants = true
 BorderFrame.Visible = false
 BorderFrame.ZIndex = 90
-BorderFrame.Parent = CrystalGui
+Instance.new("UICorner", BorderFrame).CornerRadius = UDim.new(0, 12)
 
-local BorderCorner = Instance.new("UICorner")
-BorderCorner.CornerRadius = UDim.new(0, 12)
-BorderCorner.Parent = BorderFrame
-
-local MainFrame = Instance.new("Frame")
+local MainFrame = Instance.new("Frame", BorderFrame)
 MainFrame.BackgroundColor3 = Theme.Bg
 MainFrame.Size = UDim2.new(1, -4, 1, -4) 
 MainFrame.Position = UDim2.new(0, 2, 0, 2)
-MainFrame.BorderSizePixel = 0
 MainFrame.ZIndex = 91
-MainFrame.Parent = BorderFrame
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 10)
-MainCorner.Parent = MainFrame
-
-local GlobalGradient = Instance.new("UIGradient")
+local GlobalGradient = Instance.new("UIGradient", BorderFrame)
 GlobalGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Theme.MainBlue),
     ColorSequenceKeypoint.new(0.5, Theme.White),
     ColorSequenceKeypoint.new(1, Theme.MainBlue)
 })
-GlobalGradient.Parent = BorderFrame
 
-local Title = Instance.new("TextLabel")
+local Title = Instance.new("TextLabel", MainFrame)
 Title.Size = UDim2.new(1, 0, 0, 45)
 Title.Text = "Crystal Hub"
 Title.TextColor3 = Theme.White
@@ -120,40 +97,30 @@ Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
 Title.BackgroundTransparency = 1
 Title.ZIndex = 92
-Title.Parent = MainFrame
-
-local TitleGradient = Instance.new("UIGradient")
+local TitleGradient = Instance.new("UIGradient", Title)
 TitleGradient.Color = GlobalGradient.Color
-TitleGradient.Parent = Title
 
-local UnderLine = Instance.new("Frame")
+local UnderLine = Instance.new("Frame", MainFrame)
 UnderLine.Size = UDim2.new(0, 120, 0, 4)
 UnderLine.Position = UDim2.new(0.5, -60, 0, 40)
 UnderLine.BackgroundColor3 = Theme.White
-UnderLine.BorderSizePixel = 0
 UnderLine.ZIndex = 92
-UnderLine.Parent = MainFrame
-
-local UnderLineCorner = Instance.new("UICorner")
-UnderLineCorner.CornerRadius = UDim.new(1, 0)
-UnderLineCorner.Parent = UnderLine
-
-local LineGradient = Instance.new("UIGradient")
+Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
+local LineGradient = Instance.new("UIGradient", UnderLine)
 LineGradient.Color = GlobalGradient.Color
-LineGradient.Parent = UnderLine
 
 task.spawn(function()
-    local rotation = 0
+    local rot = 0
     RunService.RenderStepped:Connect(function(dt)
-        rotation = (rotation + 180 * dt) % 360
-        GlobalGradient.Rotation = rotation
-        TitleGradient.Rotation = rotation
-        LineGradient.Rotation = rotation
+        rot = (rot + 180 * dt) % 360
+        GlobalGradient.Rotation = rot
+        TitleGradient.Rotation = rot
+        LineGradient.Rotation = rot
     end)
 end)
 
 local function CreateButton(text, key, posY)
-    local Btn = Instance.new("TextButton")
+    local Btn = Instance.new("TextButton", MainFrame)
     Btn.Size = UDim2.new(0, 180, 0, 38)
     Btn.Position = UDim2.new(0.5, -90, 0, posY)
     Btn.BackgroundColor3 = Theme.OffRed
@@ -163,11 +130,7 @@ local function CreateButton(text, key, posY)
     Btn.TextSize = 13
     Btn.AutoButtonColor = false
     Btn.ZIndex = 93
-    Btn.Parent = MainFrame
-
-    local BtnCorner = Instance.new("UICorner")
-    BtnCorner.CornerRadius = UDim.new(0, 8)
-    BtnCorner.Parent = Btn
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
 
     Btn.MouseButton1Click:Connect(function()
         CrystalToggles[key] = not CrystalToggles[key]
@@ -216,9 +179,10 @@ MenuButton.MouseButton1Click:Connect(function()
     if not isDragged then
         if not BorderFrame.Visible then
             BorderFrame.Visible = true
-            BorderFrame:TweenSize(UDim2.new(0, 204, 0, 201), Enum.EasingDirection.Out, Enum.EasingStyle.Back, 0.5, true)
+            BorderFrame:TweenSize(UDim2.new(0, 204, 0, 201), "Out", "Back", 0.5, true)
         else
-            BorderFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.In, Enum.EasingStyle.Back, 0.4, true, function() BorderFrame.Visible = false end)
+            BorderFrame:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.4, true, function() BorderFrame.Visible = false end)
         end
     end
 end)
+
