@@ -4,12 +4,13 @@ local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 
-if CoreGui:FindFirstChild("CrystalProject") then 
-    CoreGui.CrystalProject:Destroy() 
+local UI_NAME = "CrystalProject_2026"
+if CoreGui:FindFirstChild(UI_NAME) then 
+    CoreGui[UI_NAME]:Destroy() 
 end
 
 local CrystalGui = Instance.new("ScreenGui", CoreGui)
-CrystalGui.Name = "CrystalProject"
+CrystalGui.Name = UI_NAME
 CrystalGui.IgnoreGuiInset = true
 CrystalGui.ResetOnSpawn = false
 
@@ -26,17 +27,16 @@ local Toggles = {AutoFourRow = false, AutoPopcorn = false, AutoShips = false}
 local function ExecuteLogic(key)
     task.spawn(function()
         while Toggles[key] do
-            pcall(function()
+            local success, err = pcall(function()
                 if key == "AutoPopcorn" then
-                    for _, v in pairs(workspace:GetDescendants()) do
+                    for _, v in ipairs(workspace:GetDescendants()) do
                         if v:IsA("ClickDetector") then
                             fireclickdetector(v)
                         end
                     end
-                    task.wait(0.01) 
                 end
             end)
-            task.wait(0.01) 
+            task.wait(0.01)
         end
     end)
 end
