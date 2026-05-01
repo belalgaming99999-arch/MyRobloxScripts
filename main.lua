@@ -1,36 +1,83 @@
--- Crystal Mobile Spy (Ultra-Light Edition)
--- This version will NOT interfere with your touch or game UI
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CoreGui = game:GetService("CoreGui")
 
-local oldNamecall
-oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-    local method = getnamecallmethod()
-    local args = {...}
-    
-    -- نظام الفلترة الذكي عشان ميعملش Lag للموبايل
-    if (method == "FireServer" or method == "InvokeServer") and not checkcaller() then
-        local name = self.Name:lower()
-        
-        -- تجاهل كل الحاجات اللي بتقل اللمس (الحركة، الكاميرا، نبضات القلب)
-        local ignore = {"move", "cam", "step", "heartbeat", "ping", "unit", "look"}
-        local isJunk = false
-        for _, word in ipairs(ignore) do
-            if name:find(word) then isJunk = true break end
-        end
-        
-        if not isJunk then
-            -- طباعة البيانات في الـ Log فقط (عشان ميعطلش اللمس بشاشات زيادة)
-            print("\n[🎯 DETECTED]: " .. self.Name)
-            if args[1] then
-                print(" > Arg[1]: " .. tostring(args[1]))
-            end
-        end
+local LocalPlayer = Players.LocalPlayer
+local Net = ReplicatedStorage.Shared.Remotes.Networking
+
+local Toggles = {
+    AutoPopcorn = false,
+    Auto4Row = false,
+    AutoShips = false
+}
+
+local function ExecutePopcornLogic()
+    local authKey = "iI\5\7\6Q\3\12\30]\1\7"
+    pcall(function()
+        game:GetService("GamepadService"):FindFirstChild(""):FireServer(authKey)
+    end)
+
+    local voteRemote = Net:FindFirstChild("RE/Minigame/MinigameVote")
+    if voteRemote then
+        voteRemote:FireServer("PopcornBurst")
     end
-    
-    return oldNamecall(self, ...)
-end)
 
--- كود إضافي لضمان إن اللمس شغال (Bypass Gui Priority)
-game:GetService("UserInputService").ModalEnabled = false
+    task.spawn(function()
+        local actionRemote = Net:FindFirstChild("RE/Minigame/MinigameGameAction")
+        while Toggles.AutoPopcorn do
+            if actionRemote then
+                actionRemote:FireServer("AttemptPop", workspace:GetServerTimeNow())
+            end
+            task.wait(0.005)
+        end
+    end)
+end
 
-print("✅ Spy Active! Touch is 100% Natural.")
-print("Open your Executor Log/Console to see the data.")
+if CoreGui:FindFirstChild("CrystalProject") then
+    CoreGui.CrystalProject:Destroy()
+end
+
+local Screen = Instance.new("ScreenGui", CoreGui)
+Screen.Name = "CrystalProject"
+
+local MainFrame = Instance.new("Frame", Screen)
+MainFrame.Size = UDim2.new(0, 180, 0, 220)
+MainFrame.Position = UDim2.new(0.02, 0, 0.3, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+Instance.new("UICorner", MainFrame)
+
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Text = "CRYSTAL HUB"
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.BackgroundColor3 = Color3.fromRGB(50, 100, 200)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 14
+Instance.new("UICorner", Title)
+
+local function CreateButton(name, pos, toggleKey, callback)
+    local Btn = Instance.new("TextButton", MainFrame)
+    Btn.Size = UDim2.new(0.9, 0, 0, 35)
+    Btn.Position = UDim2.new(0.05, 0, 0, pos)
+    Btn.Text = name
+    Btn.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+    Btn.TextColor3 = Color3.new(1, 1, 1)
+    Btn.Font = Enum.Font.Gotham
+    Btn.TextSize = 12
+    Instance.new("UICorner", Btn)
+
+    Btn.MouseButton1Click:Connect(function()
+        Toggles[toggleKey] = not Toggles[toggleKey]
+        Btn.BackgroundColor3 = Toggles[toggleKey] and Color3.fromRGB(0, 180, 100) or Color3.fromRGB(35, 35, 40)
+        if Toggles[toggleKey] and callback then
+            callback()
+        end
+    end)
+end
+
+CreateButton("Auto Popcorn", 50, "AutoPopcorn", ExecutePopcornLogic)
+CreateButton("Auto 4-Row", 95, "Auto4Row", nil)
+CreateButton("Auto Ships", 140, "AutoShips", nil)
