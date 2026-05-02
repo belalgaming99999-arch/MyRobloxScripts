@@ -64,14 +64,14 @@ Title.Size = UDim2.new(1, 0, 0, 38)
 Title.Text = "Crystal Hub - Mini Games"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font, Title.TextSize, Title.BackgroundTransparency = Enum.Font.GothamBold, 13, 1
-Title.ZIndex = 3
+Title.ZIndex = 5
 
 local CloseBtn = Instance.new("TextButton", Main)
 CloseBtn.Size = UDim2.new(0, 30, 0, 30)
 CloseBtn.Position = UDim2.new(1, -35, 0, 4)
 CloseBtn.BackgroundTransparency, CloseBtn.Text = 1, "X"
 CloseBtn.TextColor3, CloseBtn.Font, CloseBtn.TextSize = Color3.fromRGB(255, 80, 80), Enum.Font.GothamBold, 13
-CloseBtn.ZIndex = 4
+CloseBtn.ZIndex = 6
 
 local function CreateToggle(name, pos, icon, var)
     local F = Instance.new("Frame", Main)
@@ -99,48 +99,50 @@ local function CreateToggle(name, pos, icon, var)
     end)
 end
 
-CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 48), "P", "AutoPop")
-CreateToggle("Connect Four", UDim2.new(0, 195, 0, 48), "C", "ConnectFour")
+CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 59), "P", "AutoPop")
+CreateToggle("Connect Four", UDim2.new(0, 195, 0, 59), "C", "ConnectFour")
 
 local SF = Instance.new("Frame", Main)
-SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 80), UDim2.new(0, 0, 1, -80), Color3.fromRGB(35, 35, 35)
+SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 72), UDim2.new(0, 0, 1, -72), Color3.fromRGB(35, 35, 35)
 SF.BorderSizePixel = 0
 local SFCorner = Instance.new("UICorner", SF)
 SFCorner.CornerRadius = UDim.new(0, 18)
 
 local SFFix = Instance.new("Frame", SF)
-SFFix.Size = UDim2.new(1, 0, 0, 8)
+SFFix.Size = UDim2.new(1, 0, 0, 10)
 SFFix.Position = UDim2.new(0, 0, 0, 0)
 SFFix.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 SFFix.BorderSizePixel = 0
 
 local SL = Instance.new("TextLabel", SF)
-SL.Text, SL.Size, SL.Position, SL.BackgroundTransparency = "Accuracy", UDim2.new(0, 100, 0, 25), UDim2.new(0, 20, 0, 10), 1
+SL.Text, SL.Size, SL.Position, SL.BackgroundTransparency = "Accuracy", UDim2.new(0, 100, 0, 25), UDim2.new(0, 20, 0, 8), 1
 SL.TextColor3, SL.Font, SL.TextSize, SL.TextXAlignment = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12, 0
-SL.ZIndex = 3
+SL.ZIndex = 10
 
 local SV = Instance.new("TextLabel", SF)
-SV.Text, SV.Size, SV.Position, SV.BackgroundTransparency = "7", UDim2.new(0, 30, 0, 25), UDim2.new(1, -50, 0, 10), 1
+SV.Text, SV.Size, SV.Position, SV.BackgroundTransparency = "7", UDim2.new(0, 30, 0, 25), UDim2.new(1, -50, 0, 8), 1
 SV.TextColor3, SV.Font, SV.TextSize = Color3.fromRGB(0, 120, 255), Enum.Font.GothamBold, 12
-SV.ZIndex = 3
+SV.ZIndex = 10
 
 local function CreateArr(t, p)
     local b = Instance.new("TextButton", SF)
     b.Size, b.Position, b.BackgroundColor3, b.Text = UDim2.new(0, 28, 0, 28), p, Color3.fromRGB(0, 120, 255), t
     b.TextColor3, b.Font, b.TextSize, b.AutoButtonColor, b.Active = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12, false, true
     MakeOval(b, UDim.new(0, 18))
-    b.ZIndex = 3
+    b.ZIndex = 10
     return b
 end
 
-local L_Arr, R_Arr = CreateArr("<", UDim2.new(0, 20, 0, 42)), CreateArr(">", UDim2.new(1, -48, 0, 42))
+local L_Arr, R_Arr = CreateArr("<", UDim2.new(0, 20, 0, 36)), CreateArr(">", UDim2.new(1, -48, 0, 36))
 local SBtn = Instance.new("TextButton", SF)
-SBtn.Size, SBtn.Position, SBtn.BackgroundColor3 = UDim2.new(0, 260, 0, 6), UDim2.new(0.5, -130, 0, 53), Color3.fromRGB(60, 60, 60)
+SBtn.Size, SBtn.Position, SBtn.BackgroundColor3 = UDim2.new(0, 260, 0, 6), UDim2.new(0.5, -130, 0, 47), Color3.fromRGB(60, 60, 60)
 SBtn.Text, SBtn.AutoButtonColor, SBtn.Active = "", false, true
-SBtn.ZIndex = 3
+SBtn.ZIndex = 11
 MakeOval(SBtn, UDim.new(1, 0))
+
 local SFill = Instance.new("Frame", SBtn)
 SFill.Size, SFill.BackgroundColor3 = UDim2.new(0.7, 0, 1, 0), Color3.fromRGB(0, 120, 255)
+SFill.ZIndex = 12
 MakeOval(SFill, UDim.new(1, 0))
 
 local function UpdS()
@@ -214,3 +216,4 @@ RS.Heartbeat:Connect(function()
         end
     end)
 end)
+
