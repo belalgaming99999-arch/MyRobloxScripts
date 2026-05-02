@@ -2,7 +2,7 @@ local TS = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local LP = game:GetService("Players").LocalPlayer
 
-local ScreenName = "CrystalHub_V14_Classic"
+local ScreenName = "CrystalHub_V15_FinalClean"
 local ExistingUI = game:GetService("CoreGui"):FindFirstChild(ScreenName) or LP.PlayerGui:FindFirstChild(ScreenName)
 if ExistingUI then ExistingUI:Destroy() end
 
@@ -12,20 +12,25 @@ local Screen = Instance.new("ScreenGui", game:GetService("CoreGui"))
 Screen.Name = ScreenName
 Screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- // زر الفتح (مرفوع سنة لفوق وتحت دلتا في النص)
+-- // زر الفتح (تصميم نظيف بدون توهج)
 local OpenBtn = Instance.new("TextButton", Screen)
 OpenBtn.Name = "OpenBtn"
 OpenBtn.Size = UDim2.new(0, 110, 0, 35)
-OpenBtn.Position = UDim2.new(0.5, -55, 0.16, 0) -- تم الرفع قليلاً
+OpenBtn.Position = UDim2.new(0.5, -55, 0.16, 0)
 OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-OpenBtn.Text, OpenBtn.TextColor3 = "Crystal Hub", Color3.fromRGB(255, 255, 255)
-OpenBtn.Font, OpenBtn.TextSize = Enum.Font.GothamBold, 13
+OpenBtn.Text = "Crystal Hub"
+OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+OpenBtn.Font = Enum.Font.GothamBold
+OpenBtn.TextSize = 12 -- حجم خط متناسق
 OpenBtn.AutoButtonColor = false
 OpenBtn.ZIndex = 10
 Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 18)
 
+-- حواف الأيقونة (نفس اللي جوه القائمة تماماً)
 local BtnStroke = Instance.new("UIStroke", OpenBtn)
-BtnStroke.Color, BtnStroke.Thickness = Color3.fromRGB(0, 120, 255), 1.5
+BtnStroke.Color = Color3.fromRGB(0, 120, 255)
+BtnStroke.Thickness = 1.5
+BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 -- // الإطار الرئيسي
 local Main = Instance.new("CanvasGroup", Screen)
@@ -38,9 +43,10 @@ Main.GroupTransparency = 1
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 18)
 
 local MainStroke = Instance.new("UIStroke", Main)
-MainStroke.Color, MainStroke.Thickness = Color3.fromRGB(0, 120, 255), 1.5
+MainStroke.Color = Color3.fromRGB(0, 120, 255)
+MainStroke.Thickness = 1.5
 
--- // وظيفة التبديل (بدون أي توهج)
+-- // دالة التبديل
 local function ToggleUI(state)
     local info = TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
     if state then
@@ -64,24 +70,20 @@ end
 local Header = Instance.new("Frame", Main)
 Header.Size, Header.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(35, 35, 35)
 Header.BorderSizePixel = 0
-local HCorner = Instance.new("UICorner", Header)
-HCorner.CornerRadius = UDim.new(0, 18)
--- القطعة اللي بتخلي الهيدر مربع من تحت
+Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 18)
 local HeaderSquare = Instance.new("Frame", Header)
-HeaderSquare.Size = UDim2.new(1, 0, 0, 15)
-HeaderSquare.Position = UDim2.new(0, 0, 1, -15)
-HeaderSquare.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-HeaderSquare.BorderSizePixel = 0
+HeaderSquare.Size, HeaderSquare.Position = UDim2.new(1, 0, 0, 15), UDim2.new(0, 0, 1, -15)
+HeaderSquare.BackgroundColor3, HeaderSquare.BorderSizePixel = Color3.fromRGB(35, 35, 35), 0
 
 local Title = Instance.new("TextLabel", Main)
 Title.Size, Title.Text = UDim2.new(1, 0, 0, 38), "Crystal Hub - Mini Games"
-Title.TextColor3, Title.Font, Title.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 13
+Title.TextColor3, Title.Font, Title.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
 Title.BackgroundTransparency = 1
 
 local CloseBtn = Instance.new("TextButton", Main)
 CloseBtn.Size, CloseBtn.Position = UDim2.new(0, 35, 0, 38), UDim2.new(1, -38, 0, 0)
 CloseBtn.Text, CloseBtn.TextColor3 = "X", Color3.fromRGB(255, 255, 255)
-CloseBtn.Font, CloseBtn.TextSize = Enum.Font.GothamBold, 13
+CloseBtn.Font, CloseBtn.TextSize = Enum.Font.GothamBold, 12
 CloseBtn.BackgroundTransparency = 1
 
 local function CreateToggle(name, pos, icon, var)
@@ -122,19 +124,14 @@ CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
 local SF = Instance.new("Frame", Main)
 SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 75), UDim2.new(0, 0, 1, -75), Color3.fromRGB(35, 35, 35)
 SF.BorderSizePixel = 0
-local SFCorner = Instance.new("UICorner", SF)
-SFCorner.CornerRadius = UDim.new(0, 18)
--- القطعة اللي بتخلي السلايدر مربع من فوق
+Instance.new("UICorner", SF).CornerRadius = UDim.new(0, 18)
 local SFSquare = Instance.new("Frame", SF)
-SFSquare.Size = UDim2.new(1, 0, 0, 15)
-SFSquare.Position = UDim2.new(0, 0, 0, 0)
-SFSquare.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-SFSquare.BorderSizePixel = 0
+SFSquare.Size, SFSquare.BackgroundColor3, SFSquare.BorderSizePixel = UDim2.new(1, 0, 0, 15), Color3.fromRGB(35, 35, 35), 0
 
 local CombinedLabel = Instance.new("TextLabel", SF)
 CombinedLabel.Text = "Accuracy - " .. tostring(getgenv().Config.Accuracy)
 CombinedLabel.Size, CombinedLabel.Position = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 12)
-CombinedLabel.TextColor3, CombinedLabel.Font, CombinedLabel.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 13
+CombinedLabel.TextColor3, CombinedLabel.Font, CombinedLabel.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
 CombinedLabel.BackgroundTransparency = 1
 
 local function CreateArr(t, p, step)
