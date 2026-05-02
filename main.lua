@@ -62,7 +62,7 @@ local function CreateToggle(name, pos, icon, var)
     local I = Instance.new("TextLabel", F)
     I.Size, I.Position, I.BackgroundColor3 = UDim2.new(0, 28, 0, 28), UDim2.new(0, 8, 0.5, -14), Color3.fromRGB(0, 120, 255)
     I.Text, I.TextColor3, I.Font, I.TextSize = icon, Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
-    Instance.new("UICorner", I).CornerRadius = UDim.new(0, 18)
+    Instance.new("UICorner", I).CornerRadius = UDim.new(1, 0)
     local L = Instance.new("TextLabel", F)
     L.Size, L.Position, L.Text = UDim2.new(0, 80, 1, 0), UDim2.new(0, 45, 0, 0), name
     L.TextColor3, L.Font, L.TextSize, L.TextXAlignment, L.BackgroundTransparency = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12, 0, 1
@@ -91,19 +91,19 @@ local SFFix = Instance.new("Frame", SF)
 SFFix.Size, SFFix.Position, SFFix.BackgroundColor3, SFFix.BorderSizePixel = UDim2.new(1, 0, 0, 10), UDim2.new(0, 0, 0, 0), Color3.fromRGB(35, 35, 35), 0
 
 local AccLabel = Instance.new("TextLabel", SF)
-AccLabel.Text, AccLabel.Size, AccLabel.Position = "Accuracy", UDim2.new(0, 100, 0, 20), UDim2.new(0, 20, 0, 12)
+AccLabel.Text, AccLabel.Size, AccLabel.Position = "Accuracy", UDim2.new(0, 100, 0, 20), UDim2.new(0, 20, 0, 10)
 AccLabel.TextColor3, AccLabel.Font, AccLabel.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
 AccLabel.TextXAlignment, AccLabel.BackgroundTransparency, AccLabel.ZIndex = 0, 1, 10
 
 local SV = Instance.new("TextLabel", SF)
-SV.Text, SV.Size, SV.Position = tostring(getgenv().Config.Accuracy), UDim2.new(0, 30, 0, 20), UDim2.new(1, -50, 0, 12)
+SV.Text, SV.Size, SV.Position = tostring(getgenv().Config.Accuracy), UDim2.new(0, 30, 0, 20), UDim2.new(1, -50, 0, 10)
 SV.TextColor3, SV.Font, SV.TextSize, SV.BackgroundTransparency, SV.ZIndex = Color3.fromRGB(0, 120, 255), Enum.Font.GothamBold, 13, 1, 10
 
 local function CreateArr(t, p, step)
     local b = Instance.new("TextButton", SF)
-    b.Size, b.Position, b.BackgroundColor3, b.Text = UDim2.new(0, 30, 0, 30), p, Color3.fromRGB(0, 120, 255), t
+    b.Size, b.Position, b.BackgroundColor3, b.Text = UDim2.new(0, 28, 0, 28), p, Color3.fromRGB(0, 120, 255), t
     b.TextColor3, b.Font, b.TextSize, b.ZIndex, b.AutoButtonColor = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 14, 10, false
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 10)
+    Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
     b.MouseButton1Click:Connect(function()
         getgenv().Config.Accuracy = math.clamp(getgenv().Config.Accuracy + step, 0, 10)
         SV.Text = tostring(getgenv().Config.Accuracy)
@@ -111,11 +111,11 @@ local function CreateArr(t, p, step)
     end)
 end
 
-CreateArr("<", UDim2.new(0, 20, 0, 35), -1)
-CreateArr(">", UDim2.new(1, -50, 0, 35), 1)
+CreateArr("<", UDim2.new(0, 20, 0, 33), -1)
+CreateArr(">", UDim2.new(1, -48, 0, 33), 1)
 
 local SBtn = Instance.new("Frame", SF)
-SBtn.Size, SBtn.Position, SBtn.BackgroundColor3, SBtn.ZIndex = UDim2.new(0, 250, 0, 6), UDim2.new(0.5, -125, 0, 47), Color3.fromRGB(60, 60, 60), 11
+SBtn.Size, SBtn.Position, SBtn.BackgroundColor3, SBtn.ZIndex = UDim2.new(0, 250, 0, 6), UDim2.new(0.5, -125, 0, 45), Color3.fromRGB(60, 60, 60), 11
 Instance.new("UICorner", SBtn).CornerRadius = UDim.new(1, 0)
 
 local SFill = Instance.new("Frame", SBtn)
