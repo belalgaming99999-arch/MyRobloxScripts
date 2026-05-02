@@ -3,7 +3,7 @@ local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local LP = game:GetService("Players").LocalPlayer
 
-local ScreenName = "CrystalHubFinalV4"
+local ScreenName = "CrystalHubFinalClean"
 local ExistingUI = game:GetService("CoreGui"):FindFirstChild(ScreenName) or LP.PlayerGui:FindFirstChild(ScreenName)
 if ExistingUI then ExistingUI:Destroy() end
 
@@ -12,7 +12,6 @@ getgenv().Config = {AutoPop = false, ConnectFour = false, Accuracy = 7}
 local Screen = Instance.new("ScreenGui", game:GetService("CoreGui"))
 Screen.Name = ScreenName
 
--- // زر الفتح (الأيقونة)
 local OpenBtn = Instance.new("TextButton", Screen)
 OpenBtn.Name = "OpenBtn"
 OpenBtn.Size = UDim2.new(0, 110, 0, 35)
@@ -29,7 +28,6 @@ BtnStroke.Color = Color3.fromRGB(0, 120, 255)
 BtnStroke.Thickness = 1.5 
 BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
--- // الإطار الرئيسي
 local Main = Instance.new("Frame", Screen)
 Main.Name = "Main"
 Main.Size = UDim2.new(0, 380, 0, 190)
@@ -41,7 +39,6 @@ Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 18)
 local MainStroke = Instance.new("UIStroke", Main)
 MainStroke.Color, MainStroke.Thickness = Color3.fromRGB(0, 120, 255), 1.5
 
--- // الهيدر
 local Header = Instance.new("Frame", Main)
 Header.Size, Header.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 18)
@@ -59,7 +56,6 @@ CloseBtn.Text, CloseBtn.TextColor3 = "X", Color3.fromRGB(255, 255, 255)
 CloseBtn.Font, CloseBtn.TextSize = Enum.Font.GothamBold, 13
 CloseBtn.TextStrokeTransparency, CloseBtn.BackgroundTransparency = 1, 1
 
--- // أزرار التفعيل (تم تعديل المسافة هنا)
 local function CreateToggle(name, pos, icon, var)
     local F = Instance.new("Frame", Main)
     F.Size, F.Position, F.BackgroundColor3 = UDim2.new(0, 175, 0, 42), pos, Color3.fromRGB(35, 35, 35)
@@ -72,11 +68,10 @@ local function CreateToggle(name, pos, icon, var)
     Instance.new("UICorner", I).CornerRadius = UDim.new(1, 0)
     
     local L = Instance.new("TextLabel", F)
-    L.Size, L.Position, L.Text = UDim2.new(0, 90, 1, 0), UDim2.new(0, 45, 0, 0), name
+    L.Size, L.Position, L.Text = UDim2.new(0, 85, 1, 0), UDim2.new(0, 45, 0, 0), name
     L.TextColor3, L.Font, L.TextSize, L.TextStrokeTransparency, L.BackgroundTransparency = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12, 1, 1
     L.TextXAlignment = 0
     
-    -- تعديل موقع الزر (B.Position) ليكون أقرب للاسم
     local B = Instance.new("TextButton", F)
     B.Size, B.Position, B.BackgroundColor3 = UDim2.new(0, 32, 0, 16), UDim2.new(0, 133, 0.5, -8), Color3.fromRGB(50, 50, 50)
     B.Text, B.AutoButtonColor = "", false
@@ -88,15 +83,16 @@ local function CreateToggle(name, pos, icon, var)
     
     B.MouseButton1Click:Connect(function()
         getgenv().Config[var] = not getgenv().Config[var]
+        local onP = UDim2.new(0, 18, 0.5, -6) 
+        local offP = UDim2.new(0, 2, 0.5, -6)
         TS:Create(B, TweenInfo.new(0.2), {BackgroundColor3 = getgenv().Config[var] and Color3.fromRGB(0, 120, 255) or Color3.fromRGB(50, 50, 50)}):Play()
-        TS:Create(Dot, TweenInfo.new(0.2), {Position = getgenv().Config[var] and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)}):Play()
+        TS:Create(Dot, TweenInfo.new(0.2), {Position = getgenv().Config[var] and onP or offP}):Play()
     end)
 end
 
 CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "P", "AutoPop")
 CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
 
--- // المنطقة الرمادية السفلية
 local SF = Instance.new("Frame", Main)
 SF.Name = "SliderFrame"
 SF.Size = UDim2.new(1, 0, 0, 75)
@@ -142,7 +138,6 @@ Instance.new("UICorner", SFill).CornerRadius = UDim.new(1, 0)
 CreateArr("<", UDim2.new(0, 33, 0, 37), -1)
 CreateArr(">", UDim2.new(1, -61, 0, 37), 1)
 
--- // منطق السحب والفتح
 local dragging, dragStart, startPos, dragDist = false, nil, nil, 0
 OpenBtn.InputBegan:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
