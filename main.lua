@@ -1,10 +1,12 @@
+local GameID = game.PlaceId
+if GameID ~= 111917342868480 then return end
+
 local TS = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local CG = game:GetService("CoreGui")
 local LP = game:GetService("Players").LocalPlayer
 
--- // تشفير الهوية لمنع الكشف (Anti-Detection)
-local UI_ID = "Crystal_Elite_2026"
+local UI_ID = "Crystal_Elite_2026_Secure"
 local Existing = CG:FindFirstChild(UI_ID) or LP.PlayerGui:FindFirstChild(UI_ID)
 if Existing then Existing:Destroy() end
 
@@ -14,25 +16,23 @@ local Screen = Instance.new("ScreenGui", CG)
 Screen.Name = UI_ID
 Screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- // أيقونة الفتح (مطابقة تماماً للقائمة)
 local OpenBtn = Instance.new("TextButton", Screen)
 OpenBtn.Size = UDim2.new(0, 110, 0, 35)
-OpenBtn.Position = UDim2.new(0.5, -58, 0.16, 0) -- السنترة المثالية تحت الدلتا
+OpenBtn.Position = UDim2.new(0.5, -58, 0.16, 0)
 OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 OpenBtn.Text = "Crystal Hub"
-OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255) -- أبيض سادة
+OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 OpenBtn.Font = Enum.Font.GothamBold
 OpenBtn.TextSize = 12
 OpenBtn.AutoButtonColor = false
 OpenBtn.ZIndex = 10
-Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 18) -- نفس بيضاوية القائمة
+Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 18)
 
 local BtnStroke = Instance.new("UIStroke", OpenBtn)
 BtnStroke.Color = Color3.fromRGB(0, 120, 255)
 BtnStroke.Thickness = 1.5
 BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
--- // القائمة الرئيسية (CanvasGroup للأداء العالي والإخفاء النظيف)
 local Main = Instance.new("CanvasGroup", Screen)
 Main.Size = UDim2.new(0, 380, 0, 190)
 Main.Position = UDim2.new(0.5, -190, 0.5, -95)
@@ -46,7 +46,6 @@ MainStroke.Color = Color3.fromRGB(0, 120, 255)
 MainStroke.Thickness = 1.5
 MainStroke.Transparency = 1
 
--- // محرك الانتقالات المتطور
 local function ToggleUI(state)
     local info = TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
     if state then
@@ -57,22 +56,18 @@ local function ToggleUI(state)
         TS:Create(BtnStroke, info, {Transparency = 1}):Play()
         task.delay(0.3, function() OpenBtn.Visible = false end)
     else
-        -- اختفاء فوري متزامن (القائمة + الحواف)
         TS:Create(MainStroke, info, {Transparency = 1}):Play()
         local hide = TS:Create(Main, info, {GroupTransparency = 1, Size = UDim2.new(0, 360, 0, 170)})
         hide:Play()
-        
         OpenBtn.Visible = true
         TS:Create(OpenBtn, info, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
         TS:Create(BtnStroke, info, {Transparency = 0}):Play()
-        
         hide.Completed:Connect(function()
             Main.Visible = false
         end)
     end
 end
 
--- // الهيدر (تقفيل هندسي مربع من الأسفل)
 local Header = Instance.new("Frame", Main)
 Header.Size = UDim2.new(1, 0, 0, 38)
 Header.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
@@ -102,7 +97,6 @@ CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.TextSize = 12
 CloseBtn.BackgroundTransparency = 1
 
--- // نظام الأزرار (Toggles)
 local function CreateToggle(name, pos, icon, var)
     local F = Instance.new("Frame", Main)
     F.Size, F.Position, F.BackgroundColor3 = UDim2.new(0, 175, 0, 42), pos, Color3.fromRGB(35, 35, 35)
@@ -120,7 +114,7 @@ local function CreateToggle(name, pos, icon, var)
     
     local B = Instance.new("TextButton", F)
     B.Size, B.Position, B.BackgroundColor3 = UDim2.new(0, 32, 0, 16), UDim2.new(1, -40, 0.5, -8), Color3.fromRGB(50, 50, 50)
-    B.Text, B.AutoButtonColor = "", false
+    B.Text, B.AutoButtonColor = false, false
     Instance.new("UICorner", B).CornerRadius = UDim.new(1, 0)
     
     local Dot = Instance.new("Frame", B)
@@ -137,7 +131,6 @@ end
 CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "P", "AutoPop")
 CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
 
--- // منطقة السلايدر (تقفيل هندسي مربع من الأعلى)
 local SF = Instance.new("Frame", Main)
 SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 75), UDim2.new(0, 0, 1, -75), Color3.fromRGB(35, 35, 35)
 SF.BorderSizePixel = 0
@@ -173,7 +166,6 @@ Instance.new("UICorner", SFill).CornerRadius = UDim.new(1, 0)
 CreateArr("<", UDim2.new(0, 33, 0, 37), -1)
 CreateArr(">", UDim2.new(1, -61, 0, 37), 1)
 
--- // نظام السحب (Dragging)
 local dragToggle, dragStart, startPos
 OpenBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
