@@ -3,7 +3,7 @@ local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local LP = game:GetService("Players").LocalPlayer
 
-local ScreenName = "CrystalHubFinal"
+local ScreenName = "CrystalHubFinalM"
 local ExistingUI = game:GetService("CoreGui"):FindFirstChild(ScreenName) or LP.PlayerGui:FindFirstChild(ScreenName)
 
 if ExistingUI then
@@ -17,6 +17,7 @@ getgenv().Config = {AutoPop = false, ConnectFour = false, Accuracy = 7}
 local Screen = Instance.new("ScreenGui", game:GetService("CoreGui"))
 Screen.Name = ScreenName
 
+-- // زر الفتح المطابق
 local OpenBtn = Instance.new("TextButton", Screen)
 OpenBtn.Name = "OpenBtn"
 OpenBtn.Size = UDim2.new(0, 110, 0, 35)
@@ -26,9 +27,12 @@ OpenBtn.Text, OpenBtn.TextColor3 = "Crystal Hub", Color3.fromRGB(255, 255, 255)
 OpenBtn.Font, OpenBtn.TextSize = Enum.Font.GothamBold, 13
 OpenBtn.AutoButtonColor = false
 Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 18)
+
 local BtnStroke = Instance.new("UIStroke", OpenBtn)
 BtnStroke.Color, BtnStroke.Thickness = Color3.fromRGB(0, 120, 255), 1.5
+BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
+-- // الإطار الرئيسي
 local Main = Instance.new("Frame", Screen)
 Main.Name = "Main"
 Main.Size = UDim2.new(0, 380, 0, 190)
@@ -39,6 +43,7 @@ Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 18)
 local MainStroke = Instance.new("UIStroke", Main)
 MainStroke.Color, MainStroke.Thickness = Color3.fromRGB(0, 120, 255), 1.5
 
+-- // الهيدر
 local Header = Instance.new("Frame", Main)
 Header.Size, Header.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 18)
@@ -55,6 +60,7 @@ CloseBtn.Size, CloseBtn.Position = UDim2.new(0, 30, 0, 30), UDim2.new(1, -35, 0,
 CloseBtn.Text, CloseBtn.TextColor3, CloseBtn.Font, CloseBtn.TextSize = "X", Color3.fromRGB(255, 80, 80), Enum.Font.GothamBold, 13
 CloseBtn.BackgroundTransparency, CloseBtn.ZIndex, CloseBtn.AutoButtonColor = 1, 6, false
 
+-- // أزرار التفعيل
 local function CreateToggle(name, pos, icon, var)
     local F = Instance.new("Frame", Main)
     F.Size, F.Position, F.BackgroundColor3 = UDim2.new(0, 175, 0, 42), pos, Color3.fromRGB(35, 35, 35)
@@ -84,20 +90,25 @@ end
 CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "P", "AutoPop")
 CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
 
+-- // منطقة السلايدر
 local SF = Instance.new("Frame", Main)
 SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 75), UDim2.new(0, 0, 1, -75), Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", SF).CornerRadius = UDim.new(0, 18)
 local SFFix = Instance.new("Frame", SF)
 SFFix.Size, SFFix.Position, SFFix.BackgroundColor3, SFFix.BorderSizePixel = UDim2.new(1, 0, 0, 10), UDim2.new(0, 0, 0, 0), Color3.fromRGB(35, 35, 35), 0
 
-local AccLabel = Instance.new("TextLabel", SF)
-AccLabel.Text, AccLabel.Size, AccLabel.Position = "Accuracy", UDim2.new(0, 100, 0, 20), UDim2.new(0, 20, 0, 10)
-AccLabel.TextColor3, AccLabel.Font, AccLabel.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
-AccLabel.TextXAlignment, AccLabel.BackgroundTransparency, AccLabel.ZIndex = 0, 1, 10
-
-local SV = Instance.new("TextLabel", SF)
-SV.Text, SV.Size, SV.Position = tostring(getgenv().Config.Accuracy), UDim2.new(0, 30, 0, 20), UDim2.new(1, -50, 0, 10)
-SV.TextColor3, SV.Font, SV.TextSize, SV.BackgroundTransparency, SV.ZIndex = Color3.fromRGB(0, 120, 255), Enum.Font.GothamBold, 13, 1, 10
+-- دمج الكلمة والرقم معاً ليكون التنسيق: Accuracy - 7
+local CombinedLabel = Instance.new("TextLabel", SF)
+CombinedLabel.Name = "CombinedLabel"
+CombinedLabel.Text = "Accuracy - " .. tostring(getgenv().Config.Accuracy)
+CombinedLabel.Size = UDim2.new(0, 150, 0, 20)
+CombinedLabel.Position = UDim2.new(0, 20, 0, 10)
+CombinedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+CombinedLabel.Font = Enum.Font.GothamBold
+CombinedLabel.TextSize = 12
+CombinedLabel.TextXAlignment = Enum.TextXAlignment.Left
+CombinedLabel.BackgroundTransparency = 1
+CombinedLabel.ZIndex = 10
 
 local function CreateArr(t, p, step)
     local b = Instance.new("TextButton", SF)
@@ -106,7 +117,7 @@ local function CreateArr(t, p, step)
     Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
     b.MouseButton1Click:Connect(function()
         getgenv().Config.Accuracy = math.clamp(getgenv().Config.Accuracy + step, 0, 10)
-        SV.Text = tostring(getgenv().Config.Accuracy)
+        CombinedLabel.Text = "Accuracy - " .. tostring(getgenv().Config.Accuracy)
         TS:Create(Main:FindFirstChild("Fill", true), TweenInfo.new(0.2), {Size = UDim2.new(getgenv().Config.Accuracy/10, 0, 1, 0)}):Play()
     end)
 end
@@ -122,6 +133,7 @@ local SFill = Instance.new("Frame", SBtn)
 SFill.Name, SFill.Size, SFill.BackgroundColor3, SFill.ZIndex = "Fill", UDim2.new(getgenv().Config.Accuracy/10, 0, 1, 0), Color3.fromRGB(0, 120, 255), 12
 Instance.new("UICorner", SFill).CornerRadius = UDim.new(1, 0)
 
+-- // سحب الأيقونة والفتح/القفل
 local dragging, dragStart, startPos, dragDist = false, nil, nil, 0
 OpenBtn.InputBegan:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
