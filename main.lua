@@ -1,22 +1,25 @@
 local TS = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
+local RS = game:GetService("RunService")
+local CG = game:GetService("CoreGui")
 local LP = game:GetService("Players").LocalPlayer
 
-local ScreenName = "CrystalHub_V16_FinalFix"
-local ExistingUI = game:GetService("CoreGui"):FindFirstChild(ScreenName) or LP.PlayerGui:FindFirstChild(ScreenName)
-if ExistingUI then ExistingUI:Destroy() end
+-- // Anti-Detection & Optimization System
+local UI_ID = "CH_" .. math.random(1000, 9999)
+local Existing = CG:FindFirstChild(UI_ID) or LP.PlayerGui:FindFirstChild(UI_ID)
+if Existing then Existing:Destroy() end
 
 getgenv().Config = {AutoPop = false, ConnectFour = false, Accuracy = 7}
 
-local Screen = Instance.new("ScreenGui", game:GetService("CoreGui"))
-Screen.Name = ScreenName
+-- // Main Controller
+local Screen = Instance.new("ScreenGui", CG)
+Screen.Name = UI_ID
 Screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- // زر الفتح
+-- // Centralized Open Button (Offset Adjusted for Delta Icon)
 local OpenBtn = Instance.new("TextButton", Screen)
-OpenBtn.Name = "OpenBtn"
 OpenBtn.Size = UDim2.new(0, 110, 0, 35)
-OpenBtn.Position = UDim2.new(0.5, -55, 0.16, 0)
+OpenBtn.Position = UDim2.new(0.5, -58, 0.16, 0) -- Adjusted -58 for perfect center
 OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 OpenBtn.Text = "Crystal Hub"
 OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -29,11 +32,9 @@ Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 18)
 local BtnStroke = Instance.new("UIStroke", OpenBtn)
 BtnStroke.Color = Color3.fromRGB(0, 120, 255)
 BtnStroke.Thickness = 1.5
-BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
--- // الإطار الرئيسي
+-- // Master Frame (CanvasGroup for Frame-Perfect Transparency)
 local Main = Instance.new("CanvasGroup", Screen)
-Main.Name = "Main"
 Main.Size = UDim2.new(0, 380, 0, 190)
 Main.Position = UDim2.new(0.5, -190, 0.5, -95)
 Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
@@ -44,22 +45,21 @@ Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 18)
 local MainStroke = Instance.new("UIStroke", Main)
 MainStroke.Color = Color3.fromRGB(0, 120, 255)
 MainStroke.Thickness = 1.5
-MainStroke.Transparency = 1 -- تبدأ مخفية
+MainStroke.Transparency = 1
 
--- // دالة التبديل (تم إصلاح تزامن الحواف هنا)
+-- // Ultra-Smooth Transition Engine
 local function ToggleUI(state)
     local info = TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
     if state then
         Main.Visible = true
         TS:Create(Main, info, {GroupTransparency = 0, Size = UDim2.new(0, 380, 0, 190)}):Play()
-        TS:Create(MainStroke, info, {Transparency = 0}):Play() -- إظهار الحواف مع القائمة
-        
+        TS:Create(MainStroke, info, {Transparency = 0}):Play()
         TS:Create(OpenBtn, info, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
         TS:Create(BtnStroke, info, {Transparency = 1}):Play()
         task.delay(0.3, function() OpenBtn.Visible = false end)
     else
-        -- حل مشكلة الحواف: إخفاء الحواف والقائمة في نفس التوقيت بالظبط
-        TS:Create(MainStroke, info, {Transparency = 1}):Play() 
+        -- Absolute Sync: Stroke + Group fade simultaneously
+        TS:Create(MainStroke, info, {Transparency = 1}):Play()
         local hide = TS:Create(Main, info, {GroupTransparency = 1, Size = UDim2.new(0, 360, 0, 170)})
         hide:Play()
         
@@ -67,31 +67,43 @@ local function ToggleUI(state)
         TS:Create(OpenBtn, info, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
         TS:Create(BtnStroke, info, {Transparency = 0}):Play()
         
-        hide.Completed:Wait()
-        Main.Visible = false
+        hide.Completed:Connect(function()
+            Main.Visible = false
+        end)
     end
 end
 
--- // الهيدر
+-- // Header Construction (Square Bottom)
 local Header = Instance.new("Frame", Main)
-Header.Size, Header.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(35, 35, 35)
+Header.Size = UDim2.new(1, 0, 0, 38)
+Header.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 Header.BorderSizePixel = 0
 Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 18)
+
 local HeaderSquare = Instance.new("Frame", Header)
-HeaderSquare.Size, HeaderSquare.Position = UDim2.new(1, 0, 0, 15), UDim2.new(0, 0, 1, -15)
-HeaderSquare.BackgroundColor3, HeaderSquare.BorderSizePixel = Color3.fromRGB(35, 35, 35), 0
+HeaderSquare.Size = UDim2.new(1, 0, 0, 15)
+HeaderSquare.Position = UDim2.new(0, 0, 1, -15)
+HeaderSquare.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+HeaderSquare.BorderSizePixel = 0
 
 local Title = Instance.new("TextLabel", Main)
-Title.Size, Title.Text = UDim2.new(1, 0, 0, 38), "Crystal Hub - Mini Games"
-Title.TextColor3, Title.Font, Title.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
+Title.Size = UDim2.new(1, 0, 0, 38)
+Title.Text = "Crystal Hub - Mini Games"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 12
 Title.BackgroundTransparency = 1
 
 local CloseBtn = Instance.new("TextButton", Main)
-CloseBtn.Size, CloseBtn.Position = UDim2.new(0, 35, 0, 38), UDim2.new(1, -38, 0, 0)
-CloseBtn.Text, CloseBtn.TextColor3 = "X", Color3.fromRGB(255, 255, 255)
-CloseBtn.Font, CloseBtn.TextSize = Enum.Font.GothamBold, 12
+CloseBtn.Size = UDim2.new(0, 35, 0, 38)
+CloseBtn.Position = UDim2.new(1, -38, 0, 0)
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 12
 CloseBtn.BackgroundTransparency = 1
 
+-- // Dynamic Toggle Module
 local function CreateToggle(name, pos, icon, var)
     local F = Instance.new("Frame", Main)
     F.Size, F.Position, F.BackgroundColor3 = UDim2.new(0, 175, 0, 42), pos, Color3.fromRGB(35, 35, 35)
@@ -126,7 +138,7 @@ end
 CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "P", "AutoPop")
 CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
 
--- // منطقة السلايدر
+-- // Slider Engine (Square Top)
 local SF = Instance.new("Frame", Main)
 SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 75), UDim2.new(0, 0, 1, -75), Color3.fromRGB(35, 35, 35)
 SF.BorderSizePixel = 0
@@ -162,7 +174,7 @@ Instance.new("UICorner", SFill).CornerRadius = UDim.new(1, 0)
 CreateArr("<", UDim2.new(0, 33, 0, 37), -1)
 CreateArr(">", UDim2.new(1, -61, 0, 37), 1)
 
--- // سحب الأيقونة
+-- // Lag-Free Dragging System
 local dragToggle, dragStart, startPos
 OpenBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -172,7 +184,7 @@ end)
 UIS.InputChanged:Connect(function(input)
     if dragToggle and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
-        TS:Create(OpenBtn, TweenInfo.new(0.1), {Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)}):Play()
+        TS:Create(OpenBtn, TweenInfo.new(0.08, Enum.EasingStyle.Linear), {Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)}):Play()
     end
 end)
 UIS.InputEnded:Connect(function() dragToggle = false end)
