@@ -62,11 +62,36 @@ local function ToggleUI(state)
         OpenBtn.Visible = true
         TS:Create(OpenBtn, info, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
         TS:Create(BtnStroke, info, {Transparency = 0}):Play()
-        hide.Completed:Connect(function()
-            Main.Visible = false
-        end)
+        hide.Completed:Connect(function() Main.Visible = false end)
     end
 end
+
+local dragToggle, dragStart, startPos
+local dragDistance = 0
+
+OpenBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragToggle, dragStart, startPos = true, input.Position, OpenBtn.Position
+        dragDistance = 0
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if dragToggle and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        dragDistance = delta.Magnitude
+        TS:Create(OpenBtn, TweenInfo.new(0.08, Enum.EasingStyle.Linear), {Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)}):Play()
+    end
+end)
+
+OpenBtn.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragToggle = false
+        if dragDistance < 5 then
+            ToggleUI(true)
+        end
+    end
+end)
 
 local Header = Instance.new("Frame", Main)
 Header.Size = UDim2.new(1, 0, 0, 38)
@@ -81,40 +106,24 @@ HeaderSquare.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 HeaderSquare.BorderSizePixel = 0
 
 local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1, 0, 0, 38)
-Title.Text = "Crystal Hub - Mini Games"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 12
+Title.Size, Title.Text = UDim2.new(1, 0, 0, 38), "Crystal Hub - Mini Games"
+Title.TextColor3, Title.Font, Title.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
 Title.BackgroundTransparency = 1
 
 local CloseBtn = Instance.new("TextButton", Main)
-CloseBtn.Size = UDim2.new(0, 35, 0, 38)
-CloseBtn.Position = UDim2.new(1, -38, 0, 0)
-CloseBtn.Text = "X"
-CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 12
+CloseBtn.Size, CloseBtn.Position, CloseBtn.Text = UDim2.new(0, 35, 0, 38), UDim2.new(1, -38, 0, 0), "X"
+CloseBtn.TextColor3, CloseBtn.Font, CloseBtn.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
 CloseBtn.BackgroundTransparency = 1
+CloseBtn.MouseButton1Click:Connect(function() ToggleUI(false) end)
 
-local function CreateToggle(name, pos, icon, var)
+local function CreateToggle(name, pos, var)
     local F = Instance.new("Frame", Main)
     F.Size, F.Position, F.BackgroundColor3 = UDim2.new(0, 175, 0, 42), pos, Color3.fromRGB(35, 35, 35)
     Instance.new("UICorner", F).CornerRadius = UDim.new(0, 18)
     
-    local I = Instance.new("TextLabel", F)
-    I.Size, I.Position, I.BackgroundColor3 = UDim2.new(0, 28, 0, 28), UDim2.new(0, 8, 0.5, -14), Color3.fromRGB(0, 120, 255)
-    I.Text, I.TextColor3, I.Font, I.TextSize = icon, Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
-    Instance.new("UICorner", I).CornerRadius = UDim.new(1, 0)
-    
-    local L = Instance.new("TextLabel", F)
-    L.Size, L.Position, L.Text = UDim2.new(0, 85, 1, 0), UDim2.new(0, 44, 0, 0), name
-    L.TextColor3, L.Font, L.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 11
-    L.BackgroundTransparency, L.TextXAlignment = 1, Enum.TextXAlignment.Left
-    
     local B = Instance.new("TextButton", F)
     B.Size, B.Position, B.BackgroundColor3 = UDim2.new(0, 32, 0, 16), UDim2.new(1, -40, 0.5, -8), Color3.fromRGB(50, 50, 50)
-    B.Text, B.AutoButtonColor = false, false
+    B.Text, B.AutoButtonColor = "", false
     Instance.new("UICorner", B).CornerRadius = UDim.new(1, 0)
     
     local Dot = Instance.new("Frame", B)
@@ -126,28 +135,28 @@ local function CreateToggle(name, pos, icon, var)
         TS:Create(B, TweenInfo.new(0.2), {BackgroundColor3 = getgenv().Config[var] and Color3.fromRGB(0, 120, 255) or Color3.fromRGB(50, 50, 50)}):Play()
         TS:Create(Dot, TweenInfo.new(0.2, Enum.EasingStyle.Back), {Position = getgenv().Config[var] and UDim2.new(0, 18, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)}):Play()
     end)
+    
+    local L = Instance.new("TextLabel", F)
+    L.Size, L.Position, L.Text = UDim2.new(0, 100, 1, 0), UDim2.new(0, 15, 0, 0), name
+    L.TextColor3, L.Font, L.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 11
+    L.BackgroundTransparency, L.TextXAlignment = 1, Enum.TextXAlignment.Left
 end
 
-CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "P", "AutoPop")
-CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
+CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "AutoPop")
+CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "ConnectFour")
 
 local SF = Instance.new("Frame", Main)
 SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 75), UDim2.new(0, 0, 1, -75), Color3.fromRGB(35, 35, 35)
-SF.BorderSizePixel = 0
 Instance.new("UICorner", SF).CornerRadius = UDim.new(0, 18)
-local SFSquare = Instance.new("Frame", SF)
-SFSquare.Size, SFSquare.BackgroundColor3, SFSquare.BorderSizePixel = UDim2.new(1, 0, 0, 15), Color3.fromRGB(35, 35, 35), 0
 
 local CombinedLabel = Instance.new("TextLabel", SF)
-CombinedLabel.Text = "Accuracy - " .. tostring(getgenv().Config.Accuracy)
-CombinedLabel.Size, CombinedLabel.Position = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 12)
-CombinedLabel.TextColor3, CombinedLabel.Font, CombinedLabel.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
-CombinedLabel.BackgroundTransparency = 1
+CombinedLabel.Text, CombinedLabel.Size, CombinedLabel.Position = "Accuracy - " .. tostring(getgenv().Config.Accuracy), UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 12)
+CombinedLabel.TextColor3, CombinedLabel.Font, CombinedLabel.TextSize, CombinedLabel.BackgroundTransparency = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12, 1
 
 local function CreateArr(t, p, step)
     local b = Instance.new("TextButton", SF)
     b.Size, b.Position, b.BackgroundColor3, b.Text = UDim2.new(0, 28, 0, 28), p, Color3.fromRGB(0, 120, 255), t
-    b.TextColor3, b.Font, b.TextSize, b.AutoButtonColor = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 14, false
+    b.TextColor3, b.Font, b.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 14
     Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
     b.MouseButton1Click:Connect(function()
         getgenv().Config.Accuracy = math.clamp(getgenv().Config.Accuracy + step, 0, 10)
@@ -165,20 +174,3 @@ Instance.new("UICorner", SFill).CornerRadius = UDim.new(1, 0)
 
 CreateArr("<", UDim2.new(0, 33, 0, 37), -1)
 CreateArr(">", UDim2.new(1, -61, 0, 37), 1)
-
-local dragToggle, dragStart, startPos
-OpenBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragToggle, dragStart, startPos = true, input.Position, OpenBtn.Position
-    end
-end)
-UIS.InputChanged:Connect(function(input)
-    if dragToggle and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        TS:Create(OpenBtn, TweenInfo.new(0.08, Enum.EasingStyle.Linear), {Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)}):Play()
-    end
-end)
-UIS.InputEnded:Connect(function() dragToggle = false end)
-
-OpenBtn.MouseButton1Click:Connect(function() ToggleUI(true) end)
-CloseBtn.MouseButton1Click:Connect(function() ToggleUI(false) end)
