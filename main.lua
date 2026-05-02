@@ -2,7 +2,7 @@ local TS = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local LP = game:GetService("Players").LocalPlayer
 
-local ScreenName = "CrystalHub_V9_Final"
+local ScreenName = "CrystalHub_V11_Final"
 local ExistingUI = game:GetService("CoreGui"):FindFirstChild(ScreenName) or LP.PlayerGui:FindFirstChild(ScreenName)
 if ExistingUI then ExistingUI:Destroy() end
 
@@ -15,8 +15,7 @@ Screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 local OpenBtn = Instance.new("TextButton", Screen)
 OpenBtn.Name = "OpenBtn"
 OpenBtn.Size = UDim2.new(0, 110, 0, 35)
--- الموضع تحت دلتا وفي المنتصف أفقياً
-OpenBtn.Position = UDim2.new(0.5, -55, 0.55, 0)
+OpenBtn.Position = UDim2.new(0.5, -55, 0.15, 0)
 OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 OpenBtn.Text, OpenBtn.TextColor3 = "Crystal Hub", Color3.fromRGB(255, 255, 255)
 OpenBtn.Font, OpenBtn.TextSize = Enum.Font.GothamBold, 13
@@ -32,42 +31,81 @@ BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 local Main = Instance.new("Frame", Screen)
 Main.Name = "Main"
 Main.Size = UDim2.new(0, 380, 0, 190)
--- القائمة تفتح في منتصف الشاشة تماماً
 Main.Position = UDim2.new(0.5, -190, 0.5, -95)
 Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 Main.Visible = false
 Main.Active = true
 Main.ClipsDescendants = true 
-Main.BackgroundTransparency = 1
 Main.ZIndex = 5
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 18)
 
 local MainStroke = Instance.new("UIStroke", Main)
 MainStroke.Color, MainStroke.Thickness = Color3.fromRGB(0, 120, 255), 1.5
-MainStroke.Transparency = 1
+MainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
+-- // وظيفة الشفافية الجماعية لمنع تقطيع الخلفية
+local function SetUITransparency(value)
+    Main.BackgroundTransparency = value
+    MainStroke.Transparency = value
+    for _, child in ipairs(Main:GetDescendants()) do
+        if child:IsA("Frame") and child.Name ~= "Main" then
+            child.BackgroundTransparency = (value == 0 and 0 or value) -- موازنة للأطر الداخلية
+        elseif child:IsA("TextLabel") or child:IsA("TextButton") then
+            child.TextTransparency = value
+            if child:IsA("TextButton") and child.Name ~= "CloseBtn" then
+                child.BackgroundTransparency = (value == 0 and 0 or value)
+            end
+        elseif child:IsA("UIStroke") then
+            child.Transparency = value
+        end
+    end
+end
+
+-- // نظام الفتح والإغلاق الموحد
 local function ToggleUI(state)
     local info = TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
     if state then
+        SetUITransparency(1)
         Main.Visible = true
-        TS:Create(Main, info, {BackgroundTransparency = 0, Size = UDim2.new(0, 380, 0, 190)}):Play()
-        TS:Create(MainStroke, info, {Transparency = 0}):Play()
+        Main.Size = UDim2.new(0, 370, 0, 180)
+        TS:Create(Main, info, {Size = UDim2.new(0, 380, 0, 190)}):Play()
+        
+        -- Tween لشفافية كل شيء معاً
+        local showTween = TS:Create(Main, info, {BackgroundTransparency = 0})
+        showTween:Play()
+        
+        -- تحديث شفافية العناصر أثناء الـ Tween
+        local connection
+        connection = game:GetService("RunService").RenderStepped:Connect(function()
+            if showTween.PlaybackState == Enum.PlaybackState.Playing then
+                SetUITransparency(Main.BackgroundTransparency)
+            else
+                connection:Disconnect()
+                SetUITransparency(0)
+            end
+        end)
+
         TS:Create(OpenBtn, info, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
         TS:Create(BtnStroke, info, {Transparency = 1}):Play()
         task.delay(0.3, function() OpenBtn.Visible = false end)
     else
-        -- حل مشكلة الخلفية: إغلاق كلي متزامن
-        local T1 = TS:Create(Main, info, {BackgroundTransparency = 1, Size = UDim2.new(0, 360, 0, 170)})
-        local T2 = TS:Create(MainStroke, info, {Transparency = 1})
-        T1:Play()
-        T2:Play()
-        
+        local hideTween = TS:Create(Main, info, {BackgroundTransparency = 1, Size = UDim2.new(0, 370, 0, 180)})
+        hideTween:Play()
+
+        local connection
+        connection = game:GetService("RunService").RenderStepped:Connect(function()
+            if hideTween.PlaybackState == Enum.PlaybackState.Playing then
+                SetUITransparency(Main.BackgroundTransparency)
+            else
+                connection:Disconnect()
+                Main.Visible = false
+                SetUITransparency(1)
+            end
+        end)
+
         OpenBtn.Visible = true
         TS:Create(OpenBtn, info, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
         TS:Create(BtnStroke, info, {Transparency = 0}):Play()
-        
-        T1.Completed:Wait()
-        Main.Visible = false
     end
 end
 
@@ -84,6 +122,7 @@ Title.TextColor3, Title.Font, Title.TextSize = Color3.fromRGB(255, 255, 255), En
 Title.TextStrokeTransparency, Title.BackgroundTransparency = 1, 1
 
 local CloseBtn = Instance.new("TextButton", Main)
+CloseBtn.Name = "CloseBtn"
 CloseBtn.Size, CloseBtn.Position = UDim2.new(0, 35, 0, 38), UDim2.new(1, -38, 0, 0)
 CloseBtn.Text, CloseBtn.TextColor3 = "X", Color3.fromRGB(255, 255, 255)
 CloseBtn.Font, CloseBtn.TextSize = Enum.Font.GothamBold, 13
@@ -129,8 +168,6 @@ SF.Name = "SliderFrame"
 SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 75), UDim2.new(0, 0, 1, -75), Color3.fromRGB(35, 35, 35)
 SF.BorderSizePixel = 0
 Instance.new("UICorner", SF).CornerRadius = UDim.new(0, 18)
-local SFFix = Instance.new("Frame", SF)
-SFFix.Size, SFFix.BackgroundColor3, SFFix.BorderSizePixel = UDim2.new(1, 0, 0, 20), Color3.fromRGB(35, 35, 35), 0
 
 local CombinedLabel = Instance.new("TextLabel", SF)
 CombinedLabel.Text = "Accuracy - " .. tostring(getgenv().Config.Accuracy)
