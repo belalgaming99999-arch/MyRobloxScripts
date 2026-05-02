@@ -6,7 +6,7 @@ local LP = game:GetService("Players").LocalPlayer
 getgenv().Config = {AutoPop = false, ConnectFour = false, Accuracy = 7}
 
 local Screen = Instance.new("ScreenGui")
-Screen.Name = "CrystalHubFullWidth"
+Screen.Name = "CrystalHubPerfectEdges"
 pcall(function() Screen.Parent = game:GetService("CoreGui") end)
 if not Screen.Parent then Screen.Parent = LP.PlayerGui end
 
@@ -41,23 +41,34 @@ Main.ClipsDescendants, Main.Visible, Main.Active = true, false, true
 MakeOval(Main, UDim.new(0, 18))
 AddStroke(Main)
 
+-- // تعديل العنوان العلوي: بيضاوي من فوق فقط
 local Header = Instance.new("Frame", Main)
 Header.Size = UDim2.new(1, 0, 0, 38)
 Header.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 Header.BorderSizePixel = 0
--- تم إزالة البيضاوية هنا ليأخذ عرض الشاشة كاملاً
+local HeaderCorner = Instance.new("UICorner", Header)
+HeaderCorner.CornerRadius = UDim.new(0, 18)
+
+-- لإخفاء الانحناء من الأسفل وجعله مربعاً
+local HeaderFix = Instance.new("Frame", Header)
+HeaderFix.Size = UDim2.new(1, 0, 0, 10)
+HeaderFix.Position = UDim2.new(0, 0, 1, -10)
+HeaderFix.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+HeaderFix.BorderSizePixel = 0
 
 local Title = Instance.new("TextLabel", Main)
 Title.Size = UDim2.new(1, 0, 0, 38)
 Title.Text = "Crystal Hub - Mini Games"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font, Title.TextSize, Title.BackgroundTransparency = Enum.Font.GothamBold, 13, 1
+Title.ZIndex = 3
 
 local CloseBtn = Instance.new("TextButton", Main)
 CloseBtn.Size = UDim2.new(0, 30, 0, 30)
 CloseBtn.Position = UDim2.new(1, -35, 0, 4)
 CloseBtn.BackgroundTransparency, CloseBtn.Text = 1, "X"
 CloseBtn.TextColor3, CloseBtn.Font, CloseBtn.TextSize = Color3.fromRGB(255, 80, 80), Enum.Font.GothamBold, 13
+CloseBtn.ZIndex = 4
 
 local function CreateToggle(name, pos, icon, var)
     local F = Instance.new("Frame", Main)
@@ -88,24 +99,36 @@ end
 CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 48), "P", "AutoPop")
 CreateToggle("Connect Four", UDim2.new(0, 195, 0, 48), "C", "ConnectFour")
 
--- قسم السلايدر السفلي بعرض الشاشة بالكامل
+-- // تعديل قسم السلايدر السفلي: بيضاوي من تحت فقط
 local SF = Instance.new("Frame", Main)
 SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 85), UDim2.new(0, 0, 1, -85), Color3.fromRGB(35, 35, 35)
 SF.BorderSizePixel = 0
+local SFCorner = Instance.new("UICorner", SF)
+SFCorner.CornerRadius = UDim.new(0, 18)
+
+-- لإخفاء الانحناء من الأعلى وجعله مربعاً
+local SFFix = Instance.new("Frame", SF)
+SFFix.Size = UDim2.new(1, 0, 0, 10)
+SFFix.Position = UDim2.new(0, 0, 0, 0)
+SFFix.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+SFFix.BorderSizePixel = 0
 
 local SL = Instance.new("TextLabel", SF)
 SL.Text, SL.Size, SL.Position, SL.BackgroundTransparency = "Accuracy", UDim2.new(0, 100, 0, 25), UDim2.new(0, 20, 0, 12), 1
 SL.TextColor3, SL.Font, SL.TextSize, SL.TextXAlignment = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 13, 0
+SL.ZIndex = 3
 
 local SV = Instance.new("TextLabel", SF)
 SV.Text, SV.Size, SV.Position, SV.BackgroundTransparency = "7", UDim2.new(0, 30, 0, 25), UDim2.new(1, -50, 0, 12), 1
 SV.TextColor3, SV.Font, SV.TextSize = Color3.fromRGB(0, 120, 255), Enum.Font.GothamBold, 13
+SV.ZIndex = 3
 
 local function CreateArr(t, p)
     local b = Instance.new("TextButton", SF)
     b.Size, b.Position, b.BackgroundColor3, b.Text = UDim2.new(0, 30, 0, 30), p, Color3.fromRGB(0, 120, 255), t
     b.TextColor3, b.Font, b.TextSize, b.AutoButtonColor, b.Active = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 13, false, true
     MakeOval(b, UDim.new(0, 18))
+    b.ZIndex = 3
     return b
 end
 
@@ -113,6 +136,7 @@ local L_Arr, R_Arr = CreateArr("<", UDim2.new(0, 20, 0, 45)), CreateArr(">", UDi
 local SBtn = Instance.new("TextButton", SF)
 SBtn.Size, SBtn.Position, SBtn.BackgroundColor3 = UDim2.new(0, 260, 0, 6), UDim2.new(0.5, -130, 0, 57), Color3.fromRGB(60, 60, 60)
 SBtn.Text, SBtn.AutoButtonColor, SBtn.Active = "", false, true
+SBtn.ZIndex = 3
 MakeOval(SBtn, UDim.new(1, 0))
 local SFill = Instance.new("Frame", SBtn)
 SFill.Size, SFill.BackgroundColor3 = UDim2.new(0.7, 0, 1, 0), Color3.fromRGB(0, 120, 255)
