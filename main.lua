@@ -23,8 +23,8 @@ local MainStroke = Instance.new("UIStroke", Main)
 MainStroke.Color, MainStroke.Thickness = Color3.fromRGB(0, 120, 255), 1.5
 MainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-local function AddDesign(obj, radius)
-    Instance.new("UICorner", obj).CornerRadius = radius or UDim.new(0, 18)
+local function AddDesign(obj)
+    Instance.new("UICorner", obj).CornerRadius = UDim.new(0, 18)
     local s = Instance.new("UIStroke", obj)
     s.Color, s.Thickness = Color3.fromRGB(0, 120, 255), 1.5
     s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -61,27 +61,21 @@ local function CreateToggle(name, pos, icon, var)
     local F = Instance.new("Frame", Main)
     F.Size, F.Position, F.BackgroundColor3 = UDim2.new(0, 175, 0, 42), pos, Color3.fromRGB(35, 35, 35)
     Instance.new("UICorner", F).CornerRadius = UDim.new(0, 18)
-    
     local I = Instance.new("TextLabel", F)
     I.Size, I.Position, I.BackgroundColor3 = UDim2.new(0, 28, 0, 28), UDim2.new(0, 8, 0.5, -14), Color3.fromRGB(0, 120, 255)
     I.Text, I.TextColor3, I.Font, I.TextSize = icon, Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
     Instance.new("UICorner", I).CornerRadius = UDim.new(0, 18)
-    
     local L = Instance.new("TextLabel", F)
     L.Size, L.Position, L.Text = UDim2.new(0, 80, 1, 0), UDim2.new(0, 45, 0, 0), name
     L.TextColor3, L.Font, L.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
     L.TextXAlignment, L.BackgroundTransparency = 0, 1
-    
     local B = Instance.new("TextButton", F)
     B.Size, B.Position, B.BackgroundColor3 = UDim2.new(0, 32, 0, 16), UDim2.new(1, -42, 0.5, -8), Color3.fromRGB(50, 50, 50)
     B.Text, B.AutoButtonColor = "", false
     Instance.new("UICorner", B).CornerRadius = UDim.new(1, 0)
-    
     local Dot = Instance.new("Frame", B)
-    Dot.Size, Dot.Position = UDim2.new(0, 12, 0, 12), UDim2.new(0, 2, 0.5, -6)
-    Dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Dot.Size, Dot.Position, Dot.BackgroundColor3 = UDim2.new(0, 12, 0, 12), UDim2.new(0, 2, 0.5, -6), Color3.fromRGB(255, 255, 255)
     Instance.new("UICorner", Dot).CornerRadius = UDim.new(1, 0)
-    
     B.MouseButton1Click:Connect(function()
         getgenv().Config[var] = not getgenv().Config[var]
         local act = getgenv().Config[var]
@@ -90,7 +84,6 @@ local function CreateToggle(name, pos, icon, var)
     end)
 end
 
--- الأزرار في منتصف المساحة تماماً
 CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 58), "P", "AutoPop")
 CreateToggle("Connect Four", UDim2.new(0, 195, 0, 58), "C", "ConnectFour")
 
@@ -99,20 +92,23 @@ SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 72), UDim2.new(0,
 Instance.new("UICorner", SF).CornerRadius = UDim.new(0, 18)
 
 local SFFix = Instance.new("Frame", SF)
-SFFix.Size, SFFix.Position = UDim2.new(1, 0, 0, 10), UDim2.new(0, 0, 0, 0)
-SFFix.BackgroundColor3, SFFix.BorderSizePixel = Color3.fromRGB(35, 35, 35), 0
+SFFix.Size, SFFix.Position, SFFix.BackgroundColor3, SFFix.BorderSizePixel = UDim2.new(1, 0, 0, 10), UDim2.new(0, 0, 0, 0), Color3.fromRGB(35, 35, 35), 0
+
+-- إعادة إضافة كلمة Accuracy
+local AccLabel = Instance.new("TextLabel", SF)
+AccLabel.Text, AccLabel.Size, AccLabel.Position = "Accuracy", UDim2.new(0, 100, 0, 25), UDim2.new(0, 20, 0, 8)
+AccLabel.TextColor3, AccLabel.Font, AccLabel.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
+AccLabel.TextXAlignment, AccLabel.BackgroundTransparency, AccLabel.ZIndex = 0, 1, 10
 
 local SV = Instance.new("TextLabel", SF)
 SV.Text, SV.Size, SV.Position = "7", UDim2.new(0, 30, 0, 25), UDim2.new(1, -50, 0, 8)
-SV.TextColor3, SV.Font, SV.TextSize = Color3.fromRGB(0, 120, 255), Enum.Font.GothamBold, 12
-SV.BackgroundTransparency, SV.ZIndex = 1, 10
+SV.TextColor3, SV.Font, SV.TextSize, SV.BackgroundTransparency, SV.ZIndex = Color3.fromRGB(0, 120, 255), Enum.Font.GothamBold, 12, 1, 10
 
 local function CreateArr(t, p, step)
     local b = Instance.new("TextButton", SF)
     b.Size, b.Position, b.BackgroundColor3, b.Text = UDim2.new(0, 28, 0, 28), p, Color3.fromRGB(0, 120, 255), t
-    b.TextColor3, b.Font, b.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
+    b.TextColor3, b.Font, b.TextSize, b.ZIndex = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12, 10
     Instance.new("UICorner", b).CornerRadius = UDim.new(0, 18)
-    b.ZIndex = 10
     b.MouseButton1Click:Connect(function()
         getgenv().Config.Accuracy = math.clamp(getgenv().Config.Accuracy + step, 0, 10)
         SV.Text = tostring(getgenv().Config.Accuracy)
@@ -124,14 +120,11 @@ CreateArr("<", UDim2.new(0, 20, 0, 36), -1)
 CreateArr(">", UDim2.new(1, -48, 0, 36), 1)
 
 local SBtn = Instance.new("Frame", SF)
-SBtn.Size, SBtn.Position = UDim2.new(0, 260, 0, 6), UDim2.new(0.5, -130, 0, 47)
-SBtn.BackgroundColor3, SBtn.ZIndex = Color3.fromRGB(60, 60, 60), 11
+SBtn.Size, SBtn.Position, SBtn.BackgroundColor3, SBtn.ZIndex = UDim2.new(0, 260, 0, 6), UDim2.new(0.5, -130, 0, 47), Color3.fromRGB(60, 60, 60), 11
 Instance.new("UICorner", SBtn).CornerRadius = UDim.new(1, 0)
 
 local SFill = Instance.new("Frame", SBtn)
-SFill.Name = "Fill"
-SFill.Size, SFill.BackgroundColor3 = UDim2.new(0.7, 0, 1, 0), Color3.fromRGB(0, 120, 255)
-SFill.ZIndex = 12
+SFill.Name, SFill.Size, SFill.BackgroundColor3, SFill.ZIndex = "Fill", UDim2.new(0.7, 0, 1, 0), Color3.fromRGB(0, 120, 255), 12
 Instance.new("UICorner", SFill).CornerRadius = UDim.new(1, 0)
 
 local dragging, dragStart, startPos, dragDist = false, nil, nil, 0
@@ -147,7 +140,7 @@ UIS.InputChanged:Connect(function(i)
         OpenBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 end)
-UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then dragging = false end end)
 
 local function ToggleUI(s)
     if s then
@@ -158,7 +151,8 @@ local function ToggleUI(s)
     else
         MainStroke.Transparency = 1
         TS:Create(Main, TweenInfo.new(0.2), {Size = UDim2.new(0, 380, 0, 0)}):Play()
-        task.wait(0.2) Main.Visible, OpenBtn.Visible = false, true
+        task.wait(0.2)
+        Main.Visible, OpenBtn.Visible = false, true
     end
 end
 
