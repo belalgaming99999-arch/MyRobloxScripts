@@ -7,9 +7,7 @@ local ScreenName = "CrystalHubFinalM"
 local ExistingUI = game:GetService("CoreGui"):FindFirstChild(ScreenName) or LP.PlayerGui:FindFirstChild(ScreenName)
 
 if ExistingUI then
-    ExistingUI.Main.Visible = false
-    ExistingUI.OpenBtn.Visible = true
-    return 
+    ExistingUI:Destroy() 
 end
 
 getgenv().Config = {AutoPop = false, ConnectFour = false, Accuracy = 7}
@@ -25,9 +23,9 @@ OpenBtn.Position = UDim2.new(0, 50, 0.5, -17)
 OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 OpenBtn.Text, OpenBtn.TextColor3 = "Crystal Hub", Color3.fromRGB(255, 255, 255)
 OpenBtn.Font, OpenBtn.TextSize = Enum.Font.GothamBold, 13
+OpenBtn.TextStrokeTransparency = 1
 OpenBtn.AutoButtonColor = false
 Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 18)
-
 local BtnStroke = Instance.new("UIStroke", OpenBtn)
 BtnStroke.Color, BtnStroke.Thickness = Color3.fromRGB(0, 120, 255), 1.5
 
@@ -52,14 +50,16 @@ HeaderFix.Size, HeaderFix.Position, HeaderFix.BackgroundColor3, HeaderFix.Border
 local Title = Instance.new("TextLabel", Main)
 Title.Size, Title.Text = UDim2.new(1, 0, 0, 38), "Crystal Hub - Mini Games"
 Title.TextColor3, Title.Font, Title.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 13
+Title.TextStrokeTransparency = 1
 Title.BackgroundTransparency, Title.ZIndex = 1, 5
 
 local CloseBtn = Instance.new("TextButton", Main)
 CloseBtn.Size, CloseBtn.Position = UDim2.new(0, 30, 0, 30), UDim2.new(1, -35, 0, 4)
 CloseBtn.Text, CloseBtn.TextColor3, CloseBtn.Font, CloseBtn.TextSize = "X", Color3.fromRGB(255, 80, 80), Enum.Font.GothamBold, 13
-CloseBtn.BackgroundTransparency, CloseBtn.ZIndex, CloseBtn.AutoButtonColor = 1, 6, false
+CloseBtn.TextStrokeTransparency = 1
+CloseBtn.BackgroundTransparency, CloseBtn.AutoButtonColor = 1, false
 
--- // أزرار التفعيل
+-- // دالة إنشاء الأزرار (مع ضبط التوسيط العمودي)
 local function CreateToggle(name, pos, icon, var)
     local F = Instance.new("Frame", Main)
     F.Size, F.Position, F.BackgroundColor3 = UDim2.new(0, 175, 0, 42), pos, Color3.fromRGB(35, 35, 35)
@@ -67,10 +67,13 @@ local function CreateToggle(name, pos, icon, var)
     local I = Instance.new("TextLabel", F)
     I.Size, I.Position, I.BackgroundColor3 = UDim2.new(0, 28, 0, 28), UDim2.new(0, 8, 0.5, -14), Color3.fromRGB(0, 120, 255)
     I.Text, I.TextColor3, I.Font, I.TextSize = icon, Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
+    I.TextStrokeTransparency = 1
     Instance.new("UICorner", I).CornerRadius = UDim.new(1, 0)
     local L = Instance.new("TextLabel", F)
     L.Size, L.Position, L.Text = UDim2.new(0, 80, 1, 0), UDim2.new(0, 45, 0, 0), name
-    L.TextColor3, L.Font, L.TextSize, L.TextXAlignment, L.BackgroundTransparency = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12, 0, 1
+    L.TextColor3, L.Font, L.TextSize, L.BackgroundTransparency = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12, 1
+    L.TextStrokeTransparency = 1
+    L.TextXAlignment = 0
     local B = Instance.new("TextButton", F)
     B.Size, B.Position, B.BackgroundColor3 = UDim2.new(0, 32, 0, 16), UDim2.new(1, -42, 0.5, -8), Color3.fromRGB(50, 50, 50)
     B.Text, B.AutoButtonColor = "", false
@@ -86,33 +89,30 @@ local function CreateToggle(name, pos, icon, var)
     end)
 end
 
-CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "P", "AutoPop")
-CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
+-- توزيع الأزرار في المنتصف تماماً بين الهيدر والمربع السفلي
+CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 60), "P", "AutoPop")
+CreateToggle("Connect Four", UDim2.new(0, 195, 0, 60), "C", "ConnectFour")
 
--- // منطقة السلايدر
+-- // المربع الرمادي السفلي (تصغير ونزول)
 local SF = Instance.new("Frame", Main)
-SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 85), UDim2.new(0, 0, 1, -85), Color3.fromRGB(35, 35, 35)
+SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 70), UDim2.new(0, 0, 1, -70), Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", SF).CornerRadius = UDim.new(0, 18)
 local SFFix = Instance.new("Frame", SF)
 SFFix.Size, SFFix.Position, SFFix.BackgroundColor3, SFFix.BorderSizePixel = UDim2.new(1, 0, 0, 10), UDim2.new(0, 0, 0, 0), Color3.fromRGB(35, 35, 35), 0
 
--- // نص Accuracy - 7 في المنتصف تماماً وبخط كبير
+-- نص Accuracy - 7 في المنتصف
 local CombinedLabel = Instance.new("TextLabel", SF)
-CombinedLabel.Name = "CombinedLabel"
 CombinedLabel.Text = "Accuracy - " .. tostring(getgenv().Config.Accuracy)
-CombinedLabel.Size = UDim2.new(1, 0, 0, 25)
-CombinedLabel.Position = UDim2.new(0, 0, 0, 12) -- توسيط عمودي في المساحة العلوية
-CombinedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-CombinedLabel.Font = Enum.Font.GothamBold
-CombinedLabel.TextSize = 13 -- نفس حجم عنوان الهيدر
-CombinedLabel.TextXAlignment = Enum.TextXAlignment.Center -- توسيط أفقي
-CombinedLabel.BackgroundTransparency = 1
-CombinedLabel.ZIndex = 10
+CombinedLabel.Size = UDim2.new(1, 0, 0, 20)
+CombinedLabel.Position = UDim2.new(0, 0, 0, 10)
+CombinedLabel.TextColor3, CombinedLabel.Font, CombinedLabel.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 13
+CombinedLabel.TextStrokeTransparency, CombinedLabel.BackgroundTransparency = 1, 1
 
 local function CreateArr(t, p, step)
     local b = Instance.new("TextButton", SF)
-    b.Size, b.Position, b.BackgroundColor3, b.Text = UDim2.new(0, 28, 0, 28), p, Color3.fromRGB(0, 120, 255), t
-    b.TextColor3, b.Font, b.TextSize, b.ZIndex, b.AutoButtonColor = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 14, 10, false
+    b.Size, b.Position, b.BackgroundColor3, b.Text = UDim2.new(0, 26, 0, 26), p, Color3.fromRGB(0, 120, 255), t
+    b.TextColor3, b.Font, b.TextSize, b.AutoButtonColor = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 14, false
+    b.TextStrokeTransparency = 1
     Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
     b.MouseButton1Click:Connect(function()
         getgenv().Config.Accuracy = math.clamp(getgenv().Config.Accuracy + step, 0, 10)
@@ -121,16 +121,16 @@ local function CreateArr(t, p, step)
     end)
 end
 
--- ضبط أماكن الأسهم والسلايدر لتكون أسفل النص المركز
-CreateArr("<", UDim2.new(0, 20, 0, 45), -1)
-CreateArr(">", UDim2.new(1, -48, 0, 45), 1)
+-- ضبط الأسهم والسلايدر داخل المربع المصغر
+CreateArr("<", UDim2.new(0, 25, 0, 36), -1)
+CreateArr(">", UDim2.new(1, -51, 0, 36), 1)
 
 local SBtn = Instance.new("Frame", SF)
-SBtn.Size, SBtn.Position, SBtn.BackgroundColor3, SBtn.ZIndex = UDim2.new(0, 250, 0, 6), UDim2.new(0.5, -125, 0, 56), Color3.fromRGB(60, 60, 60), 11
+SBtn.Size, SBtn.Position, SBtn.BackgroundColor3 = UDim2.new(0, 240, 0, 6), UDim2.new(0.5, -120, 0, 46), Color3.fromRGB(60, 60, 60)
 Instance.new("UICorner", SBtn).CornerRadius = UDim.new(1, 0)
 
 local SFill = Instance.new("Frame", SBtn)
-SFill.Name, SFill.Size, SFill.BackgroundColor3, SFill.ZIndex = "Fill", UDim2.new(getgenv().Config.Accuracy/10, 0, 1, 0), Color3.fromRGB(0, 120, 255), 12
+SFill.Name, SFill.Size, SFill.BackgroundColor3 = "Fill", UDim2.new(getgenv().Config.Accuracy/10, 0, 1, 0), Color3.fromRGB(0, 120, 255)
 Instance.new("UICorner", SFill).CornerRadius = UDim.new(1, 0)
 
 -- // سحب الأيقونة والفتح/القفل
@@ -165,7 +165,7 @@ end
 OpenBtn.MouseButton1Click:Connect(function() if dragDist < 5 then ToggleUI(true) end end)
 CloseBtn.MouseButton1Click:Connect(function() ToggleUI(false) end)
 
--- // منطق العمل (دون تغيير)
+-- // منطق العمل (الذكاء)
 RS.Heartbeat:Connect(function()
     pcall(function()
         if getgenv().Config.AutoPop then
