@@ -3,7 +3,7 @@ local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local LP = game:GetService("Players").LocalPlayer
 
-local ScreenName = "CrystalHubFinalClean"
+local ScreenName = "CrystalHubV6"
 local ExistingUI = game:GetService("CoreGui"):FindFirstChild(ScreenName) or LP.PlayerGui:FindFirstChild(ScreenName)
 if ExistingUI then ExistingUI:Destroy() end
 
@@ -36,6 +36,7 @@ Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 Main.Visible, Main.Active = false, true
 Main.ClipsDescendants = true 
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 18)
+
 local MainStroke = Instance.new("UIStroke", Main)
 MainStroke.Color, MainStroke.Thickness = Color3.fromRGB(0, 120, 255), 1.5
 
@@ -68,12 +69,12 @@ local function CreateToggle(name, pos, icon, var)
     Instance.new("UICorner", I).CornerRadius = UDim.new(1, 0)
     
     local L = Instance.new("TextLabel", F)
-    L.Size, L.Position, L.Text = UDim2.new(0, 85, 1, 0), UDim2.new(0, 45, 0, 0), name
-    L.TextColor3, L.Font, L.TextSize, L.TextStrokeTransparency, L.BackgroundTransparency = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12, 1, 1
-    L.TextXAlignment = 0
+    L.Size, L.Position, L.Text = UDim2.new(0, 85, 1, 0), UDim2.new(0, 44, 0, 0), name
+    L.TextColor3, L.Font, L.TextSize, L.TextStrokeTransparency, L.BackgroundTransparency = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 11, 1, 1
+    L.TextXAlignment = Enum.TextXAlignment.Left
     
     local B = Instance.new("TextButton", F)
-    B.Size, B.Position, B.BackgroundColor3 = UDim2.new(0, 32, 0, 16), UDim2.new(0, 133, 0.5, -8), Color3.fromRGB(50, 50, 50)
+    B.Size, B.Position, B.BackgroundColor3 = UDim2.new(0, 32, 0, 16), UDim2.new(1, -40, 0.5, -8), Color3.fromRGB(50, 50, 50)
     B.Text, B.AutoButtonColor = "", false
     Instance.new("UICorner", B).CornerRadius = UDim.new(1, 0)
     
