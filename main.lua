@@ -17,7 +17,7 @@ getgenv().Config = {AutoPop = false, ConnectFour = false, Accuracy = 7}
 local Screen = Instance.new("ScreenGui", game:GetService("CoreGui"))
 Screen.Name = ScreenName
 
--- // زر الفتح المطابق
+-- // زر الفتح
 local OpenBtn = Instance.new("TextButton", Screen)
 OpenBtn.Name = "OpenBtn"
 OpenBtn.Size = UDim2.new(0, 110, 0, 35)
@@ -30,7 +30,6 @@ Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 18)
 
 local BtnStroke = Instance.new("UIStroke", OpenBtn)
 BtnStroke.Color, BtnStroke.Thickness = Color3.fromRGB(0, 120, 255), 1.5
-BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 -- // الإطار الرئيسي
 local Main = Instance.new("Frame", Screen)
@@ -92,21 +91,21 @@ CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
 
 -- // منطقة السلايدر
 local SF = Instance.new("Frame", Main)
-SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 75), UDim2.new(0, 0, 1, -75), Color3.fromRGB(35, 35, 35)
+SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 85), UDim2.new(0, 0, 1, -85), Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", SF).CornerRadius = UDim.new(0, 18)
 local SFFix = Instance.new("Frame", SF)
 SFFix.Size, SFFix.Position, SFFix.BackgroundColor3, SFFix.BorderSizePixel = UDim2.new(1, 0, 0, 10), UDim2.new(0, 0, 0, 0), Color3.fromRGB(35, 35, 35), 0
 
--- دمج الكلمة والرقم معاً ليكون التنسيق: Accuracy - 7
+-- // نص Accuracy - 7 في المنتصف تماماً وبخط كبير
 local CombinedLabel = Instance.new("TextLabel", SF)
 CombinedLabel.Name = "CombinedLabel"
 CombinedLabel.Text = "Accuracy - " .. tostring(getgenv().Config.Accuracy)
-CombinedLabel.Size = UDim2.new(0, 150, 0, 20)
-CombinedLabel.Position = UDim2.new(0, 20, 0, 10)
+CombinedLabel.Size = UDim2.new(1, 0, 0, 25)
+CombinedLabel.Position = UDim2.new(0, 0, 0, 12) -- توسيط عمودي في المساحة العلوية
 CombinedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 CombinedLabel.Font = Enum.Font.GothamBold
-CombinedLabel.TextSize = 12
-CombinedLabel.TextXAlignment = Enum.TextXAlignment.Left
+CombinedLabel.TextSize = 13 -- نفس حجم عنوان الهيدر
+CombinedLabel.TextXAlignment = Enum.TextXAlignment.Center -- توسيط أفقي
 CombinedLabel.BackgroundTransparency = 1
 CombinedLabel.ZIndex = 10
 
@@ -122,11 +121,12 @@ local function CreateArr(t, p, step)
     end)
 end
 
-CreateArr("<", UDim2.new(0, 20, 0, 33), -1)
-CreateArr(">", UDim2.new(1, -48, 0, 33), 1)
+-- ضبط أماكن الأسهم والسلايدر لتكون أسفل النص المركز
+CreateArr("<", UDim2.new(0, 20, 0, 45), -1)
+CreateArr(">", UDim2.new(1, -48, 0, 45), 1)
 
 local SBtn = Instance.new("Frame", SF)
-SBtn.Size, SBtn.Position, SBtn.BackgroundColor3, SBtn.ZIndex = UDim2.new(0, 250, 0, 6), UDim2.new(0.5, -125, 0, 45), Color3.fromRGB(60, 60, 60), 11
+SBtn.Size, SBtn.Position, SBtn.BackgroundColor3, SBtn.ZIndex = UDim2.new(0, 250, 0, 6), UDim2.new(0.5, -125, 0, 56), Color3.fromRGB(60, 60, 60), 11
 Instance.new("UICorner", SBtn).CornerRadius = UDim.new(1, 0)
 
 local SFill = Instance.new("Frame", SBtn)
@@ -165,6 +165,7 @@ end
 OpenBtn.MouseButton1Click:Connect(function() if dragDist < 5 then ToggleUI(true) end end)
 CloseBtn.MouseButton1Click:Connect(function() ToggleUI(false) end)
 
+-- // منطق العمل (دون تغيير)
 RS.Heartbeat:Connect(function()
     pcall(function()
         if getgenv().Config.AutoPop then
