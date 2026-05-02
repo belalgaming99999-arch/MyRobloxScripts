@@ -2,7 +2,7 @@ local TS = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local LP = game:GetService("Players").LocalPlayer
 
-local ScreenName = "CrystalHub_V11_Final"
+local ScreenName = "CrystalHub_V12_Final"
 local ExistingUI = game:GetService("CoreGui"):FindFirstChild(ScreenName) or LP.PlayerGui:FindFirstChild(ScreenName)
 if ExistingUI then ExistingUI:Destroy() end
 
@@ -12,10 +12,12 @@ local Screen = Instance.new("ScreenGui", game:GetService("CoreGui"))
 Screen.Name = ScreenName
 Screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
+-- // زر الفتح (تحريك لليسار قليلاً)
 local OpenBtn = Instance.new("TextButton", Screen)
 OpenBtn.Name = "OpenBtn"
 OpenBtn.Size = UDim2.new(0, 110, 0, 35)
-OpenBtn.Position = UDim2.new(0.5, -55, 0.15, 0)
+-- تم تعديل X من 0.5 إلى 0.45 ليكون مائلاً لليسار تحت أيقونة دلتا
+OpenBtn.Position = UDim2.new(0.45, -55, 0.15, 0)
 OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 OpenBtn.Text, OpenBtn.TextColor3 = "Crystal Hub", Color3.fromRGB(255, 255, 255)
 OpenBtn.Font, OpenBtn.TextSize = Enum.Font.GothamBold, 13
@@ -28,105 +30,58 @@ local BtnStroke = Instance.new("UIStroke", OpenBtn)
 BtnStroke.Color, BtnStroke.Thickness = Color3.fromRGB(0, 120, 255), 1.5
 BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-local Main = Instance.new("Frame", Screen)
+-- // الإطار الرئيسي (استخدام CanvasGroup للشفافية المثالية)
+local Main = Instance.new("CanvasGroup", Screen) -- استخدام CanvasGroup يحل مشكلة الدوائر الزرقاء
 Main.Name = "Main"
 Main.Size = UDim2.new(0, 380, 0, 190)
 Main.Position = UDim2.new(0.5, -190, 0.5, -95)
 Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 Main.Visible = false
-Main.Active = true
-Main.ClipsDescendants = true 
 Main.ZIndex = 5
+Main.GroupTransparency = 1 -- التحكم في شفافية كل شيء مرة واحدة
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 18)
 
 local MainStroke = Instance.new("UIStroke", Main)
 MainStroke.Color, MainStroke.Thickness = Color3.fromRGB(0, 120, 255), 1.5
-MainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
--- // وظيفة الشفافية الجماعية لمنع تقطيع الخلفية
-local function SetUITransparency(value)
-    Main.BackgroundTransparency = value
-    MainStroke.Transparency = value
-    for _, child in ipairs(Main:GetDescendants()) do
-        if child:IsA("Frame") and child.Name ~= "Main" then
-            child.BackgroundTransparency = (value == 0 and 0 or value) -- موازنة للأطر الداخلية
-        elseif child:IsA("TextLabel") or child:IsA("TextButton") then
-            child.TextTransparency = value
-            if child:IsA("TextButton") and child.Name ~= "CloseBtn" then
-                child.BackgroundTransparency = (value == 0 and 0 or value)
-            end
-        elseif child:IsA("UIStroke") then
-            child.Transparency = value
-        end
-    end
-end
-
--- // نظام الفتح والإغلاق الموحد
+-- // نظام الفتح والإغلاق السلس (Sync)
 local function ToggleUI(state)
-    local info = TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+    local info = TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
     if state then
-        SetUITransparency(1)
         Main.Visible = true
-        Main.Size = UDim2.new(0, 370, 0, 180)
-        TS:Create(Main, info, {Size = UDim2.new(0, 380, 0, 190)}):Play()
-        
-        -- Tween لشفافية كل شيء معاً
-        local showTween = TS:Create(Main, info, {BackgroundTransparency = 0})
-        showTween:Play()
-        
-        -- تحديث شفافية العناصر أثناء الـ Tween
-        local connection
-        connection = game:GetService("RunService").RenderStepped:Connect(function()
-            if showTween.PlaybackState == Enum.PlaybackState.Playing then
-                SetUITransparency(Main.BackgroundTransparency)
-            else
-                connection:Disconnect()
-                SetUITransparency(0)
-            end
-        end)
-
+        Main.Size = UDim2.new(0, 360, 0, 170)
+        TS:Create(Main, info, {GroupTransparency = 0, Size = UDim2.new(0, 380, 0, 190)}):Play()
         TS:Create(OpenBtn, info, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
         TS:Create(BtnStroke, info, {Transparency = 1}):Play()
-        task.delay(0.3, function() OpenBtn.Visible = false end)
+        task.delay(0.35, function() OpenBtn.Visible = false end)
     else
-        local hideTween = TS:Create(Main, info, {BackgroundTransparency = 1, Size = UDim2.new(0, 370, 0, 180)})
-        hideTween:Play()
-
-        local connection
-        connection = game:GetService("RunService").RenderStepped:Connect(function()
-            if hideTween.PlaybackState == Enum.PlaybackState.Playing then
-                SetUITransparency(Main.BackgroundTransparency)
-            else
-                connection:Disconnect()
-                Main.Visible = false
-                SetUITransparency(1)
-            end
-        end)
-
+        local hide = TS:Create(Main, info, {GroupTransparency = 1, Size = UDim2.new(0, 360, 0, 170)})
+        hide:Play()
+        
         OpenBtn.Visible = true
         TS:Create(OpenBtn, info, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
         TS:Create(BtnStroke, info, {Transparency = 0}):Play()
+        
+        hide.Completed:Wait()
+        Main.Visible = false
     end
 end
 
+-- // الهيدر والعناصر الداخلية
 local Header = Instance.new("Frame", Main)
 Header.Size, Header.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 18)
-local HeaderFix = Instance.new("Frame", Header)
-HeaderFix.Size, HeaderFix.Position, HeaderFix.BackgroundColor3 = UDim2.new(1, 0, 0, 10), UDim2.new(0, 0, 1, -10), Color3.fromRGB(35, 35, 35)
-HeaderFix.BorderSizePixel = 0
 
 local Title = Instance.new("TextLabel", Main)
 Title.Size, Title.Text = UDim2.new(1, 0, 0, 38), "Crystal Hub - Mini Games"
 Title.TextColor3, Title.Font, Title.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 13
-Title.TextStrokeTransparency, Title.BackgroundTransparency = 1, 1
+Title.BackgroundTransparency = 1
 
 local CloseBtn = Instance.new("TextButton", Main)
-CloseBtn.Name = "CloseBtn"
 CloseBtn.Size, CloseBtn.Position = UDim2.new(0, 35, 0, 38), UDim2.new(1, -38, 0, 0)
 CloseBtn.Text, CloseBtn.TextColor3 = "X", Color3.fromRGB(255, 255, 255)
 CloseBtn.Font, CloseBtn.TextSize = Enum.Font.GothamBold, 13
-CloseBtn.TextStrokeTransparency, CloseBtn.BackgroundTransparency = 1, 1
+CloseBtn.BackgroundTransparency = 1
 
 local function CreateToggle(name, pos, icon, var)
     local F = Instance.new("Frame", Main)
@@ -136,13 +91,12 @@ local function CreateToggle(name, pos, icon, var)
     local I = Instance.new("TextLabel", F)
     I.Size, I.Position, I.BackgroundColor3 = UDim2.new(0, 28, 0, 28), UDim2.new(0, 8, 0.5, -14), Color3.fromRGB(0, 120, 255)
     I.Text, I.TextColor3, I.Font, I.TextSize = icon, Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
-    I.TextStrokeTransparency = 1
     Instance.new("UICorner", I).CornerRadius = UDim.new(1, 0)
     
     local L = Instance.new("TextLabel", F)
     L.Size, L.Position, L.Text = UDim2.new(0, 85, 1, 0), UDim2.new(0, 44, 0, 0), name
     L.TextColor3, L.Font, L.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 11
-    L.TextStrokeTransparency, L.BackgroundTransparency, L.TextXAlignment = 1, 1, Enum.TextXAlignment.Left
+    L.BackgroundTransparency, L.TextXAlignment = 1, Enum.TextXAlignment.Left
     
     local B = Instance.new("TextButton", F)
     B.Size, B.Position, B.BackgroundColor3 = UDim2.new(0, 32, 0, 16), UDim2.new(1, -40, 0.5, -8), Color3.fromRGB(50, 50, 50)
@@ -163,23 +117,21 @@ end
 CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "P", "AutoPop")
 CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
 
+-- // السلايدر
 local SF = Instance.new("Frame", Main)
-SF.Name = "SliderFrame"
 SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 75), UDim2.new(0, 0, 1, -75), Color3.fromRGB(35, 35, 35)
-SF.BorderSizePixel = 0
 Instance.new("UICorner", SF).CornerRadius = UDim.new(0, 18)
 
 local CombinedLabel = Instance.new("TextLabel", SF)
 CombinedLabel.Text = "Accuracy - " .. tostring(getgenv().Config.Accuracy)
 CombinedLabel.Size, CombinedLabel.Position = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 12)
 CombinedLabel.TextColor3, CombinedLabel.Font, CombinedLabel.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 13
-CombinedLabel.TextStrokeTransparency, CombinedLabel.BackgroundTransparency = 1, 1
+CombinedLabel.BackgroundTransparency = 1
 
 local function CreateArr(t, p, step)
     local b = Instance.new("TextButton", SF)
     b.Size, b.Position, b.BackgroundColor3, b.Text = UDim2.new(0, 28, 0, 28), p, Color3.fromRGB(0, 120, 255), t
     b.TextColor3, b.Font, b.TextSize, b.AutoButtonColor = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 14, false
-    b.TextStrokeTransparency = 1
     Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
     b.MouseButton1Click:Connect(function()
         getgenv().Config.Accuracy = math.clamp(getgenv().Config.Accuracy + step, 0, 10)
@@ -198,6 +150,7 @@ Instance.new("UICorner", SFill).CornerRadius = UDim.new(1, 0)
 CreateArr("<", UDim2.new(0, 33, 0, 37), -1)
 CreateArr(">", UDim2.new(1, -61, 0, 37), 1)
 
+-- // سحب الأيقونة
 local dragToggle, dragStart, startPos
 OpenBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -210,7 +163,7 @@ UIS.InputChanged:Connect(function(input)
         TS:Create(OpenBtn, TweenInfo.new(0.1), {Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)}):Play()
     end
 end)
-UIS.InputEnded:Connect(function(input) dragToggle = false end)
+UIS.InputEnded:Connect(function() dragToggle = false end)
 
 OpenBtn.MouseButton1Click:Connect(function() ToggleUI(true) end)
 CloseBtn.MouseButton1Click:Connect(function() ToggleUI(false) end)
