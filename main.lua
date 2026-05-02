@@ -12,33 +12,37 @@ getgenv().Config = {AutoPop = false, ConnectFour = false, Accuracy = 7}
 local Screen = Instance.new("ScreenGui", game:GetService("CoreGui"))
 Screen.Name = ScreenName
 
--- // زر الفتح (تصميم مطابق للصورة)
+-- // زر الفتح (الذي يظهر عند إغلاق القائمة)
 local OpenBtn = Instance.new("TextButton", Screen)
 OpenBtn.Name = "OpenBtn"
 OpenBtn.Size = UDim2.new(0, 110, 0, 35)
 OpenBtn.Position = UDim2.new(0, 50, 0.5, -17)
-OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-OpenBtn.Text, OpenBtn.TextColor3 = "Crystal Hub", Color3.fromRGB(255, 255, 255)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15) -- خلفية سوداء داكنة
+OpenBtn.Text, OpenBtn.TextColor3 = "Crystal Hub", Color3.fromRGB(255, 255, 255) -- نص أبيض تماماً
 OpenBtn.Font, OpenBtn.TextSize = Enum.Font.GothamBold, 13
-OpenBtn.TextStrokeTransparency = 1 -- أبيض سادة بدون توهج
+OpenBtn.TextStrokeTransparency = 1 -- إلغاء التوهج نهائياً ليكون النص أبيض حاد
 OpenBtn.AutoButtonColor = false
 Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 18)
+
+-- حواف الأيقونة (نفس لون القائمة ونفس الحجم)
 local BtnStroke = Instance.new("UIStroke", OpenBtn)
 BtnStroke.Color, BtnStroke.Thickness = Color3.fromRGB(0, 120, 255), 1.5
+BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
--- // الإطار الرئيسي
+-- // الإطار الرئيسي للقائمة
 local Main = Instance.new("Frame", Screen)
 Main.Name = "Main"
 Main.Size = UDim2.new(0, 380, 0, 190)
 Main.Position = UDim2.new(0.5, -190, 0.5, -95)
 Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 Main.Visible, Main.Active = false, true
-Main.ClipsDescendants = true
+Main.ClipsDescendants = true -- لقص العناصر السفلية وجعلها بيضوية
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 18)
+
 local MainStroke = Instance.new("UIStroke", Main)
 MainStroke.Color, MainStroke.Thickness = Color3.fromRGB(0, 120, 255), 1.5
 
--- // الهيدر
+-- // هيدر القائمة
 local Header = Instance.new("Frame", Main)
 Header.Size, Header.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 18)
@@ -48,16 +52,16 @@ HeaderFix.Size, HeaderFix.Position, HeaderFix.BackgroundColor3, HeaderFix.Border
 local Title = Instance.new("TextLabel", Main)
 Title.Size, Title.Text = UDim2.new(1, 0, 0, 38), "Crystal Hub - Mini Games"
 Title.TextColor3, Title.Font, Title.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 13
-Title.TextStrokeTransparency = 1
-Title.BackgroundTransparency = 1
+Title.TextStrokeTransparency, Title.BackgroundTransparency = 1, 1
 
+-- زر الإغلاق
 local CloseBtn = Instance.new("TextButton", Main)
 CloseBtn.Size, CloseBtn.Position = UDim2.new(0, 35, 0, 38), UDim2.new(1, -38, 0, 0)
-CloseBtn.Text, CloseBtn.TextColor3 = "X", Color3.fromRGB(255, 255, 255) -- أبيض سادة
+CloseBtn.Text, CloseBtn.TextColor3 = "X", Color3.fromRGB(255, 255, 255)
 CloseBtn.Font, CloseBtn.TextSize = Enum.Font.GothamBold, 13
 CloseBtn.TextStrokeTransparency, CloseBtn.BackgroundTransparency = 1, 1
 
--- // الأزرار
+-- // أزرار التفعيل (Toggles)
 local function CreateToggle(name, pos, icon, var)
     local F = Instance.new("Frame", Main)
     F.Size, F.Position, F.BackgroundColor3 = UDim2.new(0, 175, 0, 42), pos, Color3.fromRGB(35, 35, 35)
@@ -88,10 +92,13 @@ end
 CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "P", "AutoPop")
 CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
 
--- // المنطقة الرمادية السفلية (مربعة من الأعلى كما طلبت)
+-- // المنطقة الرمادية السفلية (مربعة من أعلى وتتبع حواف القائمة من أسفل)
 local SF = Instance.new("Frame", Main)
-SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 75), UDim2.new(0, 0, 1, -75), Color3.fromRGB(35, 35, 35)
-SF.BorderSizePixel = 0 -- جعل الحواف العلوية مربعة ومستقيمة
+SF.Name = "SliderFrame"
+SF.Size = UDim2.new(1, 0, 0, 75)
+SF.Position = UDim2.new(0, 0, 1, -75)
+SF.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+SF.BorderSizePixel = 0
 
 local CombinedLabel = Instance.new("TextLabel", SF)
 CombinedLabel.Text = "Accuracy - " .. tostring(getgenv().Config.Accuracy)
@@ -100,7 +107,7 @@ CombinedLabel.Position = UDim2.new(0, 0, 0, 12)
 CombinedLabel.TextColor3, CombinedLabel.Font, CombinedLabel.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 13
 CombinedLabel.TextStrokeTransparency, CombinedLabel.BackgroundTransparency = 1, 1
 
--- // السلايدر والأسهم بمسافات دقيقة
+-- // إنشاء الأسهم بمسافات دقيقة
 local function CreateArr(t, p, step)
     local b = Instance.new("TextButton", SF)
     b.Size, b.Position, b.BackgroundColor3, b.Text = UDim2.new(0, 28, 0, 28), p, Color3.fromRGB(0, 120, 255), t
@@ -114,7 +121,6 @@ local function CreateArr(t, p, step)
     end)
 end
 
--- رفع السلايدر "سنة" وضبط المسافة
 local SBtn = Instance.new("Frame", SF)
 SBtn.Size, SBtn.Position, SBtn.BackgroundColor3 = UDim2.new(0, 240, 0, 6), UDim2.new(0.5, -120, 0, 48), Color3.fromRGB(60, 60, 60)
 Instance.new("UICorner", SBtn).CornerRadius = UDim.new(1, 0)
@@ -125,7 +131,7 @@ Instance.new("UICorner", SFill).CornerRadius = UDim.new(1, 0)
 CreateArr("<", UDim2.new(0, 33, 0, 37), -1)
 CreateArr(">", UDim2.new(1, -61, 0, 37), 1)
 
--- // الحركة والفتح والاغلاق
+-- // منطق السحب والفتح والإغلاق
 local dragging, dragStart, startPos, dragDist = false, nil, nil, 0
 OpenBtn.InputBegan:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
@@ -140,5 +146,15 @@ UIS.InputChanged:Connect(function(i)
     end
 end)
 UIS.InputEnded:Connect(function(i) dragging = false end)
-OpenBtn.MouseButton1Click:Connect(function() if dragDist < 5 then Main.Visible = true OpenBtn.Visible = false end end)
-CloseBtn.MouseButton1Click:Connect(function() Main.Visible = false OpenBtn.Visible = true end)
+
+OpenBtn.MouseButton1Click:Connect(function() 
+    if dragDist < 5 then 
+        Main.Visible = true 
+        OpenBtn.Visible = false 
+    end 
+end)
+
+CloseBtn.MouseButton1Click:Connect(function() 
+    Main.Visible = false 
+    OpenBtn.Visible = true 
+end)
