@@ -3,7 +3,7 @@ local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local LP = game:GetService("Players").LocalPlayer
 
-local ScreenName = "CrystalHubPerfect"
+local ScreenName = "CrystalHubFinalV3"
 local ExistingUI = game:GetService("CoreGui"):FindFirstChild(ScreenName) or LP.PlayerGui:FindFirstChild(ScreenName)
 if ExistingUI then ExistingUI:Destroy() end
 
@@ -12,7 +12,7 @@ getgenv().Config = {AutoPop = false, ConnectFour = false, Accuracy = 7}
 local Screen = Instance.new("ScreenGui", game:GetService("CoreGui"))
 Screen.Name = ScreenName
 
--- // زر الفتح (نص أبيض حاد وحواف زرقاء)
+-- // زر الفتح (الأيقونة) - تم ضبط الحواف والنص الأبيض السادة
 local OpenBtn = Instance.new("TextButton", Screen)
 OpenBtn.Name = "OpenBtn"
 OpenBtn.Size = UDim2.new(0, 110, 0, 35)
@@ -20,11 +20,15 @@ OpenBtn.Position = UDim2.new(0, 50, 0.5, -17)
 OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 OpenBtn.Text, OpenBtn.TextColor3 = "Crystal Hub", Color3.fromRGB(255, 255, 255)
 OpenBtn.Font, OpenBtn.TextSize = Enum.Font.GothamBold, 13
-OpenBtn.TextStrokeTransparency = 1 
+OpenBtn.TextStrokeTransparency = 1 -- أبيض سادة بدون أي توهج
 OpenBtn.AutoButtonColor = false
 Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 18)
+
+-- حواف الأيقونة مطابقة تماماً لحواف القائمة
 local BtnStroke = Instance.new("UIStroke", OpenBtn)
-BtnStroke.Color, BtnStroke.Thickness = Color3.fromRGB(0, 120, 255), 1.5
+BtnStroke.Color = Color3.fromRGB(0, 120, 255)
+BtnStroke.Thickness = 1.5 -- نفس سمك حواف القائمة
+BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 -- // الإطار الرئيسي
 local Main = Instance.new("Frame", Screen)
@@ -94,12 +98,11 @@ SF.Size = UDim2.new(1, 0, 0, 75)
 SF.Position = UDim2.new(0, 0, 1, -75)
 SF.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 SF.BorderSizePixel = 0
-Instance.new("UICorner", SF).CornerRadius = UDim.new(0, 18) -- لجعلها دائرية من الأسفل
+Instance.new("UICorner", SF).CornerRadius = UDim.new(0, 18)
 
--- خدعة تربيع الجزء العلوي (إطار صغير يغطي زوايا الـ Corner العلوية)
+-- تصحيح الجزء العلوي ليكون مربعاً
 local SFFix = Instance.new("Frame", SF)
 SFFix.Size = UDim2.new(1, 0, 0, 20)
-SFFix.Position = UDim2.new(0, 0, 0, 0)
 SFFix.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 SFFix.BorderSizePixel = 0
 SFFix.ZIndex = 1
