@@ -2,7 +2,7 @@ local TS = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local LP = game:GetService("Players").LocalPlayer
 
-local ScreenName = "CrystalHub_V15_FinalClean"
+local ScreenName = "CrystalHub_V16_FinalFix"
 local ExistingUI = game:GetService("CoreGui"):FindFirstChild(ScreenName) or LP.PlayerGui:FindFirstChild(ScreenName)
 if ExistingUI then ExistingUI:Destroy() end
 
@@ -12,7 +12,7 @@ local Screen = Instance.new("ScreenGui", game:GetService("CoreGui"))
 Screen.Name = ScreenName
 Screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- // زر الفتح (تصميم نظيف بدون توهج)
+-- // زر الفتح
 local OpenBtn = Instance.new("TextButton", Screen)
 OpenBtn.Name = "OpenBtn"
 OpenBtn.Size = UDim2.new(0, 110, 0, 35)
@@ -21,12 +21,11 @@ OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 OpenBtn.Text = "Crystal Hub"
 OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 OpenBtn.Font = Enum.Font.GothamBold
-OpenBtn.TextSize = 12 -- حجم خط متناسق
+OpenBtn.TextSize = 12
 OpenBtn.AutoButtonColor = false
 OpenBtn.ZIndex = 10
 Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 18)
 
--- حواف الأيقونة (نفس اللي جوه القائمة تماماً)
 local BtnStroke = Instance.new("UIStroke", OpenBtn)
 BtnStroke.Color = Color3.fromRGB(0, 120, 255)
 BtnStroke.Thickness = 1.5
@@ -45,28 +44,35 @@ Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 18)
 local MainStroke = Instance.new("UIStroke", Main)
 MainStroke.Color = Color3.fromRGB(0, 120, 255)
 MainStroke.Thickness = 1.5
+MainStroke.Transparency = 1 -- تبدأ مخفية
 
--- // دالة التبديل
+-- // دالة التبديل (تم إصلاح تزامن الحواف هنا)
 local function ToggleUI(state)
     local info = TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
     if state then
         Main.Visible = true
         TS:Create(Main, info, {GroupTransparency = 0, Size = UDim2.new(0, 380, 0, 190)}):Play()
+        TS:Create(MainStroke, info, {Transparency = 0}):Play() -- إظهار الحواف مع القائمة
+        
         TS:Create(OpenBtn, info, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
         TS:Create(BtnStroke, info, {Transparency = 1}):Play()
         task.delay(0.3, function() OpenBtn.Visible = false end)
     else
+        -- حل مشكلة الحواف: إخفاء الحواف والقائمة في نفس التوقيت بالظبط
+        TS:Create(MainStroke, info, {Transparency = 1}):Play() 
         local hide = TS:Create(Main, info, {GroupTransparency = 1, Size = UDim2.new(0, 360, 0, 170)})
         hide:Play()
+        
         OpenBtn.Visible = true
         TS:Create(OpenBtn, info, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
         TS:Create(BtnStroke, info, {Transparency = 0}):Play()
+        
         hide.Completed:Wait()
         Main.Visible = false
     end
 end
 
--- // الهيدر (مربع من تحت)
+-- // الهيدر
 local Header = Instance.new("Frame", Main)
 Header.Size, Header.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(35, 35, 35)
 Header.BorderSizePixel = 0
@@ -120,7 +126,7 @@ end
 CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "P", "AutoPop")
 CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
 
--- // منطقة السلايدر (مربعة من فوق)
+-- // منطقة السلايدر
 local SF = Instance.new("Frame", Main)
 SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 75), UDim2.new(0, 0, 1, -75), Color3.fromRGB(35, 35, 35)
 SF.BorderSizePixel = 0
