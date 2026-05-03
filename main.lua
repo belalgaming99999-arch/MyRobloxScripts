@@ -108,7 +108,7 @@ AddBtn("Auto Pop", "AutoPop", 55)
 AddBtn("Feature 2", "State2", 97)
 AddBtn("Feature 3", "State3", 139)
 
--- [[ السلايدر المطور مع الدائرة ]] --
+-- [[ السلايدر المطور مع الدائرة النابضة ]] --
 local SliderLabel = Instance.new("TextLabel", Main)
 SliderLabel.Size = UDim2.new(1, 0, 0, 20)
 SliderLabel.Position = UDim2.new(0, 0, 0, 180)
@@ -131,17 +131,37 @@ Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
 local FillGrad = Instance.new("UIGradient", SliderFill)
 FillGrad.Color = GlobalGrad.Color
 
--- إضافة الدائرة البيضاء (Knob)
+-- الدائرة البيضاء (Knob)
 local SliderKnob = Instance.new("Frame", SliderFill)
-SliderKnob.Size = UDim2.new(0, 14, 0, 14)
-SliderKnob.Position = UDim2.new(1, -7, 0.5, -7)
+SliderKnob.Size = UDim2.new(0, 12, 0, 12)
+SliderKnob.Position = UDim2.new(1, -6, 0.5, -6)
 SliderKnob.BackgroundColor3 = Theme.White
 SliderKnob.ZIndex = 5
 Instance.new("UICorner", SliderKnob).CornerRadius = UDim.new(1, 0)
--- إضافة ظل بسيط للدائرة
+
+-- الإطار الأبيض المتحرك (Pulsing Stroke)
 local KnobStroke = Instance.new("UIStroke", SliderKnob)
-KnobStroke.Color = Theme.MainBlue
-KnobStroke.Thickness = 1.5
+KnobStroke.Color = Theme.White
+KnobStroke.Thickness = 2 -- سماكة أكبر كما طلبت
+KnobStroke.Transparency = 0.3
+
+-- تأثير النبض (Pulse Effect)
+task.spawn(function()
+    while task.wait() do
+        local pulse = TweenService:Create(KnobStroke, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            Thickness = 4.5,
+            Transparency = 0.6
+        })
+        pulse:Play()
+        pulse.Completed:Wait()
+        local shrink = TweenService:Create(KnobStroke, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            Thickness = 1.5,
+            Transparency = 0.1
+        })
+        shrink:Play()
+        shrink.Completed:Wait()
+    end
+end)
 
 local function UpdateSlider(input)
     local pos = math.clamp((input.Position.X - SliderBg.AbsolutePosition.X) / SliderBg.AbsoluteSize.X, 0, 1)
@@ -170,7 +190,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- [[ الأنميشن والحركة ]] --
+-- [[ الأنميشن والحركة العامة ]] --
 RunService.RenderStepped:Connect(function(dt)
     if not Dragging then MenuBtn.Position = MenuBtn.Position:Lerp(TargetPos, 0.25) end
     Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
@@ -225,4 +245,3 @@ task.spawn(function()
         end
     end
 end)
-
