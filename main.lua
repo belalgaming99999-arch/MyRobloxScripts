@@ -53,27 +53,36 @@ local function ToggleUI(state)
     local info = TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
     if state then
         Main.Position = UDim2.new(OpenBtn.Position.X.Scale, OpenBtn.Position.X.Offset - 135, OpenBtn.Position.Y.Scale, OpenBtn.Position.Y.Offset + 48)
+        -- اختفاء فوري للأيقونة عند البدء
+        OpenBtn.Visible = false 
         Main.Visible = true
         TS:Create(Main, info, {GroupTransparency = 0, Size = UDim2.new(0, 380, 0, 190)}):Play()
         TS:Create(MainStroke, info, {Transparency = 0}):Play()
-        TS:Create(OpenBtn, info, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
-        TS:Create(BtnStroke, info, {Transparency = 1}):Play()
-        task.delay(0.4, function() OpenBtn.Visible = false end)
     else
         TS:Create(MainStroke, info, {Transparency = 1}):Play()
         local hide = TS:Create(Main, info, {GroupTransparency = 1, Size = UDim2.new(0, 360, 0, 170)})
         hide:Play()
-        OpenBtn.Visible = true
-        TS:Create(OpenBtn, info, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
-        TS:Create(BtnStroke, info, {Transparency = 0}):Play()
-        hide.Completed:Connect(function() Main.Visible = false end)
+        hide.Completed:Connect(function() 
+            Main.Visible = false 
+            OpenBtn.Visible = true -- تظهر الأيقونة فقط بعد إغلاق القائمة
+            TS:Create(OpenBtn, info, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
+            TS:Create(BtnStroke, info, {Transparency = 0}):Play()
+        end)
     end
 end
 
+-- الـ Header مع معالجة الحواف السفلية (مربعة من تحت)
 local Header = Instance.new("Frame", Main)
 Header.Size = UDim2.new(1, 0, 0, 38)
 Header.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+Header.BorderSizePixel = 0
 Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 18)
+
+local HeaderSquare = Instance.new("Frame", Header)
+HeaderSquare.Size = UDim2.new(1, 0, 0, 10)
+HeaderSquare.Position = UDim2.new(0, 0, 1, -10)
+HeaderSquare.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+HeaderSquare.BorderSizePixel = 0 -- عشان يخلي الحواف اللي تحت مربعة
 
 local Title = Instance.new("TextLabel", Main)
 Title.Size = UDim2.new(1, 0, 0, 38)
@@ -82,6 +91,7 @@ Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 12
 Title.BackgroundTransparency = 1
+Title.ZIndex = 3
 
 local CloseBtn = Instance.new("TextButton", Main)
 CloseBtn.Size = UDim2.new(0, 35, 0, 38)
@@ -91,6 +101,7 @@ CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.TextSize = 12
 CloseBtn.BackgroundTransparency = 1
+CloseBtn.ZIndex = 3
 
 local function CreateToggle(name, pos, var)
     local F = Instance.new("Frame", Main)
@@ -121,15 +132,24 @@ end
 CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "AutoPop")
 CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "ConnectFour")
 
+-- الـ Slider مع معالجة الحواف العلوية (مربعة من فوق)
 local SF = Instance.new("Frame", Main)
 SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 75), UDim2.new(0, 0, 1, -75), Color3.fromRGB(35, 35, 35)
+SF.BorderSizePixel = 0
 Instance.new("UICorner", SF).CornerRadius = UDim.new(0, 18)
+
+local SFSquare = Instance.new("Frame", SF)
+SFSquare.Size = UDim2.new(1, 0, 0, 10)
+SFSquare.Position = UDim2.new(0, 0, 0, 0)
+SFSquare.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+SFSquare.BorderSizePixel = 0 -- جعل المنطقة العلوية للسلايدر مربعة
 
 local CombinedLabel = Instance.new("TextLabel", SF)
 CombinedLabel.Text = "Accuracy - 7"
 CombinedLabel.Size, CombinedLabel.Position = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 12)
 CombinedLabel.TextColor3, CombinedLabel.Font, CombinedLabel.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
 CombinedLabel.BackgroundTransparency = 1
+CombinedLabel.ZIndex = 3
 
 local SBtn = Instance.new("Frame", SF)
 SBtn.Size, SBtn.Position, SBtn.BackgroundColor3 = UDim2.new(0, 240, 0, 6), UDim2.new(0.5, -120, 0, 48), Color3.fromRGB(60, 60, 60)
@@ -180,7 +200,7 @@ task.spawn(function()
             for i = 1, burst do
                 task.spawn(function() Action:FireServer("AttemptPop", tick() + math.random()) end)
             end
-            task.wait(math.clamp(0.14 - (burst * 0.009), 0.05, 0.14))
+            task.wait(math.clamp(0.14 - (burst * 0.01), 0.06, 0.14))
         end
         if getgenv().Config.ConnectFour then
             local Moves = {4, 3, 5, 2, 6, 1, 7}
@@ -192,3 +212,4 @@ task.spawn(function()
         end
     end
 end)
+
