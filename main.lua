@@ -23,7 +23,7 @@ local Theme = {
     Slider = Color3.fromRGB(40, 50, 75)
 }
 
-local Toggles = {AutoPop = false, AutoFour = false}
+local Toggles = {AutoPop = false, AutoFour = false, Feature3 = false}
 local Accuracy = 7
 local UI_Open, Dragging = false, false
 
@@ -77,6 +77,7 @@ end
 
 CreateBtn("Auto Pop", "AutoPop", 55)
 CreateBtn("Auto Four", "AutoFour", 97)
+CreateBtn("Feature 3", "Feature3", 139)
 
 local SliderLabel = Instance.new("TextLabel", Main)
 SliderLabel.Size, SliderLabel.Position, SliderLabel.BackgroundTransparency = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 180), 1
@@ -158,12 +159,18 @@ task.spawn(function()
     local Remotes = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Networking")
     local PopRemote = Remotes:WaitForChild("RE/Minigame/MinigameGameAction")
     
-    while task.wait() do
+    while task.wait(0.03) do -- تسريع حلقة التحقق الرئيسية
         if Toggles.AutoPop then
             for i = 1, Accuracy do
-                task.spawn(function() PopRemote:FireServer("AttemptPop", tick() + math.random()) end)
+                task.spawn(function()
+                    -- محاكاة "الضغطات الثلاثية الجامدة" وراء بعضها لكل حبة فشار
+                    for combo = 1, 5 do 
+                        PopRemote:FireServer("AttemptPop", tick(), 100)
+                        -- لا يوجد انتظار طويل هنا لضمان السرعة القصوى (Combo)
+                        RunService.Heartbeat:Wait() 
+                    end
+                end)
             end
-            task.wait(math.clamp(0.14 - (Accuracy * 0.01), 0.07, 0.14))
         end
     end
 end)
