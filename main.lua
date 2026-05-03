@@ -17,18 +17,17 @@ CrystalGui.ResetOnSpawn = false
 
 local Theme = {
     Bg = Color3.fromRGB(25, 35, 55),
-    Main = Color3.fromRGB(45, 85, 160), -- لون كريستال
+    Main = Color3.fromRGB(45, 85, 160),
     White = Color3.new(1, 1, 1),
     Off = Color3.fromRGB(135, 55, 55), 
     On = Color3.fromRGB(55, 120, 85),
     Slider = Color3.fromRGB(40, 50, 75)
 }
 
-local Toggles = {AutoPop = false, AutoFour = false}
-local Accuracy = 10 -- ضبطناه على 10 لضمان الفوز
+local Toggles = {AutoPop = false, AutoFour = false, Feature3 = false}
+local Accuracy = 7
 local UI_Open, Dragging = false, false
 
--- // إنشاء واجهة المستخدم (UI) بنفس تصميمك الأنيق
 local MenuBtn = Instance.new("TextButton", CrystalGui)
 MenuBtn.Size, MenuBtn.Position, MenuBtn.BackgroundColor3 = UDim2.new(0, 52, 0, 52), UDim2.new(0.05, 0, 0.25, 0), Theme.Main
 MenuBtn.Text, MenuBtn.AutoButtonColor = "", false
@@ -54,99 +53,117 @@ local GlobalGrad = Instance.new("UIGradient", Border)
 GlobalGrad.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Theme.Main), ColorSequenceKeypoint.new(0.5, Theme.White), ColorSequenceKeypoint.new(1, Theme.Main)})
 
 local Title = Instance.new("TextLabel", Main)
-Title.Size, Title.Text, Title.TextColor3 = UDim2.new(1, 0, 0, 45), "Crystal Hub v2", Theme.White
+Title.Size, Title.Text, Title.TextColor3 = UDim2.new(1, 0, 0, 45), "Crystal Hub", Theme.White
 Title.Font, Title.TextSize, Title.BackgroundTransparency = Enum.Font.GothamBold, 16, 1
 local TitleGrad = GlobalGrad:Clone(); TitleGrad.Parent = Title
 
--- // وظيفة إنشاء الأزرار
+local UnderLine = Instance.new("Frame", Main)
+UnderLine.Size, UnderLine.Position, UnderLine.BackgroundColor3 = UDim2.new(0, 120, 0, 6), UDim2.new(0.5, -60, 0, 40), Theme.White
+Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
+local LineGrad = GlobalGrad:Clone(); LineGrad.Parent = UnderLine
+
 local function CreateBtn(txt, key, y)
     local B = Instance.new("TextButton", Main)
     B.Size, B.Position, B.BackgroundColor3 = UDim2.new(0, 180, 0, 36), UDim2.new(0.5, -90, 0, y), Theme.Off
-    B.Text, B.TextColor3, B.Font, B.TextSize = txt.." [OFF]", Theme.White, Enum.Font.GothamBold, 13
+    B.Text, B.TextColor3, B.Font, B.TextSize = txt.." [Disable]", Theme.White, Enum.Font.GothamBold, 13
     B.AutoButtonColor = false
     Instance.new("UICorner", B).CornerRadius = UDim.new(0, 8)
 
     B.MouseButton1Click:Connect(function()
         Toggles[key] = not Toggles[key]
-        B.Text = txt .. (Toggles[key] and " [ON]" or " [OFF]")
+        B.Text = txt .. (Toggles[key] and " [Active]" or " [Disable]")
         TweenService:Create(B, TweenInfo.new(0.3), {BackgroundColor3 = Toggles[key] and Theme.On or Theme.Off}):Play()
     end)
 end
 
 CreateBtn("Auto Popcorn", "AutoPop", 55)
 CreateBtn("Auto Connect4", "AutoFour", 97)
+CreateBtn("Feature 3", "Feature3", 139)
 
--- // سلايدر الـ Accuracy لضبط قوة السكربت
 local SliderLabel = Instance.new("TextLabel", Main)
-SliderLabel.Size, SliderLabel.Position, SliderLabel.BackgroundTransparency = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 150), 1
-SliderLabel.Text, SliderLabel.TextColor3, SliderLabel.Font, SliderLabel.TextSize = "Accuracy: 10", Theme.White, Enum.Font.GothamBold, 16
+SliderLabel.Size, SliderLabel.Position, SliderLabel.BackgroundTransparency = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 180), 1
+SliderLabel.Text, SliderLabel.TextColor3, SliderLabel.Font, SliderLabel.TextSize = "Accuracy: 7", Theme.White, Enum.Font.GothamBold, 16
+local SliderGrad = GlobalGrad:Clone(); SliderGrad.Parent = SliderLabel
 
 local SliderBg = Instance.new("Frame", Main)
-SliderBg.Size, SliderBg.Position, SliderBg.BackgroundColor3 = UDim2.new(0, 120, 0, 6), UDim2.new(0.5, -60, 0, 178), Theme.Slider
+SliderBg.Size, SliderBg.Position, SliderBg.BackgroundColor3 = UDim2.new(0, 120, 0, 6), UDim2.new(0.5, -60, 0, 208), Theme.Slider
 Instance.new("UICorner", SliderBg).CornerRadius = UDim.new(1, 0)
 
 local SliderFill = Instance.new("Frame", SliderBg)
-SliderFill.Size, SliderFill.BackgroundColor3 = UDim2.new(1, 0, 1, 0), Theme.White
+SliderFill.Size, SliderFill.BackgroundColor3 = UDim2.new(0.7, 0, 1, 0), Theme.White
 Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
+local FillGrad = GlobalGrad:Clone(); FillGrad.Parent = SliderFill
+
+local Knob = Instance.new("Frame", SliderFill)
+Knob.Size, Knob.Position, Knob.BackgroundColor3 = UDim2.new(0, 14, 0, 14), UDim2.new(1, -7, 0.5, -7), Theme.White
+Knob.ZIndex = 5
+Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
 
 local function UpdateSlider(input)
     local rawPos = math.clamp((input.Position.X - SliderBg.AbsolutePosition.X) / SliderBg.AbsoluteSize.X, 0, 1)
     Accuracy = math.floor(rawPos * 10)
     SliderLabel.Text = "Accuracy: " .. Accuracy
-    SliderFill.Size = UDim2.new(rawPos, 0, 1, 0)
+    SliderFill.Size = UDim2.new(rawPos, 0, 1, 0) -- تعديل للنسبة الحقيقية
 end
 
--- // منطق الـ Dragging والفتح والغلق
-local dStart, sPos, isDragged, Sliding = nil, nil, false, false
-MenuBtn.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Dragging, isDragged, dStart, sPos = true, false, i.Position, MenuBtn.Position end end)
+local Sliding = false
+SliderBg.InputBegan:Connect(function(i) if i.UserInputType.Name:find("MouseButton1") or i.UserInputType.Name:find("Touch") then Sliding = true; UpdateSlider(i) end end)
+UserInputService.InputChanged:Connect(function(i) if Sliding and (i.UserInputType.Name:find("MouseMovement") or i.UserInputType.Name:find("Touch")) then UpdateSlider(i) end end)
+UserInputService.InputEnded:Connect(function() Sliding = false end)
+
+local dStart, sPos, isDragged
+MenuBtn.InputBegan:Connect(function(i)
+    if i.UserInputType.Name:find("MouseButton1") or i.UserInputType.Name:find("Touch") then
+        Dragging, isDragged, dStart, sPos = true, false, i.Position, MenuBtn.Position
+    end
+end)
+
 UserInputService.InputChanged:Connect(function(i)
-    if Dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+    if Dragging and (i.UserInputType.Name:find("MouseMovement") or i.UserInputType.Name:find("Touch")) then
         local delta = i.Position - dStart
         if delta.Magnitude > 3 then isDragged = true end
         MenuBtn.Position = UDim2.new(sPos.X.Scale, sPos.X.Offset + delta.X, sPos.Y.Scale, sPos.Y.Offset + delta.Y)
     end
-    if Sliding and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then UpdateSlider(i) end
 end)
-UserInputService.InputEnded:Connect(function() Dragging, Sliding = false, false end)
-SliderBg.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Sliding = true; UpdateSlider(i) end end)
+
+UserInputService.InputEnded:Connect(function() Dragging = false end)
 
 MenuBtn.MouseButton1Click:Connect(function()
     if not isDragged then
         UI_Open = not UI_Open
-        if UI_Open then Border.Visible = true; Border:TweenSize(UDim2.new(0, 204, 0, 210), "Out", "Quint", 0.4, true)
-        else Border:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.3, true, function() Border.Visible = false end) end
+        if UI_Open then
+            Border.Visible = true
+            Border:TweenSize(UDim2.new(0, 204, 0, 235), "Out", "Quint", 0.4, true)
+        else
+            Border:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.3, true, function() Border.Visible = false end)
+        end
     end
 end)
 
--- // التحديث المستمر للـ UI والتدوير
 RunService.RenderStepped:Connect(function(dt)
     Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
-    GlobalGrad.Rotation = (GlobalGrad.Rotation + 120 * dt) % 360
+    local rot = (GlobalGrad.Rotation + 150 * dt) % 360
+    GlobalGrad.Rotation = rot; TitleGrad.Rotation = rot; LineGrad.Rotation = rot; FillGrad.Rotation = rot; SliderGrad.Rotation = rot
 end)
 
--- // المنطق البرمجي السري (The Secret Logic)
+-- // الجزء الخاص بالبوب كورن (معدل تقنياً فقط لضمان الفوز)
 task.spawn(function()
-    -- البحث عن الريموت بناءً على الـ Dump
     local PopRemote = ReplicatedStorage:FindFirstChild("MinigameGameAction", true)
     
     while true do
         if Toggles.AutoPop and PopRemote then
-            -- البحث عن البورد في الـ Workspace
             local Board = workspace:FindFirstChild("PopcornBurstBoard", true)
             if Board then
                 for _, obj in pairs(Board:GetDescendants()) do
                     if obj:IsA("BasePart") and obj:GetAttribute("TargetScale") then
-                        -- التوقيت السحري للفوز 100% (Perfect)
-                        -- الـ Dump قال إن الـ Tween بياخد 0.139 ثانية، إحنا هنضرب قبلها بشعرة
-                        local waitTime = (11 - Accuracy) * 0.015 
+                        -- نظام التأخير بناءً على الـ Accuracy بتاعك
+                        local waitTime = (11 - Accuracy) * 0.02
                         task.wait(waitTime)
-                        
-                        -- إرسال الإشارة للسيرفر (الاسم "PopcornPop" مستخرج من الـ Dump)
                         PopRemote:FireServer("PopcornPop", obj.Name)
                     end
                 end
             end
         end
-        task.wait(0.1) -- حماية من الكراش
+        task.wait(0.1)
     end
 end)
