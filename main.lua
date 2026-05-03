@@ -53,7 +53,6 @@ local function ToggleUI(state)
     local info = TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
     if state then
         Main.Position = UDim2.new(OpenBtn.Position.X.Scale, OpenBtn.Position.X.Offset - 135, OpenBtn.Position.Y.Scale, OpenBtn.Position.Y.Offset + 48)
-        -- اختفاء فوري للأيقونة عند البدء
         OpenBtn.Visible = false 
         Main.Visible = true
         TS:Create(Main, info, {GroupTransparency = 0, Size = UDim2.new(0, 380, 0, 190)}):Play()
@@ -64,14 +63,13 @@ local function ToggleUI(state)
         hide:Play()
         hide.Completed:Connect(function() 
             Main.Visible = false 
-            OpenBtn.Visible = true -- تظهر الأيقونة فقط بعد إغلاق القائمة
+            OpenBtn.Visible = true
             TS:Create(OpenBtn, info, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
             TS:Create(BtnStroke, info, {Transparency = 0}):Play()
         end)
     end
 end
 
--- الـ Header مع معالجة الحواف السفلية (مربعة من تحت)
 local Header = Instance.new("Frame", Main)
 Header.Size = UDim2.new(1, 0, 0, 38)
 Header.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
@@ -82,7 +80,7 @@ local HeaderSquare = Instance.new("Frame", Header)
 HeaderSquare.Size = UDim2.new(1, 0, 0, 10)
 HeaderSquare.Position = UDim2.new(0, 0, 1, -10)
 HeaderSquare.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-HeaderSquare.BorderSizePixel = 0 -- عشان يخلي الحواف اللي تحت مربعة
+HeaderSquare.BorderSizePixel = 0
 
 local Title = Instance.new("TextLabel", Main)
 Title.Size = UDim2.new(1, 0, 0, 38)
@@ -103,11 +101,26 @@ CloseBtn.TextSize = 12
 CloseBtn.BackgroundTransparency = 1
 CloseBtn.ZIndex = 3
 
-local function CreateToggle(name, pos, var)
+local function CreateToggle(name, pos, icon, var)
     local F = Instance.new("Frame", Main)
     F.Size, F.Position, F.BackgroundColor3 = UDim2.new(0, 175, 0, 42), pos, Color3.fromRGB(35, 35, 35)
     Instance.new("UICorner", F).CornerRadius = UDim.new(0, 18)
     
+    local I = Instance.new("TextLabel", F)
+    I.Size = UDim2.new(0, 28, 0, 28)
+    I.Position = UDim2.new(0, 8, 0.5, -14)
+    I.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+    I.Text = icon
+    I.TextColor3 = Color3.fromRGB(255, 255, 255)
+    I.Font = Enum.Font.GothamBold
+    I.TextSize = 12
+    Instance.new("UICorner", I).CornerRadius = UDim.new(1, 0)
+    
+    local L = Instance.new("TextLabel", F)
+    L.Size, L.Position, L.Text = UDim2.new(0, 85, 1, 0), UDim2.new(0, 44, 0, 0), name
+    L.TextColor3, L.Font, L.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 11
+    L.BackgroundTransparency, L.TextXAlignment = 1, Enum.TextXAlignment.Left
+
     local B = Instance.new("TextButton", F)
     B.Size, B.Position, B.BackgroundColor3, B.Text = UDim2.new(0, 32, 0, 16), UDim2.new(1, -40, 0.5, -8), Color3.fromRGB(50, 50, 50), ""
     B.AutoButtonColor = false
@@ -116,11 +129,6 @@ local function CreateToggle(name, pos, var)
     local Dot = Instance.new("Frame", B)
     Dot.Size, Dot.Position, Dot.BackgroundColor3 = UDim2.new(0, 12, 0, 12), UDim2.new(0, 2, 0.5, -6), Color3.fromRGB(255, 255, 255)
     Instance.new("UICorner", Dot).CornerRadius = UDim.new(1, 0)
-    
-    local L = Instance.new("TextLabel", F)
-    L.Size, L.Position, L.Text = UDim2.new(0, 85, 1, 0), UDim2.new(0, 44, 0, 0), name
-    L.TextColor3, L.Font, L.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 11
-    L.BackgroundTransparency, L.TextXAlignment = 1, Enum.TextXAlignment.Left
 
     B.MouseButton1Click:Connect(function()
         getgenv().Config[var] = not getgenv().Config[var]
@@ -129,10 +137,9 @@ local function CreateToggle(name, pos, var)
     end)
 end
 
-CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "AutoPop")
-CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "ConnectFour")
+CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "P", "AutoPop")
+CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
 
--- الـ Slider مع معالجة الحواف العلوية (مربعة من فوق)
 local SF = Instance.new("Frame", Main)
 SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 75), UDim2.new(0, 0, 1, -75), Color3.fromRGB(35, 35, 35)
 SF.BorderSizePixel = 0
@@ -142,7 +149,7 @@ local SFSquare = Instance.new("Frame", SF)
 SFSquare.Size = UDim2.new(1, 0, 0, 10)
 SFSquare.Position = UDim2.new(0, 0, 0, 0)
 SFSquare.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-SFSquare.BorderSizePixel = 0 -- جعل المنطقة العلوية للسلايدر مربعة
+SFSquare.BorderSizePixel = 0
 
 local CombinedLabel = Instance.new("TextLabel", SF)
 CombinedLabel.Text = "Accuracy - 7"
@@ -212,4 +219,3 @@ task.spawn(function()
         end
     end
 end)
-
