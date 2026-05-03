@@ -58,7 +58,7 @@ Title.Font, Title.TextSize, Title.BackgroundTransparency = Enum.Font.GothamBold,
 local TitleGrad = GlobalGrad:Clone(); TitleGrad.Parent = Title
 
 local UnderLine = Instance.new("Frame", Main)
-UnderLine.Size, UnderLine.Position, UnderLine.BackgroundColor3 = UDim2.new(0, 120, 0, 4), UDim2.new(0.5, -60, 0, 40), Theme.White
+UnderLine.Size, UnderLine.Position, UnderLine.BackgroundColor3 = UDim2.new(0, 120, 0, 6), UDim2.new(0.5, -60, 0, 40), Theme.White
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 local LineGrad = GlobalGrad:Clone(); LineGrad.Parent = UnderLine
 
@@ -169,3 +169,4 @@ task.spawn(function()
         RunService.Heartbeat:Wait()
     end
 end)
+
