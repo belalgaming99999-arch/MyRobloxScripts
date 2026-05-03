@@ -90,7 +90,7 @@ SliderBg.Size, SliderBg.Position, SliderBg.BackgroundColor3 = UDim2.new(0, 160, 
 Instance.new("UICorner", SliderBg).CornerRadius = UDim.new(1, 0)
 
 local SliderFill = Instance.new("Frame", SliderBg)
-SliderFill.Size, SliderFill.BackgroundColor3 = UDim2.new(0.7, 0, 1, 0), Theme.Main
+SliderFill.Size, SliderFill.BackgroundColor3 = UDim2.new(0.7, 0, 1, 0), Theme.White
 Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
 local FillGrad = GlobalGrad:Clone(); FillGrad.Parent = SliderFill
 
