@@ -13,6 +13,7 @@ local CrystalGui = Instance.new("ScreenGui", Root)
 CrystalGui.Name = "CrystalProject"
 CrystalGui.IgnoreGuiInset = true
 CrystalGui.DisplayOrder = 9e9
+CrystalGui.ResetOnSpawn = false
 
 local Theme = {
     Bg = Color3.fromRGB(25, 35, 55),
@@ -23,7 +24,7 @@ local Theme = {
     Slider = Color3.fromRGB(40, 50, 75)
 }
 
-local Toggles = {AutoPop = false, AutoFour = false, Feature3 = false}
+local Toggles = {AutoPop = false, AutoFour = false}
 local Accuracy = 7
 local UI_Open, Dragging = false, false
 
@@ -64,20 +65,19 @@ local LineGrad = GlobalGrad:Clone(); LineGrad.Parent = UnderLine
 local function CreateBtn(txt, key, y)
     local B = Instance.new("TextButton", Main)
     B.Size, B.Position, B.BackgroundColor3 = UDim2.new(0, 180, 0, 36), UDim2.new(0.5, -90, 0, y), Theme.Off
-    B.Text, B.TextColor3, B.Font, B.TextSize = txt.." [Disable]", Theme.White, Enum.Font.GothamBold, 13
+    B.Text, B.TextColor3, B.Font, B.TextSize = txt.." [Off]", Theme.White, Enum.Font.GothamBold, 13
     B.AutoButtonColor = false
     Instance.new("UICorner", B).CornerRadius = UDim.new(0, 8)
 
     B.MouseButton1Click:Connect(function()
         Toggles[key] = not Toggles[key]
-        B.Text = txt .. (Toggles[key] and " [Active]" or " [Disable]")
+        B.Text = txt .. (Toggles[key] and " [On]" or " [Off]")
         TweenService:Create(B, TweenInfo.new(0.3), {BackgroundColor3 = Toggles[key] and Theme.On or Theme.Off}):Play()
     end)
 end
 
-CreateBtn("Auto Pop", "AutoPop", 55)
+CreateBtn("Auto Popcorn", "AutoPop", 55)
 CreateBtn("Auto Four", "AutoFour", 97)
-CreateBtn("Feature 3", "Feature3", 139)
 
 local SliderLabel = Instance.new("TextLabel", Main)
 SliderLabel.Size, SliderLabel.Position, SliderLabel.BackgroundTransparency = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 180), 1
@@ -85,7 +85,7 @@ SliderLabel.Text, SliderLabel.TextColor3, SliderLabel.Font, SliderLabel.TextSize
 local SliderGrad = GlobalGrad:Clone(); SliderGrad.Parent = SliderLabel
 
 local SliderBg = Instance.new("Frame", Main)
-SliderBg.Size, SliderBg.Position, SliderBg.BackgroundColor3 = UDim2.new(0, 140, 0, 6), UDim2.new(0.5, -70, 0, 208), Theme.Slider
+SliderBg.Size, SliderBg.Position, SliderBg.BackgroundColor3 = UDim2.new(0, 120, 0, 6), UDim2.new(0.5, -60, 0, 208), Theme.Slider
 Instance.new("UICorner", SliderBg).CornerRadius = UDim.new(1, 0)
 
 local SliderFill = Instance.new("Frame", SliderBg)
@@ -97,16 +97,6 @@ local Knob = Instance.new("Frame", SliderFill)
 Knob.Size, Knob.Position, Knob.BackgroundColor3 = UDim2.new(0, 14, 0, 14), UDim2.new(1, -7, 0.5, -7), Theme.White
 Knob.ZIndex = 5
 Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
-
-local KnobGlow = Instance.new("Frame", Knob)
-KnobGlow.AnchorPoint, KnobGlow.Size, KnobGlow.Position = Vector2.new(0.5, 0.5), UDim2.new(1, 0, 1, 0), UDim2.new(0.5, 0, 0.5, 0)
-KnobGlow.BackgroundColor3, KnobGlow.BackgroundTransparency, KnobGlow.ZIndex = Theme.White, 0.5, 4
-Instance.new("UICorner", KnobGlow).CornerRadius = UDim.new(1, 0)
-
-TweenService:Create(KnobGlow, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-    Size = UDim2.new(1.6, 0, 1.6, 0),
-    BackgroundTransparency = 0.96
-}):Play()
 
 local function UpdateSlider(input)
     local rawPos = math.clamp((input.Position.X - SliderBg.AbsolutePosition.X) / SliderBg.AbsoluteSize.X, 0, 1)
@@ -156,21 +146,26 @@ RunService.RenderStepped:Connect(function(dt)
 end)
 
 task.spawn(function()
-    local Remotes = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Networking")
-    local PopRemote = Remotes:WaitForChild("RE/Minigame/MinigameGameAction")
-    
-    while task.wait(0.03) do -- تسريع حلقة التحقق الرئيسية
+    local function GetPopRemote()
+        local Net = ReplicatedStorage:FindFirstChild("Shared") and ReplicatedStorage.Shared:FindFirstChild("Remotes") and ReplicatedStorage.Shared.Remotes:FindFirstChild("Networking")
+        return Net and Net:FindFirstChild("RE/Minigame/MinigameGameAction")
+    end
+
+    while true do
         if Toggles.AutoPop then
-            for i = 1, Accuracy do
-                task.spawn(function()
-                    -- محاكاة "الضغطات الثلاثية الجامدة" وراء بعضها لكل حبة فشار
-                    for combo = 1, 5 do 
-                        PopRemote:FireServer("AttemptPop", tick(), 100)
-                        -- لا يوجد انتظار طويل هنا لضمان السرعة القصوى (Combo)
-                        RunService.Heartbeat:Wait() 
-                    end
-                end)
+            local PopRemote = GetPopRemote()
+            if PopRemote then
+                local CurrentTime = tick()
+                for slot = 1, 16 do
+                    task.spawn(function()
+                        local Delay = (11 - Accuracy) * 0.012
+                        task.wait(Delay)
+                        PopRemote:FireServer("AttemptPop", slot, CurrentTime, 100)
+                    end)
+                end
             end
         end
+        task.wait(0.04)
     end
 end)
+
