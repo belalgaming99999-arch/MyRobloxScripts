@@ -99,16 +99,21 @@ Knob.Size, Knob.Position, Knob.BackgroundColor3 = UDim2.new(0, 14, 0, 14), UDim2
 Knob.ZIndex = 5
 Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
 
-local Glow = Instance.new("Frame", Knob)
-Glow.Size, Glow.Position, Glow.BackgroundColor3 = UDim2.new(1, 0, 1, 0), UDim2.new(0.5, 0, 0.5, 0), Theme.White
-Glow.AnchorPoint = Vector2.new(0.5, 0.5)
-Glow.ZIndex = 4
-Glow.BackgroundTransparency = 0.6
-Instance.new("UICorner", Glow).CornerRadius = UDim.new(1, 0)
+-- تأثير النبض السريع المتتالي (ورا بعض سريع)
+local KnobGlow = Instance.new("Frame", Knob)
+KnobGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+KnobGlow.Size = UDim2.new(1, 0, 1, 0)
+KnobGlow.Position = UDim2.new(0.5, 0, 0.5, 0)
+KnobGlow.BackgroundColor3 = Theme.White
+KnobGlow.BackgroundTransparency = 0.5
+KnobGlow.ZIndex = 4
+Instance.new("UICorner", KnobGlow).CornerRadius = UDim.new(1, 0)
 
-TweenService:Create(Glow, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-    Size = UDim2.new(1.7, 0, 1.7, 0),
-    BackgroundTransparency = 0.96
+-- الأنميشن السريع جداً والمتكرر
+local pulseInfo = TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+TweenService:Create(KnobGlow, pulseInfo, {
+    Size = UDim2.new(2.5, 0, 2.5, 0), -- تخرج لهذا الحجم وتعود بسرعة
+    BackgroundTransparency = 0.9
 }):Play()
 
 local function UpdateSlider(input)
