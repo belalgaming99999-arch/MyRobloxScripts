@@ -76,8 +76,8 @@ local function CreateBtn(txt, key, y)
     end)
 end
 
-CreateBtn("Auto Popcorn", "AutoPop", 55)
-CreateBtn("Auto Connect4", "AutoFour", 97)
+CreateBtn("Auto Pop", "AutoPop", 55)
+CreateBtn("Auto 4-Row", "AutoFour", 97)
 CreateBtn("Feature 3", "Feature3", 139)
 
 local SliderLabel = Instance.new("TextLabel", Main)
@@ -95,21 +95,40 @@ Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
 local FillGrad = GlobalGrad:Clone(); FillGrad.Parent = SliderFill
 
 local Knob = Instance.new("Frame", SliderFill)
-Knob.Size, Knob.Position, Knob.BackgroundColor3 = UDim2.new(0, 14, 0, 14), UDim2.new(1, -7, 0.5, -7), Theme.White
+-- // تصغير الدائرة لـ 10x10 وتضبيط مكانها في النص
+Knob.Size, Knob.Position, Knob.BackgroundColor3 = UDim2.new(0, 10, 0, 10), UDim2.new(1, -5, 0.5, -5), Theme.White
 Knob.ZIndex = 5
 Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
+-- // إضافة الموجات جوه الدائرة
+local KnobGrad = GlobalGrad:Clone(); KnobGrad.Parent = Knob
 
 local function UpdateSlider(input)
-    local rawPos = math.clamp((input.Position.X - SliderBg.AbsolutePosition.X) / SliderBg.AbsoluteSize.X, 0, 1)
-    Accuracy = math.floor(rawPos * 10)
+    local xPos = input.Position.X - SliderBg.AbsolutePosition.X
+    local rawPos = math.clamp(xPos / SliderBg.AbsoluteSize.X, 0, 1)
+    
+    Accuracy = math.max(1, math.floor(rawPos * 10))
     SliderLabel.Text = "Accuracy: " .. Accuracy
-    SliderFill.Size = UDim2.new(rawPos, 0, 1, 0) -- تعديل للنسبة الحقيقية
+    SliderFill.Size = UDim2.new(rawPos, 0, 1, 0)
 end
 
 local Sliding = false
-SliderBg.InputBegan:Connect(function(i) if i.UserInputType.Name:find("MouseButton1") or i.UserInputType.Name:find("Touch") then Sliding = true; UpdateSlider(i) end end)
-UserInputService.InputChanged:Connect(function(i) if Sliding and (i.UserInputType.Name:find("MouseMovement") or i.UserInputType.Name:find("Touch")) then UpdateSlider(i) end end)
-UserInputService.InputEnded:Connect(function() Sliding = false end)
+SliderBg.InputBegan:Connect(function(i) 
+    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then 
+        Sliding = true; UpdateSlider(i) 
+    end 
+end)
+
+UserInputService.InputChanged:Connect(function(i) 
+    if Sliding and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then 
+        UpdateSlider(i) 
+    end 
+end)
+
+UserInputService.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+        Sliding = false
+    end
+end)
 
 local dStart, sPos, isDragged
 MenuBtn.InputBegan:Connect(function(i)
@@ -143,10 +162,10 @@ end)
 RunService.RenderStepped:Connect(function(dt)
     Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
     local rot = (GlobalGrad.Rotation + 150 * dt) % 360
-    GlobalGrad.Rotation = rot; TitleGrad.Rotation = rot; LineGrad.Rotation = rot; FillGrad.Rotation = rot; SliderGrad.Rotation = rot
+    -- // إضافة KnobGrad للقائمة عشان يلف مع الباقي
+    GlobalGrad.Rotation = rot; TitleGrad.Rotation = rot; LineGrad.Rotation = rot; FillGrad.Rotation = rot; SliderGrad.Rotation = rot; KnobGrad.Rotation = rot
 end)
 
--- // الجزء الخاص بالبوب كورن (معدل تقنياً فقط لضمان الفوز)
 task.spawn(function()
     local PopRemote = ReplicatedStorage:FindFirstChild("MinigameGameAction", true)
     
@@ -156,7 +175,6 @@ task.spawn(function()
             if Board then
                 for _, obj in pairs(Board:GetDescendants()) do
                     if obj:IsA("BasePart") and obj:GetAttribute("TargetScale") then
-                        -- نظام التأخير بناءً على الـ Accuracy بتاعك
                         local waitTime = (11 - Accuracy) * 0.02
                         task.wait(waitTime)
                         PopRemote:FireServer("PopcornPop", obj.Name)
@@ -167,3 +185,4 @@ task.spawn(function()
         task.wait(0.1)
     end
 end)
+
