@@ -1,11 +1,9 @@
-local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CoreGui = game:GetService("CoreGui")
 
--- نظام التنظيف الذاتي لمنع ظهور قائمتين
 local Root = (gethui and gethui()) or (get_hidden_gui and get_hidden_gui()) or CoreGui
 if Root:FindFirstChild("CrystalProject") then
     Root:FindFirstChild("CrystalProject"):Destroy()
@@ -25,14 +23,12 @@ local Theme = {
     Slider = Color3.fromRGB(40, 50, 75)
 }
 
-local Toggles = {AutoPop = false, State2 = false, State3 = false}
+local Toggles = {AutoPop = false}
 local Accuracy = 7
 local UI_Open, Dragging = false, false
-local TargetPos = UDim2.new(0.05, 0, 0.25, 0)
 
--- الزر العائم
 local MenuBtn = Instance.new("TextButton", CrystalGui)
-MenuBtn.Size, MenuBtn.Position, MenuBtn.BackgroundColor3 = UDim2.new(0, 52, 0, 52), TargetPos, Theme.Main
+MenuBtn.Size, MenuBtn.Position, MenuBtn.BackgroundColor3 = UDim2.new(0, 52, 0, 52), UDim2.new(0.05, 0, 0.25, 0), Theme.Main
 MenuBtn.Text, MenuBtn.AutoButtonColor = "", false
 Instance.new("UICorner", MenuBtn).CornerRadius = UDim.new(0, 10)
 
@@ -43,7 +39,6 @@ for i = -1, 1 do
     Instance.new("UICorner", L).CornerRadius = UDim.new(1, 0)
 end
 
--- القائمة
 local Border = Instance.new("Frame", CrystalGui)
 Border.Size, Border.Visible, Border.BackgroundColor3 = UDim2.new(0, 0, 0, 0), false, Theme.White
 Border.ClipsDescendants = true
@@ -81,8 +76,6 @@ local function CreateBtn(txt, key, y)
 end
 
 CreateBtn("Auto Pop", "AutoPop", 55)
-CreateBtn("Feature 2", "State2", 97)
-CreateBtn("Feature 3", "State3", 139)
 
 local SliderLabel = Instance.new("TextLabel", Main)
 SliderLabel.Size, SliderLabel.Position, SliderLabel.BackgroundTransparency = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 180), 1
@@ -90,7 +83,7 @@ SliderLabel.Text, SliderLabel.TextColor3, SliderLabel.Font, SliderLabel.TextSize
 local SliderGrad = GlobalGrad:Clone(); SliderGrad.Parent = SliderLabel
 
 local SliderBg = Instance.new("Frame", Main)
-SliderBg.Size, SliderBg.Position, SliderBg.BackgroundColor3 = UDim2.new(0, 160, 0, 6), UDim2.new(0.5, -80, 0, 208), Theme.Slider
+SliderBg.Size, SliderBg.Position, SliderBg.BackgroundColor3 = UDim2.new(0, 140, 0, 6), UDim2.new(0.5, -70, 0, 208), Theme.Slider
 Instance.new("UICorner", SliderBg).CornerRadius = UDim.new(1, 0)
 
 local SliderFill = Instance.new("Frame", SliderBg)
@@ -104,27 +97,20 @@ Knob.ZIndex = 5
 Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
 
 local KnobGlow = Instance.new("Frame", Knob)
-KnobGlow.AnchorPoint = Vector2.new(0.5, 0.5)
-KnobGlow.Size = UDim2.new(1, 0, 1, 0)
-KnobGlow.Position = UDim2.new(0.5, 0, 0.5, 0)
-KnobGlow.BackgroundColor3 = Theme.White
-KnobGlow.BackgroundTransparency = 0.5
-KnobGlow.ZIndex = 4
+KnobGlow.AnchorPoint, KnobGlow.Size, KnobGlow.Position = Vector2.new(0.5, 0.5), UDim2.new(1, 0, 1, 0), UDim2.new(0.5, 0, 0.5, 0)
+KnobGlow.BackgroundColor3, KnobGlow.BackgroundTransparency, KnobGlow.ZIndex = Theme.White, 0.5, 4
 Instance.new("UICorner", KnobGlow).CornerRadius = UDim.new(1, 0)
 
--- أنيميشن الموجات المتناسق
-local pulseInfo = TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
-TweenService:Create(KnobGlow, pulseInfo, {
-    Size = UDim2.new(1.8, 0, 1.8, 0),
-    BackgroundTransparency = 0.95
+TweenService:Create(KnobGlow, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
+    Size = UDim2.new(1.6, 0, 1.6, 0),
+    BackgroundTransparency = 0.96
 }):Play()
 
 local function UpdateSlider(input)
     local rawPos = math.clamp((input.Position.X - SliderBg.AbsolutePosition.X) / SliderBg.AbsoluteSize.X, 0, 1)
     Accuracy = math.floor(rawPos * 10)
-    local steppedPos = Accuracy / 10
     SliderLabel.Text = "Accuracy: " .. Accuracy
-    SliderFill.Size = UDim2.new(steppedPos, 0, 1, 0)
+    SliderFill.Size = UDim2.new(Accuracy / 10, 0, 1, 0)
 end
 
 local Sliding = false
@@ -147,7 +133,7 @@ UserInputService.InputChanged:Connect(function(i)
     end
 end)
 
-UserInputService.InputEnded:Connect(function(i) if i.UserInputType.Name:find("MouseButton1") or i.UserInputType.Name:find("Touch") then Dragging = false end end)
+UserInputService.InputEnded:Connect(function() Dragging = false end)
 
 MenuBtn.MouseButton1Click:Connect(function()
     if not isDragged then
@@ -174,9 +160,7 @@ task.spawn(function()
     while task.wait() do
         if Toggles.AutoPop then
             for i = 1, Accuracy do
-                task.spawn(function() 
-                    PopRemote:FireServer("AttemptPop", tick() + math.random()) 
-                end)
+                task.spawn(function() PopRemote:FireServer("AttemptPop", tick() + math.random()) end)
             end
             task.wait(math.clamp(0.14 - (Accuracy * 0.01), 0.07, 0.14))
         end
