@@ -39,14 +39,26 @@ end
 
 local Screen = UI:Build("ScreenGui", {Name = Crystal.ID, ZIndexBehavior = Enum.ZIndexBehavior.Sibling}, CG)
 
+-- [ الأيقونة - مطابقة تماماً للقائمة ] --
 local OpenBtn = UI:Build("TextButton", {
     Size = UDim2.new(0, 110, 0, 35), Position = UDim2.new(0.5, -58, 0.16, 0),
-    BackgroundColor3 = Crystal.Theme.Icon, Text = "Crystal Hub", TextColor3 = Crystal.Theme.White,
-    Font = Crystal.Theme.Font, TextSize = Crystal.Theme.Size, AutoButtonColor = false, ZIndex = 10
+    BackgroundColor3 = Crystal.Theme.Icon, 
+    Text = "Crystal Hub", 
+    TextColor3 = Crystal.Theme.White, -- تم توحيد اللون للأبيض
+    Font = Crystal.Theme.Font, 
+    TextSize = Crystal.Theme.Size, 
+    AutoButtonColor = false, 
+    ZIndex = 10
 }, Screen)
 UI:Build("UICorner", {CornerRadius = UDim.new(0, 18)}, OpenBtn)
-local BtnStroke = UI:Build("UIStroke", {Color = Crystal.Theme.MainBlue, Thickness = 1.5}, OpenBtn)
 
+local BtnStroke = UI:Build("UIStroke", {
+    Color = Crystal.Theme.MainBlue, 
+    Thickness = 1.5, 
+    ApplyStrokeMode = Enum.ApplyStrokeMode.Border -- تم توحيد الحواف
+}, OpenBtn)
+
+-- [ القائمة الأساسية ] --
 local Main = UI:Build("CanvasGroup", {
     Size = UDim2.new(0, 380, 0, 190), Position = UDim2.new(0.5, -190, 0.5, -95),
     BackgroundColor3 = Crystal.Theme.Dark, Visible = false, GroupTransparency = 1
