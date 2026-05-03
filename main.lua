@@ -5,12 +5,14 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CoreGui = game:GetService("CoreGui")
 
+-- نظام التنظيف الذاتي لمنع ظهور قائمتين
 local Root = (gethui and gethui()) or (get_hidden_gui and get_hidden_gui()) or CoreGui
-local Existing = Root:FindFirstChild("CrystalProject")
-if Existing then Existing:Destroy() end
+if Root:FindFirstChild("CrystalProject") then
+    Root:FindFirstChild("CrystalProject"):Destroy()
+end
 
 local CrystalGui = Instance.new("ScreenGui", Root)
-CrystalGui.Name = "CrystalProject_" .. math.random(100, 999)
+CrystalGui.Name = "CrystalProject"
 CrystalGui.IgnoreGuiInset = true
 CrystalGui.DisplayOrder = 9e9
 
@@ -28,6 +30,7 @@ local Accuracy = 7
 local UI_Open, Dragging = false, false
 local TargetPos = UDim2.new(0.05, 0, 0.25, 0)
 
+-- الزر العائم
 local MenuBtn = Instance.new("TextButton", CrystalGui)
 MenuBtn.Size, MenuBtn.Position, MenuBtn.BackgroundColor3 = UDim2.new(0, 52, 0, 52), TargetPos, Theme.Main
 MenuBtn.Text, MenuBtn.AutoButtonColor = "", false
@@ -40,6 +43,7 @@ for i = -1, 1 do
     Instance.new("UICorner", L).CornerRadius = UDim.new(1, 0)
 end
 
+-- القائمة
 local Border = Instance.new("Frame", CrystalGui)
 Border.Size, Border.Visible, Border.BackgroundColor3 = UDim2.new(0, 0, 0, 0), false, Theme.White
 Border.ClipsDescendants = true
@@ -99,7 +103,6 @@ Knob.Size, Knob.Position, Knob.BackgroundColor3 = UDim2.new(0, 14, 0, 14), UDim2
 Knob.ZIndex = 5
 Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
 
--- تأثير النبض السريع المتتالي (ورا بعض سريع)
 local KnobGlow = Instance.new("Frame", Knob)
 KnobGlow.AnchorPoint = Vector2.new(0.5, 0.5)
 KnobGlow.Size = UDim2.new(1, 0, 1, 0)
@@ -109,11 +112,11 @@ KnobGlow.BackgroundTransparency = 0.5
 KnobGlow.ZIndex = 4
 Instance.new("UICorner", KnobGlow).CornerRadius = UDim.new(1, 0)
 
--- الأنميشن السريع جداً والمتكرر
-local pulseInfo = TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+-- أنيميشن الموجات المتناسق
+local pulseInfo = TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
 TweenService:Create(KnobGlow, pulseInfo, {
-    Size = UDim2.new(2.5, 0, 2.5, 0), -- تخرج لهذا الحجم وتعود بسرعة
-    BackgroundTransparency = 0.9
+    Size = UDim2.new(1.8, 0, 1.8, 0),
+    BackgroundTransparency = 0.95
 }):Play()
 
 local function UpdateSlider(input)
@@ -179,3 +182,4 @@ task.spawn(function()
         end
     end
 end)
+
