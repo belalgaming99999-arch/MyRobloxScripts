@@ -1,221 +1,177 @@
 local Services = setmetatable({}, {
-    __index = function(t, k)
-        return game:GetService(k)
-    end
+    __index = function(t, k) return game:GetService(k) end
 })
+local TS, UIS, CG, RS = Services.TweenService, Services.UserInputService, Services.CoreGui, Services.ReplicatedStorage
 
-local TS, UIS, CG, LP, RS = Services.TweenService, Services.UserInputService, Services.CoreGui, Services.Players.LocalPlayer, Services.ReplicatedStorage
-
-local UI_ID = "Crystal_Elite_2026"
-local Existing = CG:FindFirstChild(UI_ID)
-if Existing then Existing:Destroy() end
-
-getgenv().Config = {
-    AutoPop = false, 
-    ConnectFour = false, 
-    Accuracy = 7
+local Crystal = {
+    ID = "C_" .. math.random(100, 999),
+    Settings = {AutoPop = false, ConnectFour = false, Accuracy = 7},
+    Theme = {
+        MainBlue = Color3.fromRGB(0, 120, 255),
+        DarkBg = Color3.fromRGB(10, 10, 10),
+        GrayPanel = Color3.fromRGB(35, 35, 35),
+        IconBg = Color3.fromRGB(15, 15, 15),
+        ToggleOff = Color3.fromRGB(50, 50, 50),
+        SliderBar = Color3.fromRGB(60, 60, 60),
+        Text = Color3.fromRGB(255, 255, 255),
+        Font = Enum.Font.GothamBold,
+        FontSize = 12
+    }
 }
 
-local Screen = Instance.new("ScreenGui", CG)
-Screen.Name = UI_ID
-Screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-local OpenBtn = Instance.new("TextButton", Screen)
-OpenBtn.Size = UDim2.new(0, 110, 0, 35)
-OpenBtn.Position = UDim2.new(0.5, -55, 0.15, 0)
-OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-OpenBtn.Text = "Crystal Hub"
-OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-OpenBtn.Font = Enum.Font.GothamBold
-OpenBtn.TextSize = 12
-OpenBtn.AutoButtonColor = false
-OpenBtn.ZIndex = 10
-Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 18)
-
-local BtnStroke = Instance.new("UIStroke", OpenBtn)
-BtnStroke.Color = Color3.fromRGB(0, 120, 255)
-BtnStroke.Thickness = 1.5
-BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-local Main = Instance.new("CanvasGroup", Screen)
-Main.Size = UDim2.new(0, 380, 0, 190)
-Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-Main.Visible = false
-Main.GroupTransparency = 1 
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 18)
-
-local MainStroke = Instance.new("UIStroke", Main)
-MainStroke.Color = Color3.fromRGB(0, 120, 255)
-MainStroke.Thickness = 1.5
-MainStroke.Transparency = 1
-
-local function ToggleUI(state)
-    local info = TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-    if state then
-        Main.Position = UDim2.new(OpenBtn.Position.X.Scale, OpenBtn.Position.X.Offset - 135, OpenBtn.Position.Y.Scale, OpenBtn.Position.Y.Offset + 48)
-        OpenBtn.Visible = false 
-        Main.Visible = true
-        TS:Create(Main, info, {GroupTransparency = 0, Size = UDim2.new(0, 380, 0, 190)}):Play()
-        TS:Create(MainStroke, info, {Transparency = 0}):Play()
-    else
-        TS:Create(MainStroke, info, {Transparency = 1}):Play()
-        local hide = TS:Create(Main, info, {GroupTransparency = 1, Size = UDim2.new(0, 360, 0, 170)})
-        hide:Play()
-        hide.Completed:Connect(function() 
-            Main.Visible = false 
-            OpenBtn.Visible = true
-            TS:Create(OpenBtn, info, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
-            TS:Create(BtnStroke, info, {Transparency = 0}):Play()
-        end)
-    end
+local UI = {}
+function UI:Create(class, props)
+    local inst = Instance.new(class)
+    for k, v in pairs(props) do inst[k] = v end
+    return inst
 end
 
-local Header = Instance.new("Frame", Main)
-Header.Size = UDim2.new(1, 0, 0, 38)
-Header.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-Header.BorderSizePixel = 0
-Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 18)
+function UI:Animate(obj, info, goal)
+    TS:Create(obj, TweenInfo.new(unpack(info)), goal):Play()
+end
 
-local HeaderSquare = Instance.new("Frame", Header)
-HeaderSquare.Size = UDim2.new(1, 0, 0, 10)
-HeaderSquare.Position = UDim2.new(0, 0, 1, -10)
-HeaderSquare.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-HeaderSquare.BorderSizePixel = 0
+local Screen = UI:Create("ScreenGui", {Name = Crystal.ID, Parent = CG})
 
-local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1, 0, 0, 38)
-Title.Text = "Crystal Hub - Mini Games"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 12
-Title.BackgroundTransparency = 1
-Title.ZIndex = 3
+local Icon = UI:Create("TextButton", {
+    Size = UDim2.new(0, 110, 0, 35), Position = UDim2.new(0.5, -55, 0.15, 0),
+    BackgroundColor3 = Crystal.Theme.IconBg, Text = "Crystal Hub",
+    TextColor3 = Crystal.Theme.Text, Font = Crystal.Theme.Font, TextSize = Crystal.Theme.FontSize,
+    AutoButtonColor = false, Parent = Screen, ZIndex = 10
+})
+UI:Create("UICorner", {CornerRadius = UDim.new(0, 18), Parent = Icon})
+UI:Create("UIStroke", {Color = Crystal.Theme.MainBlue, Thickness = 1.5, Parent = Icon})
 
-local CloseBtn = Instance.new("TextButton", Main)
-CloseBtn.Size = UDim2.new(0, 35, 0, 38)
-CloseBtn.Position = UDim2.new(1, -38, 0, 0)
-CloseBtn.Text = "X"
-CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 12
-CloseBtn.BackgroundTransparency = 1
-CloseBtn.ZIndex = 3
+local Main = UI:Create("CanvasGroup", {
+    Size = UDim2.new(0, 380, 0, 190), BackgroundColor3 = Crystal.Theme.DarkBg,
+    Visible = false, GroupTransparency = 1, Parent = Screen
+})
+UI:Create("UICorner", {CornerRadius = UDim.new(0, 18), Parent = Main})
+local MStroke = UI:Create("UIStroke", {Color = Crystal.Theme.MainBlue, Thickness = 1.5, Transparency = 1, Parent = Main})
 
-local function CreateToggle(name, pos, icon, var)
-    local F = Instance.new("Frame", Main)
-    F.Size, F.Position, F.BackgroundColor3 = UDim2.new(0, 175, 0, 42), pos, Color3.fromRGB(35, 35, 35)
-    Instance.new("UICorner", F).CornerRadius = UDim.new(0, 18)
+local Header = UI:Create("Frame", {Size = UDim2.new(1, 0, 0, 38), BackgroundColor3 = Crystal.Theme.GrayPanel, Parent = Main})
+UI:Create("UICorner", {CornerRadius = UDim.new(0, 18), Parent = Header})
+UI:Create("Frame", {Size = UDim2.new(1, 0, 0, 10), Position = UDim2.new(0, 0, 1, -10), BackgroundColor3 = Crystal.Theme.GrayPanel, BorderSizePixel = 0, Parent = Header})
+
+local Title = UI:Create("TextLabel", {
+    Size = UDim2.new(1, 0, 0, 38), Text = "Crystal Hub - Mini Games", BackgroundTransparency = 1,
+    TextColor3 = Crystal.Theme.Text, Font = Crystal.Theme.Font, TextSize = Crystal.Theme.FontSize, Parent = Main, ZIndex = 3
+})
+
+local Close = UI:Create("TextButton", {
+    Size = UDim2.new(0, 35, 0, 38), Position = UDim2.new(1, -38, 0, 0), Text = "X",
+    BackgroundTransparency = 1, TextColor3 = Crystal.Theme.Text, Font = Crystal.Theme.Font,
+    TextSize = Crystal.Theme.FontSize, AutoButtonColor = false, Parent = Main, ZIndex = 3
+})
+
+local function NewToggle(name, pos, icon, var)
+    local F = UI:Create("Frame", {Size = UDim2.new(0, 175, 0, 42), Position = pos, BackgroundColor3 = Crystal.Theme.GrayPanel, Parent = Main})
+    UI:Create("UICorner", {CornerRadius = UDim.new(0, 18), Parent = F})
     
-    local I = Instance.new("TextLabel", F)
-    I.Size = UDim2.new(0, 28, 0, 28)
-    I.Position = UDim2.new(0, 8, 0.5, -14)
-    I.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-    I.Text = icon
-    I.TextColor3 = Color3.fromRGB(255, 255, 255)
-    I.Font = Enum.Font.GothamBold
-    I.TextSize = 12
-    Instance.new("UICorner", I).CornerRadius = UDim.new(1, 0)
+    local I = UI:Create("TextLabel", {
+        Size = UDim2.new(0, 28, 0, 28), Position = UDim2.new(0, 8, 0.5, -14), BackgroundColor3 = Crystal.Theme.MainBlue,
+        Text = icon, TextColor3 = Crystal.Theme.Text, Font = Crystal.Theme.Font, TextSize = Crystal.Theme.FontSize, Parent = F
+    })
+    UI:Create("UICorner", {CornerRadius = UDim.new(1, 0), Parent = I})
     
-    local L = Instance.new("TextLabel", F)
-    L.Size, L.Position, L.Text = UDim2.new(0, 85, 1, 0), UDim2.new(0, 44, 0, 0), name
-    L.TextColor3, L.Font, L.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 11
-    L.BackgroundTransparency, L.TextXAlignment = 1, Enum.TextXAlignment.Left
+    local L = UI:Create("TextLabel", {
+        Size = UDim2.new(0, 85, 1, 0), Position = UDim2.new(0, 44, 0, 0), Text = name, BackgroundTransparency = 1,
+        TextColor3 = Crystal.Theme.Text, Font = Crystal.Theme.Font, TextSize = 11, TextXAlignment = "Left", Parent = F
+    })
 
-    local B = Instance.new("TextButton", F)
-    B.Size, B.Position, B.BackgroundColor3, B.Text = UDim2.new(0, 32, 0, 16), UDim2.new(1, -40, 0.5, -8), Color3.fromRGB(50, 50, 50), ""
-    B.AutoButtonColor = false
-    Instance.new("UICorner", B).CornerRadius = UDim.new(1, 0)
+    local B = UI:Create("TextButton", {
+        Size = UDim2.new(0, 32, 0, 16), Position = UDim2.new(1, -40, 0.5, -8), BackgroundColor3 = Crystal.Theme.ToggleOff,
+        Text = "", AutoButtonColor = false, Parent = F
+    })
+    UI:Create("UICorner", {CornerRadius = UDim.new(1, 0), Parent = B})
     
-    local Dot = Instance.new("Frame", B)
-    Dot.Size, Dot.Position, Dot.BackgroundColor3 = UDim2.new(0, 12, 0, 12), UDim2.new(0, 2, 0.5, -6), Color3.fromRGB(255, 255, 255)
-    Instance.new("UICorner", Dot).CornerRadius = UDim.new(1, 0)
+    local D = UI:Create("Frame", {Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(0, 2, 0.5, -6), BackgroundColor3 = Crystal.Theme.Text, Parent = B})
+    UI:Create("UICorner", {CornerRadius = UDim.new(1, 0), Parent = D})
 
     B.MouseButton1Click:Connect(function()
-        getgenv().Config[var] = not getgenv().Config[var]
-        TS:Create(B, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {BackgroundColor3 = getgenv().Config[var] and Color3.fromRGB(0, 120, 255) or Color3.fromRGB(50, 50, 50)}):Play()
-        TS:Create(Dot, TweenInfo.new(0.25, Enum.EasingStyle.Back), {Position = getgenv().Config[var] and UDim2.new(0, 18, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)}):Play()
+        Crystal.Settings[var] = not Crystal.Settings[var]
+        UI:Animate(B, {0.25, Enum.EasingStyle.Quart}, {BackgroundColor3 = Crystal.Settings[var] and Crystal.Theme.MainBlue or Crystal.Theme.ToggleOff})
+        UI:Animate(D, {0.25, Enum.EasingStyle.Back}, {Position = Crystal.Settings[var] and UDim2.new(0, 18, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)})
     end)
 end
 
-CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "P", "AutoPop")
-CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
+NewToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "P", "AutoPop")
+NewToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
 
-local SF = Instance.new("Frame", Main)
-SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 75), UDim2.new(0, 0, 1, -75), Color3.fromRGB(35, 35, 35)
-SF.BorderSizePixel = 0
-Instance.new("UICorner", SF).CornerRadius = UDim.new(0, 18)
+local SArea = UI:Create("Frame", {Size = UDim2.new(1, 0, 0, 75), Position = UDim2.new(0, 0, 1, -75), BackgroundColor3 = Crystal.Theme.GrayPanel, Parent = Main})
+UI:Create("UICorner", {CornerRadius = UDim.new(0, 18), Parent = SArea})
+UI:Create("Frame", {Size = UDim2.new(1, 0, 0, 10), BackgroundColor3 = Crystal.Theme.GrayPanel, BorderSizePixel = 0, Parent = SArea})
 
-local SFSquare = Instance.new("Frame", SF)
-SFSquare.Size = UDim2.new(1, 0, 0, 10)
-SFSquare.Position = UDim2.new(0, 0, 0, 0)
-SFSquare.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-SFSquare.BorderSizePixel = 0
+local SLbl = UI:Create("TextLabel", {
+    Size = UDim2.new(1, 0, 0, 20), Position = UDim2.new(0, 0, 0, 12), Text = "Accuracy - 7",
+    BackgroundTransparency = 1, TextColor3 = Crystal.Theme.Text, Font = Crystal.Theme.Font, TextSize = Crystal.Theme.FontSize, Parent = SArea
+})
 
-local CombinedLabel = Instance.new("TextLabel", SF)
-CombinedLabel.Text = "Accuracy - 7"
-CombinedLabel.Size, CombinedLabel.Position = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 12)
-CombinedLabel.TextColor3, CombinedLabel.Font, CombinedLabel.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
-CombinedLabel.BackgroundTransparency = 1
-CombinedLabel.ZIndex = 3
+local SFill = UI:Create("Frame", {
+    Size = UDim2.new(0.7, 0, 1, 0), BackgroundColor3 = Crystal.Theme.MainBlue, 
+    Parent = UI:Create("Frame", {Size = UDim2.new(0, 240, 0, 6), Position = UDim2.new(0.5, -120, 0, 48), BackgroundColor3 = Crystal.Theme.SliderBar, Parent = SArea})
+})
+UI:Create("UICorner", {CornerRadius = UDim.new(1, 0), Parent = SFill.Parent})
+UI:Create("UICorner", {CornerRadius = UDim.new(1, 0), Parent = SFill})
 
-local SBtn = Instance.new("Frame", SF)
-SBtn.Size, SBtn.Position, SBtn.BackgroundColor3 = UDim2.new(0, 240, 0, 6), UDim2.new(0.5, -120, 0, 48), Color3.fromRGB(60, 60, 60)
-Instance.new("UICorner", SBtn).CornerRadius = UDim.new(1, 0)
-
-local SFill = Instance.new("Frame", SBtn)
-SFill.Name, SFill.Size, SFill.BackgroundColor3 = "Fill", UDim2.new(0.7, 0, 1, 0), Color3.fromRGB(0, 120, 255)
-Instance.new("UICorner", SFill).CornerRadius = UDim.new(1, 0)
-
-local function CreateArr(t, p, step)
-    local b = Instance.new("TextButton", SF)
-    b.Size, b.Position, b.BackgroundColor3, b.Text = UDim2.new(0, 28, 0, 28), p, Color3.fromRGB(0, 120, 255), t
-    b.TextColor3, b.Font, b.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 14
-    Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
+local function Arrow(t, p, s)
+    local b = UI:Create("TextButton", {
+        Size = UDim2.new(0, 28, 0, 28), Position = p, BackgroundColor3 = Crystal.Theme.MainBlue,
+        Text = t, TextColor3 = Crystal.Theme.Text, Font = Crystal.Theme.Font, TextSize = 14,
+        AutoButtonColor = false, Parent = SArea
+    })
+    UI:Create("UICorner", {CornerRadius = UDim.new(1, 0), Parent = b})
     b.MouseButton1Click:Connect(function()
-        getgenv().Config.Accuracy = math.clamp(getgenv().Config.Accuracy + step, 1, 10)
-        CombinedLabel.Text = "Accuracy - " .. tostring(getgenv().Config.Accuracy)
-        TS:Create(SFill, TweenInfo.new(0.4, Enum.EasingStyle.Quart), {Size = UDim2.new(getgenv().Config.Accuracy/10, 0, 1, 0)}):Play()
+        Crystal.Settings.Accuracy = math.clamp(Crystal.Settings.Accuracy + s, 1, 10)
+        SLbl.Text = "Accuracy - " .. Crystal.Settings.Accuracy
+        UI:Animate(SFill, {0.4, Enum.EasingStyle.Quart}, {Size = UDim2.new(Crystal.Settings.Accuracy/10, 0, 1, 0)})
     end)
 end
+Arrow("<", UDim2.new(0, 33, 0, 37), -1)
+Arrow(">", UDim2.new(1, -61, 0, 37), 1)
 
-CreateArr("<", UDim2.new(0, 33, 0, 37), -1)
-CreateArr(">", UDim2.new(1, -61, 0, 37), 1)
-
-local dragToggle, dragStart, startPos
-OpenBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragToggle, dragStart, startPos = true, input.Position, OpenBtn.Position
+local function View(state)
+    local t = {0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out}
+    if state then
+        Main.Position = UDim2.new(Icon.Position.X.Scale, Icon.Position.X.Offset - 135, Icon.Position.Y.Scale, Icon.Position.Y.Offset + 48)
+        Icon.Visible = false; Main.Visible = true
+        UI:Animate(Main, t, {GroupTransparency = 0, Size = UDim2.new(0, 380, 0, 190)})
+        UI:Animate(MStroke, t, {Transparency = 0})
+    else
+        UI:Animate(MStroke, t, {Transparency = 1})
+        local h = TS:Create(Main, TweenInfo.new(0.4), {GroupTransparency = 1, Size = UDim2.new(0, 360, 0, 170)})
+        h:Play(); h.Completed:Connect(function() Main.Visible = false; Icon.Visible = true end)
     end
-end)
-UIS.InputChanged:Connect(function(input)
-    if dragToggle and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        OpenBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-UIS.InputEnded:Connect(function() dragToggle = false end)
+end
 
-OpenBtn.MouseButton1Click:Connect(function() ToggleUI(true) end)
-CloseBtn.MouseButton1Click:Connect(function() ToggleUI(false) end)
+Icon.MouseButton1Click:Connect(function() View(true) end)
+Close.MouseButton1Click:Connect(function() View(false) end)
+
+local dT, dS, sP
+Icon.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dT, dS, sP = true, i.Position, Icon.Position end end)
+UIS.InputChanged:Connect(function(i) if dT and i.UserInputType == Enum.UserInputType.MouseMovement then
+    local d = i.Position - dS
+    Icon.Position = UDim2.new(sP.X.Scale, sP.X.Offset + d.X, sP.Y.Scale, sP.Y.Offset + d.Y)
+end end)
+UIS.InputEnded:Connect(function() dT = false end)
 
 task.spawn(function()
     local Net = RS:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Networking")
-    local Action = Net:WaitForChild("RE/Minigame/MinigameGameAction")
+    local Act = Net:WaitForChild("RE/Minigame/MinigameGameAction")
     while task.wait() do
-        if getgenv().Config.AutoPop then
-            local burst = getgenv().Config.Accuracy
-            for i = 1, burst do
-                task.spawn(function() Action:FireServer("AttemptPop", tick() + math.random()) end)
+        if Crystal.Settings.AutoPop then
+            for i = 1, Crystal.Settings.Accuracy do
+                task.spawn(function() Act:FireServer("AttemptPop", tick() + math.random()) end)
             end
-            task.wait(math.clamp(0.14 - (burst * 0.01), 0.06, 0.14))
+            task.wait(math.clamp(0.14 - (Crystal.Settings.Accuracy * 0.01), 0.06, 0.14))
         end
-        if getgenv().Config.ConnectFour then
-            local Moves = {4, 3, 5, 2, 6, 1, 7}
-            for _, col in ipairs(Moves) do
-                Action:FireServer("PlaceDisc", col)
+        if Crystal.Settings.ConnectFour then
+            for _, c in ipairs({4, 3, 5, 2, 6, 1, 7}) do
+                if not Crystal.Settings.ConnectFour then break end
+                Act:FireServer("PlaceDisc", c)
                 task.wait(0.06)
             end
             task.wait(0.5)
         end
     end
 end)
+
