@@ -1,3 +1,4 @@
+
 local TS = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local CG = game:GetService("CoreGui")
@@ -15,7 +16,7 @@ Screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local OpenBtn = Instance.new("TextButton", Screen)
 OpenBtn.Size = UDim2.new(0, 110, 0, 35)
-OpenBtn.Position = UDim2.new(0.5, -55, 0.12, 0)
+OpenBtn.Position = UDim2.new(0.5, -55, 0.13, 0)
 OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 OpenBtn.Text = "Crystal Hub"
 OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -32,7 +33,6 @@ BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 local Main = Instance.new("CanvasGroup", Screen)
 Main.Size = UDim2.new(0, 380, 0, 190)
-Main.Position = UDim2.new(0.5, -190, 0.5, -95)
 Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 Main.Visible = false
 Main.GroupTransparency = 1 
@@ -47,7 +47,7 @@ local function ToggleUI(state)
     local info = TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
     
     if state then
-        Main.Position = UDim2.new(OpenBtn.Position.X.Scale, OpenBtn.Position.X.Offset - 135, OpenBtn.Position.Y.Scale, OpenBtn.Position.Y.Offset + 50)
+        Main.Position = UDim2.new(OpenBtn.Position.X.Scale, OpenBtn.Position.X.Offset - 135, OpenBtn.Position.Y.Scale, OpenBtn.Position.Y.Offset + 45)
         Main.Visible = true
         TS:Create(Main, info, {GroupTransparency = 0, Size = UDim2.new(0, 380, 0, 190)}):Play()
         TS:Create(MainStroke, info, {Transparency = 0}):Play()
@@ -241,11 +241,4 @@ task.spawn(function()
             task.wait(math.clamp(0.12 - (acc * 0.008), 0.05, 0.12))
         end
         if getgenv().Config.ConnectFour then
-            local cols = {4, 3, 5, 2, 6, 1, 7}
-            for _, col in ipairs(cols) do
-                ActionRemote:FireServer("PlaceDisc", col)
-            end
-            task.wait(0.5)
-        end
-    end
-end)
+            local cols = {4, 3
