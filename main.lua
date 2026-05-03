@@ -6,7 +6,7 @@ local TS, UIS, CG, RS = Services.TweenService, Services.UserInputService, Servic
 
 -- [[ إعدادات السكربت ]] --
 local Crystal = {
-    ID = "Crystal_Elite_TouchFix_2026",
+    ID = "Crystal_Elite_Ultimate_Fix",
     Config = {AutoPop = false, ConnectFour = false, Accuracy = 7},
     Theme = {
         MainBlue = Color3.fromRGB(0, 120, 255),
@@ -25,7 +25,6 @@ local Crystal = {
 local Existing = CG:FindFirstChild(Crystal.ID)
 if Existing then Existing:Destroy() end
 
--- [[ محرك الواجهة ]] --
 local UI = {}
 function UI:Build(class, props, parent)
     local inst = Instance.new(class)
@@ -43,14 +42,14 @@ end
 
 local Screen = UI:Build("ScreenGui", {Name = Crystal.ID, ZIndexBehavior = Enum.ZIndexBehavior.Sibling}, CG)
 
--- [[ القائمة الأساسية ]] --
+-- [[ القائمة ]] --
 local Main = UI:Build("CanvasGroup", {
     Size = UDim2.new(0, 380, 0, 190), BackgroundColor3 = Crystal.Theme.Dark, Visible = false, GroupTransparency = 1, ZIndex = 5
 }, Screen)
 UI:Build("UICorner", {CornerRadius = UDim.new(0, 18)}, Main)
 local MStroke = UI:Build("UIStroke", {Color = Crystal.Theme.MainBlue, Thickness = 1.5, Transparency = 1}, Main)
 
--- [[ الأيقونة (OpenBtn) ]] --
+-- [[ الأيقونة ]] --
 local OpenBtn = UI:Build("TextButton", {
     Size = UDim2.new(0, 110, 0, 35), Position = UDim2.new(0.5, -55, 0.15, 0),
     BackgroundColor3 = Crystal.Theme.Icon, Text = "Crystal Hub", TextColor3 = Crystal.Theme.White,
@@ -59,34 +58,64 @@ local OpenBtn = UI:Build("TextButton", {
 UI:Build("UICorner", {CornerRadius = UDim.new(0, 18)}, OpenBtn)
 local BtnStroke = UI:Build("UIStroke", {Color = Crystal.Theme.MainBlue, Thickness = 1.5, ApplyStrokeMode = Enum.ApplyStrokeMode.Border}, OpenBtn)
 
--- [[ وظيفة الفتح والإغلاق ]] --
+-- [[ نظام الفتح والإغلاق ]] --
 local function ToggleUI(state)
-    local t = 0.4
     if state then
-        -- تحديد موقع القائمة تحت الأيقونة مباشرة
         Main.Position = UDim2.new(OpenBtn.Position.X.Scale, OpenBtn.Position.X.Offset - 135, OpenBtn.Position.Y.Scale, OpenBtn.Position.Y.Offset + 45)
         Main.Visible = true
-        UI:Tween(Main, {GroupTransparency = 0}, t)
-        UI:Tween(MStroke, {Transparency = 0}, t)
-        UI:Tween(OpenBtn, {BackgroundTransparency = 1, TextTransparency = 1}, 0.2)
-        UI:Tween(BtnStroke, {Transparency = 1}, 0.2)
-        task.delay(0.2, function() OpenBtn.Visible = false end)
+        UI:Tween(Main, {GroupTransparency = 0}, 0.4)
+        UI:Tween(MStroke, {Transparency = 0}, 0.4)
+        OpenBtn.Visible = false
     else
-        UI:Tween(MStroke, {Transparency = 1}, t)
-        local hide = UI:Tween(Main, {GroupTransparency = 1}, t)
-        OpenBtn.Visible = true
-        UI:Tween(OpenBtn, {BackgroundTransparency = 0, TextTransparency = 0}, t)
-        UI:Tween(BtnStroke, {Transparency = 0}, t)
+        UI:Tween(MStroke, {Transparency = 1}, 0.3)
+        local hide = UI:Tween(Main, {GroupTransparency = 1}, 0.3)
         hide.Completed:Connect(function() if Main.GroupTransparency == 1 then Main.Visible = false end end)
+        OpenBtn.Visible = true
+        UI:Tween(OpenBtn, {BackgroundTransparency = 0, TextTransparency = 0}, 0.3)
+        UI:Tween(BtnStroke, {Transparency = 0}, 0.3)
     end
 end
+
+-- [[ نظام السحب والضغط المطور ]] --
+local dragging, dragInput, dragStart, startPos
+local hasMoved = false
+
+OpenBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = OpenBtn.Position
+        hasMoved = false -- تصفير الحركة عند كل ضغطة
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        if delta.Magnitude > 5 then hasMoved = true end -- إذا تحرك أكثر من 5 بكسل نعتبرها سحب
+        OpenBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+OpenBtn.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if not hasMoved then -- إذا العميل ضغط ولم يحرك.. افتح القائمة
+            ToggleUI(true)
+        end
+    end
+end)
 
 -- [[ المحتوى الداخلي ]] --
 local Header = UI:Build("Frame", {Size = UDim2.new(1, 0, 0, 38), BackgroundColor3 = Crystal.Theme.Gray}, Main)
 UI:Build("UICorner", {CornerRadius = UDim.new(0, 18)}, Header)
 UI:Build("Frame", {Size = UDim2.new(1, 0, 0, 15), Position = UDim2.new(0, 0, 1, -15), BackgroundColor3 = Crystal.Theme.Gray, BorderSizePixel = 0}, Header)
 UI:Build("TextLabel", {Size = UDim2.new(1, 0, 0, 38), Text = "Crystal Hub", BackgroundTransparency = 1, TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = Crystal.Theme.Size, ZIndex = 6}, Main)
-
 local CloseBtn = UI:Build("TextButton", {Size = UDim2.new(0, 35, 0, 38), Position = UDim2.new(1, -38, 0, 0), Text = "X", BackgroundTransparency = 1, TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = Crystal.Theme.Size, AutoButtonColor = false, ZIndex = 7}, Main)
 CloseBtn.MouseButton1Click:Connect(function() ToggleUI(false) end)
 
@@ -129,25 +158,7 @@ end
 UI:Build("TextButton", {Size = UDim2.new(0, 28, 0, 28), Position = UDim2.new(0, 33, 0, 37), BackgroundColor3 = Crystal.Theme.MainBlue, Text = "<", TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = 14, AutoButtonColor = false}, SArea).MouseButton1Click:Connect(function() SetAccuracy(-1) end)
 UI:Build("TextButton", {Size = UDim2.new(0, 28, 0, 28), Position = UDim2.new(1, -61, 0, 37), BackgroundColor3 = Crystal.Theme.MainBlue, Text = ">", TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = 14, AutoButtonColor = false}, SArea).MouseButton1Click:Connect(function() SetAccuracy(1) end)
 
--- [[ معالجة المدخلات (موبايل + بيسي) ]] --
--- استخدام MouseButton1Click يضمن العمل على التاتش والماوس معاً
-OpenBtn.MouseButton1Click:Connect(function() ToggleUI(true) end)
-
-local dT, dS, sP
-OpenBtn.InputBegan:Connect(function(i) 
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-        dT, dS, sP = true, i.Position, OpenBtn.Position 
-    end 
-end)
-UIS.InputChanged:Connect(function(i) 
-    if dT and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-        local d = i.Position - dS
-        OpenBtn.Position = UDim2.new(sP.X.Scale, sP.X.Offset + d.X, sP.Y.Scale, sP.Y.Offset + d.Y)
-    end 
-end)
-UIS.InputEnded:Connect(function() dT = false end)
-
--- اختصارات الكيبورد
+-- [[ اختصارات الكيبورد ]] --
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.C then Crystal.Toggles["ConnectFour"]()
@@ -156,7 +167,7 @@ UIS.InputBegan:Connect(function(input, gpe)
     elseif input.KeyCode == Enum.KeyCode.Left then SetAccuracy(-1) end
 end)
 
--- [[ نظام العمليات التلقائية ]] --
+-- [[ وظائف الأتمتة ]] --
 task.spawn(function()
     local Net = RS:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Networking"):WaitForChild("RE/Minigame/MinigameGameAction")
     while task.wait() do
@@ -176,4 +187,3 @@ task.spawn(function()
         end
     end
 end)
-
