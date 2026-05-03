@@ -23,7 +23,7 @@ local Theme = {
     Slider = Color3.fromRGB(40, 50, 75)
 }
 
-local Toggles = {AutoPop = false}
+local Toggles = {AutoPop = false, AutoFour = false}
 local Accuracy = 7
 local UI_Open, Dragging = false, false
 
@@ -76,6 +76,7 @@ local function CreateBtn(txt, key, y)
 end
 
 CreateBtn("Auto Pop", "AutoPop", 55)
+CreateBtn("Auto Four", "AutoFour", 97)
 
 local SliderLabel = Instance.new("TextLabel", Main)
 SliderLabel.Size, SliderLabel.Position, SliderLabel.BackgroundTransparency = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 180), 1
@@ -116,7 +117,7 @@ end
 local Sliding = false
 SliderBg.InputBegan:Connect(function(i) if i.UserInputType.Name:find("MouseButton1") or i.UserInputType.Name:find("Touch") then Sliding = true; UpdateSlider(i) end end)
 UserInputService.InputChanged:Connect(function(i) if Sliding and (i.UserInputType.Name:find("MouseMovement") or i.UserInputType.Name:find("Touch")) then UpdateSlider(i) end end)
-UserInputService.InputEnded:Connect(function(i) if i.UserInputType.Name:find("MouseButton1") or i.UserInputType.Name:find("Touch") then Sliding = false end end)
+UserInputService.InputEnded:Connect(function() Sliding = false end)
 
 local dStart, sPos, isDragged
 MenuBtn.InputBegan:Connect(function(i)
@@ -166,4 +167,3 @@ task.spawn(function()
         end
     end
 end)
-
