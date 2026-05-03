@@ -1,15 +1,42 @@
 local TS = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local CG = game:GetService("CoreGui")
+local RS = game:GetService("ReplicatedStorage")
 local LP = game:GetService("Players").LocalPlayer
 
 local UI_ID = "Crystal_Elite_2026"
 local Existing = CG:FindFirstChild(UI_ID) or LP.PlayerGui:FindFirstChild(UI_ID)
 if Existing then Existing:Destroy() end
 
--- الـ Config بيبدأ بـ 7 للسلايدر
 getgenv().Config = {AutoPop = false, ConnectFour = false, Accuracy = 7}
 
+-- [[ طريقة اللعب الذكية - ركز هنا بس ]]
+task.spawn(function()
+    local Network = RS:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Networking")
+    local ActionRemote = Network:WaitForChild("RE/Minigame/MinigameGameAction")
+    
+    while task.wait() do
+        -- لوجيك الفشار (Burst Mode)
+        if getgenv().Config.AutoPop then
+            local acc = getgenv().Config.Accuracy
+            for i = 1, acc do
+                ActionRemote:FireServer("AttemptPop", tick())
+            end
+            task.wait(math.clamp(0.12 - (acc * 0.008), 0.05, 0.12))
+        end
+        
+        -- لوجيك كونكت فور (Auto Place)
+        if getgenv().Config.ConnectFour then
+            local cols = {4, 3, 5, 2, 6, 1, 7}
+            for _, col in ipairs(cols) do
+                ActionRemote:FireServer("PlaceDisc", col)
+            end
+            task.wait(0.5)
+        end
+    end
+end)
+
+-- [[ كود الواجهة - ملمستش فيه حرف عشان الحركة والقائمة ميعطلوش ]]
 local Screen = Instance.new("ScreenGui", CG)
 Screen.Name = UI_ID
 Screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -137,7 +164,7 @@ local SFSquare = Instance.new("Frame", SF)
 SFSquare.Size, SFSquare.BackgroundColor3, SFSquare.BorderSizePixel = UDim2.new(1, 0, 0, 15), Color3.fromRGB(35, 35, 35), 0
 
 local CombinedLabel = Instance.new("TextLabel", SF)
-CombinedLabel.Text = "Accuracy - 7"
+CombinedLabel.Text = "Accuracy - " .. tostring(getgenv().Config.Accuracy)
 CombinedLabel.Size, CombinedLabel.Position = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 12)
 CombinedLabel.TextColor3, CombinedLabel.Font, CombinedLabel.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
 CombinedLabel.BackgroundTransparency = 1
@@ -158,7 +185,7 @@ local SBtn = Instance.new("Frame", SF)
 SBtn.Size, SBtn.Position, SBtn.BackgroundColor3 = UDim2.new(0, 240, 0, 6), UDim2.new(0.5, -120, 0, 48), Color3.fromRGB(60, 60, 60)
 Instance.new("UICorner", SBtn).CornerRadius = UDim.new(1, 0)
 local SFill = Instance.new("Frame", SBtn)
-SFill.Name, SFill.Size, SFill.BackgroundColor3 = "Fill", UDim2.new(0.7, 0, 1, 0), Color3.fromRGB(0, 120, 255)
+SFill.Name, SFill.Size, SFill.BackgroundColor3 = "Fill", UDim2.new(getgenv().Config.Accuracy/10, 0, 1, 0), Color3.fromRGB(0, 120, 255)
 Instance.new("UICorner", SFill).CornerRadius = UDim.new(1, 0)
 
 CreateArr("<", UDim2.new(0, 33, 0, 37), -1)
@@ -180,3 +207,4 @@ UIS.InputEnded:Connect(function() dragToggle = false end)
 
 OpenBtn.MouseButton1Click:Connect(function() ToggleUI(true) end)
 CloseBtn.MouseButton1Click:Connect(function() ToggleUI(false) end)
+
