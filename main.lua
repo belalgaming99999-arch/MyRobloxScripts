@@ -98,11 +98,6 @@ Knob.Size, Knob.Position, Knob.BackgroundColor3 = UDim2.new(0, 14, 0, 14), UDim2
 Knob.ZIndex = 5
 Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
 
-local KnobStroke = Instance.new("UIStroke", Knob)
-KnobStroke.Thickness = 2
-KnobStroke.Color = Theme.Main
-KnobStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
 local Glow = Instance.new("Frame", Knob)
 Glow.Size, Glow.Position, Glow.BackgroundColor3 = UDim2.new(1, 0, 1, 0), UDim2.new(0.5, 0, 0.5, 0), Theme.White
 Glow.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -111,15 +106,17 @@ Glow.BackgroundTransparency = 0.6
 Instance.new("UICorner", Glow).CornerRadius = UDim.new(1, 0)
 
 TweenService:Create(Glow, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-    Size = UDim2.new(1.8, 0, 1.8, 0),
-    BackgroundTransparency = 0.95
+    Size = UDim2.new(1.7, 0, 1.7, 0),
+    BackgroundTransparency = 0.96
 }):Play()
 
 local function UpdateSlider(input)
-    local pos = math.clamp((input.Position.X - SliderBg.AbsolutePosition.X) / SliderBg.AbsoluteSize.X, 0, 1)
-    Accuracy = math.floor(pos * 10)
+    local rawPos = math.clamp((input.Position.X - SliderBg.AbsolutePosition.X) / SliderBg.AbsoluteSize.X, 0, 1)
+    Accuracy = math.floor(rawPos * 10)
+    local steppedPos = Accuracy / 10
+    
     SliderLabel.Text = "Accuracy: " .. Accuracy
-    SliderFill.Size = UDim2.new(pos, 0, 1, 0)
+    SliderFill.Size = UDim2.new(steppedPos, 0, 1, 0)
 end
 
 local Sliding = false
