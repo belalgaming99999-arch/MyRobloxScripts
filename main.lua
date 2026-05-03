@@ -24,7 +24,7 @@ local Theme = {
     Slider = Color3.fromRGB(40, 50, 75)
 }
 
-local Toggles = {AutoPop = false, AutoFour = false}
+local Toggles = {AutoPop = false, AutoFour = false, Feature3 = false}
 local Accuracy = 7
 local UI_Open, Dragging = false, false
 
@@ -65,19 +65,20 @@ local LineGrad = GlobalGrad:Clone(); LineGrad.Parent = UnderLine
 local function CreateBtn(txt, key, y)
     local B = Instance.new("TextButton", Main)
     B.Size, B.Position, B.BackgroundColor3 = UDim2.new(0, 180, 0, 36), UDim2.new(0.5, -90, 0, y), Theme.Off
-    B.Text, B.TextColor3, B.Font, B.TextSize = txt.." [Off]", Theme.White, Enum.Font.GothamBold, 13
+    B.Text, B.TextColor3, B.Font, B.TextSize = txt.." [Disable]", Theme.White, Enum.Font.GothamBold, 13
     B.AutoButtonColor = false
     Instance.new("UICorner", B).CornerRadius = UDim.new(0, 8)
 
     B.MouseButton1Click:Connect(function()
         Toggles[key] = not Toggles[key]
-        B.Text = txt .. (Toggles[key] and " [On]" or " [Off]")
+        B.Text = txt .. (Toggles[key] and " [Active]" or " [Disable]")
         TweenService:Create(B, TweenInfo.new(0.3), {BackgroundColor3 = Toggles[key] and Theme.On or Theme.Off}):Play()
     end)
 end
 
 CreateBtn("Auto Popcorn", "AutoPop", 55)
 CreateBtn("Auto Four", "AutoFour", 97)
+CreateBtn("Feature 3", "Feature3", 139)
 
 local SliderLabel = Instance.new("TextLabel", Main)
 SliderLabel.Size, SliderLabel.Position, SliderLabel.BackgroundTransparency = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 180), 1
@@ -155,17 +156,17 @@ task.spawn(function()
         if Toggles.AutoPop then
             local PopRemote = GetPopRemote()
             if PopRemote then
-                local CurrentTime = tick()
+                local ts = tick()
                 for slot = 1, 16 do
                     task.spawn(function()
-                        local Delay = (11 - Accuracy) * 0.012
-                        task.wait(Delay)
-                        PopRemote:FireServer("AttemptPop", slot, CurrentTime, 100)
+                        local baseDelay = (11 - Accuracy) * 0.007
+                        if baseDelay > 0 then task.wait(baseDelay) end
+                        PopRemote:FireServer("AttemptPop", slot, ts, 100)
                     end)
                 end
             end
         end
-        task.wait(0.04)
+        RunService.Heartbeat:Wait()
     end
 end)
 
