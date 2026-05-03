@@ -22,7 +22,6 @@ local Theme = {
     SliderBg = Color3.fromRGB(40, 50, 75)
 }
 
--- الإعدادات (Config)
 local Toggles = {AutoPop = false, State2 = false, State3 = false}
 local Accuracy = 7
 local TargetPos = UDim2.new(0.05, 0, 0.25, 0)
@@ -82,11 +81,10 @@ UnderLine.Size = UDim2.new(0, 120, 0, 4)
 UnderLine.Position = UDim2.new(0.5, -60, 0, 40)
 UnderLine.BackgroundColor3 = Theme.White
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
-
 local LineGrad = Instance.new("UIGradient", UnderLine)
 LineGrad.Color = GlobalGrad.Color
 
--- [[ وظائف الأزرار ]] --
+-- [[ الأزرار ]] --
 local function AddBtn(txt, key, y)
     local B = Instance.new("TextButton", Main)
     B.Size = UDim2.new(0, 180, 0, 36)
@@ -102,9 +100,7 @@ local function AddBtn(txt, key, y)
     B.MouseButton1Click:Connect(function()
         Toggles[key] = not Toggles[key]
         B.Text = txt .. (Toggles[key] and " [Active]" or " [Disable]")
-        TweenService:Create(B, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
-            BackgroundColor3 = Toggles[key] and Theme.OnGreen or Theme.OffRed
-        }):Play()
+        TweenService:Create(B, TweenInfo.new(0.3), {BackgroundColor3 = Toggles[key] and Theme.OnGreen or Theme.OffRed}):Play()
     end)
 end
 
@@ -112,7 +108,7 @@ AddBtn("Auto Pop", "AutoPop", 55)
 AddBtn("Feature 2", "State2", 97)
 AddBtn("Feature 3", "State3", 139)
 
--- [[ قسم السلايدر (Accuracy) ]] --
+-- [[ السلايدر المطور مع الدائرة ]] --
 local SliderLabel = Instance.new("TextLabel", Main)
 SliderLabel.Size = UDim2.new(1, 0, 0, 20)
 SliderLabel.Position = UDim2.new(0, 0, 0, 180)
@@ -132,15 +128,26 @@ local SliderFill = Instance.new("Frame", SliderBg)
 SliderFill.Size = UDim2.new(0.7, 0, 1, 0)
 SliderFill.BackgroundColor3 = Theme.MainBlue
 Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
-
 local FillGrad = Instance.new("UIGradient", SliderFill)
 FillGrad.Color = GlobalGrad.Color
+
+-- إضافة الدائرة البيضاء (Knob)
+local SliderKnob = Instance.new("Frame", SliderFill)
+SliderKnob.Size = UDim2.new(0, 14, 0, 14)
+SliderKnob.Position = UDim2.new(1, -7, 0.5, -7)
+SliderKnob.BackgroundColor3 = Theme.White
+SliderKnob.ZIndex = 5
+Instance.new("UICorner", SliderKnob).CornerRadius = UDim.new(1, 0)
+-- إضافة ظل بسيط للدائرة
+local KnobStroke = Instance.new("UIStroke", SliderKnob)
+KnobStroke.Color = Theme.MainBlue
+KnobStroke.Thickness = 1.5
 
 local function UpdateSlider(input)
     local pos = math.clamp((input.Position.X - SliderBg.AbsolutePosition.X) / SliderBg.AbsoluteSize.X, 0, 1)
     Accuracy = math.floor(pos * 10)
     SliderLabel.Text = "Accuracy: " .. Accuracy
-    SliderFill.Size = UDim2.new(pos, 0, 1, 0)
+    TweenService:Create(SliderFill, TweenInfo.new(0.1, Enum.EasingStyle.Linear), {Size = UDim2.new(pos, 0, 1, 0)}):Play()
 end
 
 local Sliding = false
@@ -163,13 +170,9 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- [[ نظام الحركة والأنميشن ]] --
+-- [[ الأنميشن والحركة ]] --
 RunService.RenderStepped:Connect(function(dt)
-    if not Dragging then 
-        MenuBtn.Position = MenuBtn.Position:Lerp(TargetPos, 0.25) 
-    else
-        MenuBtn.Position = TargetPos 
-    end
+    if not Dragging then MenuBtn.Position = MenuBtn.Position:Lerp(TargetPos, 0.25) end
     Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
     local rot = (GlobalGrad.Rotation + 150 * dt) % 360
     GlobalGrad.Rotation = rot
@@ -178,22 +181,20 @@ RunService.RenderStepped:Connect(function(dt)
     FillGrad.Rotation = rot
 end)
 
--- نظام السحب
+-- نظام السحب والفتح
 local dStart, sPos, isDragged
 MenuBtn.InputBegan:Connect(function(i)
     if (i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch) then
         Dragging = true; isDragged = false; dStart = i.Position; sPos = MenuBtn.Position
     end
 end)
-
 UserInputService.InputChanged:Connect(function(i)
     if Dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
         local delta = i.Position - dStart
-        if delta.Magnitude > 2 then isDragged = true end
+        if delta.Magnitude > 3 then isDragged = true end
         TargetPos = UDim2.new(sPos.X.Scale, sPos.X.Offset + delta.X, sPos.Y.Scale, sPos.Y.Offset + delta.Y)
     end
 end)
-
 UserInputService.InputEnded:Connect(function(i)
     if (i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch) then
         Dragging = false
@@ -205,14 +206,14 @@ MenuBtn.MouseButton1Click:Connect(function()
         UI_Open = not UI_Open
         if UI_Open then
             Border.Visible = true
-            Border:TweenSize(UDim2.new(0, 204, 0, 230), "Out", "Quint", 0.4, true) -- تم زيادة الطول للسلايدر
+            Border:TweenSize(UDim2.new(0, 204, 0, 235), "Out", "Quint", 0.4, true)
         else
             Border:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.3, true, function() Border.Visible = false end)
         end
     end
 end)
 
--- [[ التفعيلات البرمجية (Logic) ]] --
+-- [[ أتمتة العمليات ]] --
 task.spawn(function()
     local Path = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Networking"):WaitForChild("RE/Minigame/MinigameGameAction")
     while task.wait() do
