@@ -1,4 +1,3 @@
--- [[ Crystal Hub - Optimized v2.0 | 2026 ]] --
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -6,13 +5,12 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CoreGui = game:GetService("CoreGui")
 
--- [1] نظام الحماية والتشغيل المخفي
 local Root = (gethui and gethui()) or (get_hidden_gui and get_hidden_gui()) or CoreGui
 local Existing = Root:FindFirstChild("CrystalProject")
 if Existing then Existing:Destroy() end
 
 local CrystalGui = Instance.new("ScreenGui", Root)
-CrystalGui.Name = "CrystalProject_" .. math.random(100, 999) -- اسم عشوائي للحماية
+CrystalGui.Name = "CrystalProject_" .. math.random(100, 999)
 CrystalGui.IgnoreGuiInset = true
 CrystalGui.DisplayOrder = 9e9
 
@@ -25,13 +23,11 @@ local Theme = {
     Slider = Color3.fromRGB(40, 50, 75)
 }
 
--- [2] المتغيرات الأساسية
 local Toggles = {AutoPop = false, State2 = false, State3 = false}
 local Accuracy = 7
 local UI_Open, Dragging = false, false
 local TargetPos = UDim2.new(0.05, 0, 0.25, 0)
 
--- [3] بناء الواجهة (الأيقونة العائمة)
 local MenuBtn = Instance.new("TextButton", CrystalGui)
 MenuBtn.Size, MenuBtn.Position, MenuBtn.BackgroundColor3 = UDim2.new(0, 52, 0, 52), TargetPos, Theme.Main
 MenuBtn.Text, MenuBtn.AutoButtonColor = "", false
@@ -44,7 +40,6 @@ for i = -1, 1 do
     Instance.new("UICorner", L).CornerRadius = UDim.new(1, 0)
 end
 
--- [4] القائمة الرئيسية
 local Border = Instance.new("Frame", CrystalGui)
 Border.Size, Border.Visible, Border.BackgroundColor3 = UDim2.new(0, 0, 0, 0), false, Theme.White
 Border.ClipsDescendants = true
@@ -67,7 +62,6 @@ UnderLine.Size, UnderLine.Position, UnderLine.BackgroundColor3 = UDim2.new(0, 12
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 local LineGrad = GlobalGrad:Clone(); LineGrad.Parent = UnderLine
 
--- [5] نظام الأزرار (Buttons Factory)
 local function CreateBtn(txt, key, y)
     local B = Instance.new("TextButton", Main)
     B.Size, B.Position, B.BackgroundColor3 = UDim2.new(0, 180, 0, 36), UDim2.new(0.5, -90, 0, y), Theme.Off
@@ -86,7 +80,6 @@ CreateBtn("Auto Pop", "AutoPop", 55)
 CreateBtn("Feature 2", "State2", 97)
 CreateBtn("Feature 3", "State3", 139)
 
--- [6] نظام السلايدر المتنفس (Breathing Slider)
 local SliderLabel = Instance.new("TextLabel", Main)
 SliderLabel.Size, SliderLabel.Position, SliderLabel.BackgroundTransparency = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 180), 1
 SliderLabel.Text, SliderLabel.TextColor3, SliderLabel.Font, SliderLabel.TextSize = "Accuracy: 7", Theme.White, Enum.Font.GothamBold, 12
@@ -101,20 +94,27 @@ Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
 local FillGrad = GlobalGrad:Clone(); FillGrad.Parent = SliderFill
 
 local Knob = Instance.new("Frame", SliderFill)
-Knob.Size, Knob.Position, Knob.BackgroundColor3 = UDim2.new(0, 12, 0, 12), UDim2.new(1, -6, 0.5, -6), Theme.White
+Knob.Size, Knob.Position, Knob.BackgroundColor3 = UDim2.new(0, 14, 0, 14), UDim2.new(1, -7, 0.5, -7), Theme.White
 Knob.ZIndex = 5
 Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
 
-local Glow = Knob:Clone(); Glow.Parent, Glow.ZIndex, Glow.BackgroundTransparency = Knob, 4, 0.6
-Glow.Position = UDim2.new(0.5, 0, 0.5, 0); Glow.AnchorPoint = Vector2.new(0.5, 0.5)
+local KnobStroke = Instance.new("UIStroke", Knob)
+KnobStroke.Thickness = 2
+KnobStroke.Color = Theme.Main
+KnobStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
--- تأثير النبض (تطلع وتدخل)
-TweenService:Create(Glow, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-    Size = UDim2.new(2.2, 0, 2.2, 0),
-    BackgroundTransparency = 0.9
+local Glow = Instance.new("Frame", Knob)
+Glow.Size, Glow.Position, Glow.BackgroundColor3 = UDim2.new(1, 0, 1, 0), UDim2.new(0.5, 0, 0.5, 0), Theme.White
+Glow.AnchorPoint = Vector2.new(0.5, 0.5)
+Glow.ZIndex = 4
+Glow.BackgroundTransparency = 0.6
+Instance.new("UICorner", Glow).CornerRadius = UDim.new(1, 0)
+
+TweenService:Create(Glow, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
+    Size = UDim2.new(1.8, 0, 1.8, 0),
+    BackgroundTransparency = 0.95
 }):Play()
 
--- [7] منطق السلايدر والسحب (Interaction Logic)
 local function UpdateSlider(input)
     local pos = math.clamp((input.Position.X - SliderBg.AbsolutePosition.X) / SliderBg.AbsoluteSize.X, 0, 1)
     Accuracy = math.floor(pos * 10)
@@ -127,7 +127,6 @@ SliderBg.InputBegan:Connect(function(i) if i.UserInputType.Name:find("MouseButto
 UserInputService.InputChanged:Connect(function(i) if Sliding and (i.UserInputType.Name:find("MouseMovement") or i.UserInputType.Name:find("Touch")) then UpdateSlider(i) end end)
 UserInputService.InputEnded:Connect(function(i) if i.UserInputType.Name:find("MouseButton1") or i.UserInputType.Name:find("Touch") then Sliding = false end end)
 
--- [8] نظام الحركة الفوري (Direct Touch Follow)
 local dStart, sPos, isDragged
 MenuBtn.InputBegan:Connect(function(i)
     if i.UserInputType.Name:find("MouseButton1") or i.UserInputType.Name:find("Touch") then
@@ -157,14 +156,12 @@ MenuBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- [9] محرك الرسوم والدوران (Global Render)
 RunService.RenderStepped:Connect(function(dt)
     Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
     local rot = (GlobalGrad.Rotation + 150 * dt) % 360
     GlobalGrad.Rotation = rot; TitleGrad.Rotation = rot; LineGrad.Rotation = rot; FillGrad.Rotation = rot
 end)
 
--- [10] نظام التشغيل الآلي (Invisible Bypass Logic)
 task.spawn(function()
     local Remotes = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Networking")
     local PopRemote = Remotes:WaitForChild("RE/Minigame/MinigameGameAction")
@@ -172,14 +169,11 @@ task.spawn(function()
     while task.wait() do
         if Toggles.AutoPop then
             for i = 1, Accuracy do
-                -- تشغيل مخفي لضمان عدم اكتشاف معدل الضغط
                 task.spawn(function() 
                     PopRemote:FireServer("AttemptPop", tick() + math.random()) 
                 end)
             end
-            -- موازنة السرعة لمنع الطرد التلقائي
             task.wait(math.clamp(0.14 - (Accuracy * 0.01), 0.07, 0.14))
         end
     end
 end)
-
