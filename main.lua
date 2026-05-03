@@ -1,189 +1,227 @@
--- [[ خدمات النظام ]] --
-local Services = setmetatable({}, {
-    __index = function(t, k) return game:GetService(k) end
-})
-local TS, UIS, CG, RS = Services.TweenService, Services.UserInputService, Services.CoreGui, Services.ReplicatedStorage
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- [[ إعدادات السكربت ]] --
-local Crystal = {
-    ID = "Crystal_Elite_Ultimate_Fix",
-    Config = {AutoPop = false, ConnectFour = false, Accuracy = 7},
-    Theme = {
-        MainBlue = Color3.fromRGB(0, 120, 255),
-        Dark     = Color3.fromRGB(10, 10, 10),
-        Gray     = Color3.fromRGB(35, 35, 35),
-        Icon     = Color3.fromRGB(15, 15, 15),
-        Off      = Color3.fromRGB(50, 50, 50),
-        Slider   = Color3.fromRGB(60, 60, 60),
-        White    = Color3.fromRGB(255, 255, 255),
-        Font     = Enum.Font.GothamBold,
-        Size     = 12
-    },
-    Toggles = {} 
+local Root = (gethui and gethui()) or CoreGui
+if Root:FindFirstChild("CrystalProject") then Root.CrystalProject:Destroy() end
+
+local CrystalGui = Instance.new("ScreenGui", Root)
+CrystalGui.Name = "CrystalProject"
+CrystalGui.IgnoreGuiInset = true
+CrystalGui.DisplayOrder = 1e6
+
+local Theme = {
+    Bg = Color3.fromRGB(25, 35, 55),
+    MainBlue = Color3.fromRGB(45, 85, 160),
+    White = Color3.new(1, 1, 1),
+    OffRed = Color3.fromRGB(135, 55, 55), 
+    OnGreen = Color3.fromRGB(55, 120, 85),
+    SliderBg = Color3.fromRGB(40, 50, 75)
 }
 
-local Existing = CG:FindFirstChild(Crystal.ID)
-if Existing then Existing:Destroy() end
+-- الإعدادات (Config)
+local Toggles = {AutoPop = false, State2 = false, State3 = false}
+local Accuracy = 7
+local TargetPos = UDim2.new(0.05, 0, 0.25, 0)
+local UI_Open, Dragging = false, false
 
-local UI = {}
-function UI:Build(class, props, parent)
-    local inst = Instance.new(class)
-    for k, v in pairs(props) do inst[k] = v end
-    inst.Parent = parent
-    return inst
+-- [[ الأيقونة العائمة ]] --
+local MenuBtn = Instance.new("TextButton", CrystalGui)
+MenuBtn.Size = UDim2.new(0, 52, 0, 52)
+MenuBtn.Position = TargetPos
+MenuBtn.BackgroundColor3 = Theme.MainBlue
+MenuBtn.Text = ""
+MenuBtn.AutoButtonColor = false
+Instance.new("UICorner", MenuBtn).CornerRadius = UDim.new(0, 10)
+
+for i = -1, 1 do
+    local L = Instance.new("Frame", MenuBtn)
+    L.Size = UDim2.new(0, 26, 0, 4)
+    L.Position = UDim2.new(0.5, -13, 0.5, (i * 10) - 2)
+    L.BackgroundColor3 = Theme.White
+    Instance.new("UICorner", L).CornerRadius = UDim.new(1, 0)
 end
 
-function UI:Tween(obj, goal, time, style, dir)
-    local info = TweenInfo.new(time or 0.3, style or Enum.EasingStyle.Quart, dir or Enum.EasingDirection.Out)
-    local tween = TS:Create(obj, info, goal)
-    tween:Play()
-    return tween
+-- [[ القائمة الرئيسية ]] --
+local Border = Instance.new("Frame", CrystalGui)
+Border.Size = UDim2.new(0, 0, 0, 0)
+Border.BackgroundColor3 = Theme.White
+Border.ClipsDescendants = true
+Border.Visible = false
+Instance.new("UICorner", Border).CornerRadius = UDim.new(0, 12)
+
+local Main = Instance.new("Frame", Border)
+Main.Size = UDim2.new(1, -4, 1, -4)
+Main.Position = UDim2.new(0, 2, 0, 2)
+Main.BackgroundColor3 = Theme.Bg
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
+
+local GlobalGrad = Instance.new("UIGradient", Border)
+GlobalGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Theme.MainBlue),
+    ColorSequenceKeypoint.new(0.5, Theme.White),
+    ColorSequenceKeypoint.new(1, Theme.MainBlue)
+})
+
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, 0, 0, 45)
+Title.Text = "Crystal Hub"
+Title.TextColor3 = Theme.White
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 16
+Title.BackgroundTransparency = 1
+
+local TitleGrad = Instance.new("UIGradient", Title)
+TitleGrad.Color = GlobalGrad.Color
+
+local UnderLine = Instance.new("Frame", Main)
+UnderLine.Size = UDim2.new(0, 120, 0, 4)
+UnderLine.Position = UDim2.new(0.5, -60, 0, 40)
+UnderLine.BackgroundColor3 = Theme.White
+Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
+
+local LineGrad = Instance.new("UIGradient", UnderLine)
+LineGrad.Color = GlobalGrad.Color
+
+-- [[ وظائف الأزرار ]] --
+local function AddBtn(txt, key, y)
+    local B = Instance.new("TextButton", Main)
+    B.Size = UDim2.new(0, 180, 0, 36)
+    B.Position = UDim2.new(0.5, -90, 0, y)
+    B.BackgroundColor3 = Theme.OffRed
+    B.Text = txt .. " [Disable]"
+    B.TextColor3 = Theme.White
+    B.Font = Enum.Font.GothamBold
+    B.TextSize = 13
+    B.AutoButtonColor = false
+    Instance.new("UICorner", B).CornerRadius = UDim.new(0, 8)
+
+    B.MouseButton1Click:Connect(function()
+        Toggles[key] = not Toggles[key]
+        B.Text = txt .. (Toggles[key] and " [Active]" or " [Disable]")
+        TweenService:Create(B, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+            BackgroundColor3 = Toggles[key] and Theme.OnGreen or Theme.OffRed
+        }):Play()
+    end)
 end
 
-local Screen = UI:Build("ScreenGui", {Name = Crystal.ID, ZIndexBehavior = Enum.ZIndexBehavior.Sibling}, CG)
+AddBtn("Auto Pop", "AutoPop", 55)
+AddBtn("Feature 2", "State2", 97)
+AddBtn("Feature 3", "State3", 139)
 
--- [[ القائمة ]] --
-local Main = UI:Build("CanvasGroup", {
-    Size = UDim2.new(0, 380, 0, 190), BackgroundColor3 = Crystal.Theme.Dark, Visible = false, GroupTransparency = 1, ZIndex = 5
-}, Screen)
-UI:Build("UICorner", {CornerRadius = UDim.new(0, 18)}, Main)
-local MStroke = UI:Build("UIStroke", {Color = Crystal.Theme.MainBlue, Thickness = 1.5, Transparency = 1}, Main)
+-- [[ قسم السلايدر (Accuracy) ]] --
+local SliderLabel = Instance.new("TextLabel", Main)
+SliderLabel.Size = UDim2.new(1, 0, 0, 20)
+SliderLabel.Position = UDim2.new(0, 0, 0, 180)
+SliderLabel.Text = "Accuracy: 7"
+SliderLabel.TextColor3 = Theme.White
+SliderLabel.Font = Enum.Font.GothamBold
+SliderLabel.TextSize = 12
+SliderLabel.BackgroundTransparency = 1
 
--- [[ الأيقونة ]] --
-local OpenBtn = UI:Build("TextButton", {
-    Size = UDim2.new(0, 110, 0, 35), Position = UDim2.new(0.5, -55, 0.15, 0),
-    BackgroundColor3 = Crystal.Theme.Icon, Text = "Crystal Hub", TextColor3 = Crystal.Theme.White,
-    Font = Crystal.Theme.Font, TextSize = Crystal.Theme.Size, AutoButtonColor = false, ZIndex = 10
-}, Screen)
-UI:Build("UICorner", {CornerRadius = UDim.new(0, 18)}, OpenBtn)
-local BtnStroke = UI:Build("UIStroke", {Color = Crystal.Theme.MainBlue, Thickness = 1.5, ApplyStrokeMode = Enum.ApplyStrokeMode.Border}, OpenBtn)
+local SliderBg = Instance.new("Frame", Main)
+SliderBg.Size = UDim2.new(0, 160, 0, 6)
+SliderBg.Position = UDim2.new(0.5, -80, 0, 205)
+SliderBg.BackgroundColor3 = Theme.SliderBg
+Instance.new("UICorner", SliderBg).CornerRadius = UDim.new(1, 0)
 
--- [[ نظام الفتح والإغلاق ]] --
-local function ToggleUI(state)
-    if state then
-        Main.Position = UDim2.new(OpenBtn.Position.X.Scale, OpenBtn.Position.X.Offset - 135, OpenBtn.Position.Y.Scale, OpenBtn.Position.Y.Offset + 45)
-        Main.Visible = true
-        UI:Tween(Main, {GroupTransparency = 0}, 0.4)
-        UI:Tween(MStroke, {Transparency = 0}, 0.4)
-        OpenBtn.Visible = false
+local SliderFill = Instance.new("Frame", SliderBg)
+SliderFill.Size = UDim2.new(0.7, 0, 1, 0)
+SliderFill.BackgroundColor3 = Theme.MainBlue
+Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
+
+local FillGrad = Instance.new("UIGradient", SliderFill)
+FillGrad.Color = GlobalGrad.Color
+
+local function UpdateSlider(input)
+    local pos = math.clamp((input.Position.X - SliderBg.AbsolutePosition.X) / SliderBg.AbsoluteSize.X, 0, 1)
+    Accuracy = math.floor(pos * 10)
+    SliderLabel.Text = "Accuracy: " .. Accuracy
+    SliderFill.Size = UDim2.new(pos, 0, 1, 0)
+end
+
+local Sliding = false
+SliderBg.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        Sliding = true
+        UpdateSlider(input)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if Sliding and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        UpdateSlider(input)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        Sliding = false
+    end
+end)
+
+-- [[ نظام الحركة والأنميشن ]] --
+RunService.RenderStepped:Connect(function(dt)
+    if not Dragging then 
+        MenuBtn.Position = MenuBtn.Position:Lerp(TargetPos, 0.25) 
     else
-        UI:Tween(MStroke, {Transparency = 1}, 0.3)
-        local hide = UI:Tween(Main, {GroupTransparency = 1}, 0.3)
-        hide.Completed:Connect(function() if Main.GroupTransparency == 1 then Main.Visible = false end end)
-        OpenBtn.Visible = true
-        UI:Tween(OpenBtn, {BackgroundTransparency = 0, TextTransparency = 0}, 0.3)
-        UI:Tween(BtnStroke, {Transparency = 0}, 0.3)
+        MenuBtn.Position = TargetPos 
     end
-end
+    Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
+    local rot = (GlobalGrad.Rotation + 150 * dt) % 360
+    GlobalGrad.Rotation = rot
+    TitleGrad.Rotation = rot
+    LineGrad.Rotation = rot
+    FillGrad.Rotation = rot
+end)
 
--- [[ نظام السحب والضغط المطور ]] --
-local dragging, dragInput, dragStart, startPos
-local hasMoved = false
-
-OpenBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = OpenBtn.Position
-        hasMoved = false -- تصفير الحركة عند كل ضغطة
-        
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
+-- نظام السحب
+local dStart, sPos, isDragged
+MenuBtn.InputBegan:Connect(function(i)
+    if (i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch) then
+        Dragging = true; isDragged = false; dStart = i.Position; sPos = MenuBtn.Position
     end
 end)
 
-UIS.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        if delta.Magnitude > 5 then hasMoved = true end -- إذا تحرك أكثر من 5 بكسل نعتبرها سحب
-        OpenBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+UserInputService.InputChanged:Connect(function(i)
+    if Dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+        local delta = i.Position - dStart
+        if delta.Magnitude > 2 then isDragged = true end
+        TargetPos = UDim2.new(sPos.X.Scale, sPos.X.Offset + delta.X, sPos.Y.Scale, sPos.Y.Offset + delta.Y)
     end
 end)
 
-OpenBtn.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        if not hasMoved then -- إذا العميل ضغط ولم يحرك.. افتح القائمة
-            ToggleUI(true)
+UserInputService.InputEnded:Connect(function(i)
+    if (i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch) then
+        Dragging = false
+    end
+end)
+
+MenuBtn.MouseButton1Click:Connect(function()
+    if not isDragged then
+        UI_Open = not UI_Open
+        if UI_Open then
+            Border.Visible = true
+            Border:TweenSize(UDim2.new(0, 204, 0, 230), "Out", "Quint", 0.4, true) -- تم زيادة الطول للسلايدر
+        else
+            Border:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.3, true, function() Border.Visible = false end)
         end
     end
 end)
 
--- [[ المحتوى الداخلي ]] --
-local Header = UI:Build("Frame", {Size = UDim2.new(1, 0, 0, 38), BackgroundColor3 = Crystal.Theme.Gray}, Main)
-UI:Build("UICorner", {CornerRadius = UDim.new(0, 18)}, Header)
-UI:Build("Frame", {Size = UDim2.new(1, 0, 0, 15), Position = UDim2.new(0, 0, 1, -15), BackgroundColor3 = Crystal.Theme.Gray, BorderSizePixel = 0}, Header)
-UI:Build("TextLabel", {Size = UDim2.new(1, 0, 0, 38), Text = "Crystal Hub", BackgroundTransparency = 1, TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = Crystal.Theme.Size, ZIndex = 6}, Main)
-local CloseBtn = UI:Build("TextButton", {Size = UDim2.new(0, 35, 0, 38), Position = UDim2.new(1, -38, 0, 0), Text = "X", BackgroundTransparency = 1, TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = Crystal.Theme.Size, AutoButtonColor = false, ZIndex = 7}, Main)
-CloseBtn.MouseButton1Click:Connect(function() ToggleUI(false) end)
-
-local function AddToggle(name, pos, icon, var)
-    local F = UI:Build("Frame", {Size = UDim2.new(0, 175, 0, 42), Position = pos, BackgroundColor3 = Crystal.Theme.Gray}, Main)
-    UI:Build("UICorner", {CornerRadius = UDim.new(0, 18)}, F)
-    local B = UI:Build("TextButton", {Size = UDim2.new(0, 32, 0, 16), Position = UDim2.new(1, -40, 0.5, -8), BackgroundColor3 = Crystal.Theme.Off, Text = "", AutoButtonColor = false}, F)
-    UI:Build("UICorner", {CornerRadius = UDim.new(1, 0)}, B)
-    local D = UI:Build("Frame", {Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(0, 2, 0.5, -6), BackgroundColor3 = Crystal.Theme.White}, B)
-    UI:Build("UICorner", {CornerRadius = UDim.new(1, 0)}, D)
-    UI:Build("TextLabel", {Size = UDim2.new(0, 28, 0, 28), Position = UDim2.new(0, 8, 0.5, -14), BackgroundColor3 = Crystal.Theme.MainBlue, Text = icon, TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = Crystal.Theme.Size}, F):Build("UICorner", {CornerRadius = UDim.new(1, 0)})
-    UI:Build("TextLabel", {Size = UDim2.new(0, 85, 1, 0), Position = UDim2.new(0, 44, 0, 0), Text = name, BackgroundTransparency = 1, TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = 10, TextXAlignment = "Left"}, F)
-
-    local function Update()
-        UI:Tween(B, {BackgroundColor3 = Crystal.Config[var] and Crystal.Theme.MainBlue or Crystal.Theme.Off}, 0.3)
-        UI:Tween(D, {Position = Crystal.Config[var] and UDim2.new(0, 18, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)}, 0.3, Enum.EasingStyle.Back)
-    end
-    B.MouseButton1Click:Connect(function() Crystal.Config[var] = not Crystal.Config[var] Update() end)
-    Crystal.Toggles[var] = function() Crystal.Config[var] = not Crystal.Config[var] Update() end
-end
-
-AddToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "P", "AutoPop")
-AddToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
-
-local SArea = UI:Build("Frame", {Size = UDim2.new(1, 0, 0, 75), Position = UDim2.new(0, 0, 1, -75), BackgroundColor3 = Crystal.Theme.Gray}, Main)
-UI:Build("UICorner", {CornerRadius = UDim.new(0, 18)}, SArea)
-UI:Build("Frame", {Size = UDim2.new(1, 0, 0, 15), BackgroundColor3 = Crystal.Theme.Gray, BorderSizePixel = 0}, SArea)
-local SLbl = UI:Build("TextLabel", {Size = UDim2.new(1, 0, 0, 20), Position = UDim2.new(0, 0, 0, 12), Text = "Accuracy - 7", BackgroundTransparency = 1, TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = Crystal.Theme.Size}, SArea)
-local SBar = UI:Build("Frame", {Size = UDim2.new(0, 240, 0, 6), Position = UDim2.new(0.5, -120, 0, 48), BackgroundColor3 = Crystal.Theme.Slider}, SArea)
-UI:Build("UICorner", {CornerRadius = UDim.new(1, 0)}, SBar)
-local SFill = UI:Build("Frame", {Size = UDim2.new(0.7, 0, 1, 0), BackgroundColor3 = Crystal.Theme.MainBlue}, SBar)
-UI:Build("UICorner", {CornerRadius = UDim.new(1, 0)}, SFill)
-
-local function SetAccuracy(s)
-    Crystal.Config.Accuracy = math.clamp(Crystal.Config.Accuracy + s, 0, 10)
-    SLbl.Text = "Accuracy - " .. Crystal.Config.Accuracy
-    UI:Tween(SFill, {Size = UDim2.new(Crystal.Config.Accuracy/10, 0, 1, 0)}, 0.4)
-end
-
-UI:Build("TextButton", {Size = UDim2.new(0, 28, 0, 28), Position = UDim2.new(0, 33, 0, 37), BackgroundColor3 = Crystal.Theme.MainBlue, Text = "<", TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = 14, AutoButtonColor = false}, SArea).MouseButton1Click:Connect(function() SetAccuracy(-1) end)
-UI:Build("TextButton", {Size = UDim2.new(0, 28, 0, 28), Position = UDim2.new(1, -61, 0, 37), BackgroundColor3 = Crystal.Theme.MainBlue, Text = ">", TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = 14, AutoButtonColor = false}, SArea).MouseButton1Click:Connect(function() SetAccuracy(1) end)
-
--- [[ اختصارات الكيبورد ]] --
-UIS.InputBegan:Connect(function(input, gpe)
-    if gpe then return end
-    if input.KeyCode == Enum.KeyCode.C then Crystal.Toggles["ConnectFour"]()
-    elseif input.KeyCode == Enum.KeyCode.P then Crystal.Toggles["AutoPop"]()
-    elseif input.KeyCode == Enum.KeyCode.Right then SetAccuracy(1)
-    elseif input.KeyCode == Enum.KeyCode.Left then SetAccuracy(-1) end
-end)
-
--- [[ وظائف الأتمتة ]] --
+-- [[ التفعيلات البرمجية (Logic) ]] --
 task.spawn(function()
-    local Net = RS:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Networking"):WaitForChild("RE/Minigame/MinigameGameAction")
+    local Path = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Networking"):WaitForChild("RE/Minigame/MinigameGameAction")
     while task.wait() do
-        if Crystal.Config.AutoPop then
-            for i = 1, Crystal.Config.Accuracy do
-                task.spawn(function() Net:FireServer("AttemptPop", tick() + math.random()) end)
+        if Toggles.AutoPop then
+            for i = 1, Accuracy do
+                task.spawn(function() Path:FireServer("AttemptPop", tick() + math.random()) end)
             end
-            task.wait(math.clamp(0.14 - (Crystal.Config.Accuracy * 0.01), 0.06, 0.14))
-        end
-        if Crystal.Config.ConnectFour then
-            for _, c in ipairs({4, 3, 5, 2, 6, 1, 7}) do
-                if not Crystal.Config.ConnectFour then break end
-                Net:FireServer("PlaceDisc", c)
-                task.wait(0.06)
-            end
-            task.wait(0.5)
+            task.wait(math.clamp(0.14 - (Accuracy * 0.01), 0.06, 0.14))
         end
     end
 end)
+
