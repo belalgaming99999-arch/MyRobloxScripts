@@ -1,7 +1,6 @@
 local TS = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local CG = game:GetService("CoreGui")
-local RS = game:GetService("ReplicatedStorage")
 local LP = game:GetService("Players").LocalPlayer
 
 local UI_ID = "Crystal_Elite_2026"
@@ -10,33 +9,6 @@ if Existing then Existing:Destroy() end
 
 getgenv().Config = {AutoPop = false, ConnectFour = false, Accuracy = 7}
 
--- [[ طريقة اللعب الذكية - ركز هنا بس ]]
-task.spawn(function()
-    local Network = RS:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Networking")
-    local ActionRemote = Network:WaitForChild("RE/Minigame/MinigameGameAction")
-    
-    while task.wait() do
-        -- لوجيك الفشار (Burst Mode)
-        if getgenv().Config.AutoPop then
-            local acc = getgenv().Config.Accuracy
-            for i = 1, acc do
-                ActionRemote:FireServer("AttemptPop", tick())
-            end
-            task.wait(math.clamp(0.12 - (acc * 0.008), 0.05, 0.12))
-        end
-        
-        -- لوجيك كونكت فور (Auto Place)
-        if getgenv().Config.ConnectFour then
-            local cols = {4, 3, 5, 2, 6, 1, 7}
-            for _, col in ipairs(cols) do
-                ActionRemote:FireServer("PlaceDisc", col)
-            end
-            task.wait(0.5)
-        end
-    end
-end)
-
--- [[ كود الواجهة - ملمستش فيه حرف عشان الحركة والقائمة ميعطلوش ]]
 local Screen = Instance.new("ScreenGui", CG)
 Screen.Name = UI_ID
 Screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -73,6 +45,7 @@ MainStroke.Transparency = 1
 
 local function ToggleUI(state)
     local info = TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+    
     if state then
         Main.Visible = true
         TS:Create(Main, info, {GroupTransparency = 0, Size = UDim2.new(0, 380, 0, 190)}):Play()
@@ -124,32 +97,53 @@ CloseBtn.BackgroundTransparency = 1
 
 local function CreateToggle(name, pos, icon, var)
     local F = Instance.new("Frame", Main)
-    F.Size, F.Position, F.BackgroundColor3 = UDim2.new(0, 175, 0, 42), pos, Color3.fromRGB(35, 35, 35)
+    F.Size = UDim2.new(0, 175, 0, 42)
+    F.Position = pos
+    F.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     Instance.new("UICorner", F).CornerRadius = UDim.new(0, 18)
     
     local I = Instance.new("TextLabel", F)
-    I.Size, I.Position, I.BackgroundColor3 = UDim2.new(0, 28, 0, 28), UDim2.new(0, 8, 0.5, -14), Color3.fromRGB(0, 120, 255)
-    I.Text, I.TextColor3, I.Font, I.TextSize = icon, Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
+    I.Size = UDim2.new(0, 28, 0, 28)
+    I.Position = UDim2.new(0, 8, 0.5, -14)
+    I.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+    I.Text = icon
+    I.TextColor3 = Color3.fromRGB(255, 255, 255)
+    I.Font = Enum.Font.GothamBold
+    I.TextSize = 12
     Instance.new("UICorner", I).CornerRadius = UDim.new(1, 0)
     
     local L = Instance.new("TextLabel", F)
-    L.Size, L.Position, L.Text = UDim2.new(0, 85, 1, 0), UDim2.new(0, 44, 0, 0), name
-    L.TextColor3, L.Font, L.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 11
-    L.BackgroundTransparency, L.TextXAlignment = 1, Enum.TextXAlignment.Left
+    L.Size = UDim2.new(0, 85, 1, 0)
+    L.Position = UDim2.new(0, 44, 0, 0)
+    L.Text = name
+    L.TextColor3 = Color3.fromRGB(255, 255, 255)
+    L.Font = Enum.Font.GothamBold
+    L.TextSize = 11
+    L.BackgroundTransparency = 1
+    L.TextXAlignment = Enum.TextXAlignment.Left
     
     local B = Instance.new("TextButton", F)
-    B.Size, B.Position, B.BackgroundColor3 = UDim2.new(0, 32, 0, 16), UDim2.new(1, -40, 0.5, -8), Color3.fromRGB(50, 50, 50)
-    B.Text, B.AutoButtonColor = false, false
+    B.Size = UDim2.new(0, 32, 0, 16)
+    B.Position = UDim2.new(1, -40, 0.5, -8)
+    B.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    B.Text = ""
+    B.AutoButtonColor = false
     Instance.new("UICorner", B).CornerRadius = UDim.new(1, 0)
     
     local Dot = Instance.new("Frame", B)
-    Dot.Size, Dot.Position, Dot.BackgroundColor3 = UDim2.new(0, 12, 0, 12), UDim2.new(0, 2, 0.5, -6), Color3.fromRGB(255, 255, 255)
+    Dot.Size = UDim2.new(0, 12, 0, 12)
+    Dot.Position = UDim2.new(0, 2, 0.5, -6)
+    Dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Instance.new("UICorner", Dot).CornerRadius = UDim.new(1, 0)
     
     B.MouseButton1Click:Connect(function()
         getgenv().Config[var] = not getgenv().Config[var]
-        TS:Create(B, TweenInfo.new(0.2), {BackgroundColor3 = getgenv().Config[var] and Color3.fromRGB(0, 120, 255) or Color3.fromRGB(50, 50, 50)}):Play()
-        TS:Create(Dot, TweenInfo.new(0.2, Enum.EasingStyle.Back), {Position = getgenv().Config[var] and UDim2.new(0, 18, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)}):Play()
+        
+        local targetColor = getgenv().Config[var] and Color3.fromRGB(0, 120, 255) or Color3.fromRGB(50, 50, 50)
+        local targetPos = getgenv().Config[var] and UDim2.new(0, 18, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
+        
+        TS:Create(B, TweenInfo.new(0.2), {BackgroundColor3 = targetColor}):Play()
+        TS:Create(Dot, TweenInfo.new(0.2, Enum.EasingStyle.Back), {Position = targetPos}):Play()
     end)
 end
 
@@ -157,54 +151,109 @@ CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "P", "AutoPop")
 CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
 
 local SF = Instance.new("Frame", Main)
-SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 75), UDim2.new(0, 0, 1, -75), Color3.fromRGB(35, 35, 35)
+SF.Size = UDim2.new(1, 0, 0, 75)
+SF.Position = UDim2.new(0, 0, 1, -75)
+SF.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 SF.BorderSizePixel = 0
 Instance.new("UICorner", SF).CornerRadius = UDim.new(0, 18)
+
 local SFSquare = Instance.new("Frame", SF)
-SFSquare.Size, SFSquare.BackgroundColor3, SFSquare.BorderSizePixel = UDim2.new(1, 0, 0, 15), Color3.fromRGB(35, 35, 35), 0
+SFSquare.Size = UDim2.new(1, 0, 0, 15)
+SFSquare.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+SFSquare.BorderSizePixel = 0
 
 local CombinedLabel = Instance.new("TextLabel", SF)
-CombinedLabel.Text = "Accuracy - " .. tostring(getgenv().Config.Accuracy)
-CombinedLabel.Size, CombinedLabel.Position = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 12)
-CombinedLabel.TextColor3, CombinedLabel.Font, CombinedLabel.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
+CombinedLabel.Text = "Accuracy - 7"
+CombinedLabel.Size = UDim2.new(1, 0, 0, 20)
+CombinedLabel.Position = UDim2.new(0, 0, 0, 12)
+CombinedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+CombinedLabel.Font = Enum.Font.GothamBold
+CombinedLabel.TextSize = 12
 CombinedLabel.BackgroundTransparency = 1
 
 local function CreateArr(t, p, step)
     local b = Instance.new("TextButton", SF)
-    b.Size, b.Position, b.BackgroundColor3, b.Text = UDim2.new(0, 28, 0, 28), p, Color3.fromRGB(0, 120, 255), t
-    b.TextColor3, b.Font, b.TextSize, b.AutoButtonColor = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 14, false
+    b.Size = UDim2.new(0, 28, 0, 28)
+    b.Position = p
+    b.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+    b.Text = t
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Font = Enum.Font.GothamBold
+    b.TextSize = 14
+    b.AutoButtonColor = false
     Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
+    
     b.MouseButton1Click:Connect(function()
         getgenv().Config.Accuracy = math.clamp(getgenv().Config.Accuracy + step, 0, 10)
         CombinedLabel.Text = "Accuracy - " .. tostring(getgenv().Config.Accuracy)
-        TS:Create(Main:FindFirstChild("Fill", true), TweenInfo.new(0.3), {Size = UDim2.new(getgenv().Config.Accuracy/10, 0, 1, 0)}):Play()
+        
+        local fillSize = UDim2.new(getgenv().Config.Accuracy / 10, 0, 1, 0)
+        TS:Create(Main:FindFirstChild("Fill", true), TweenInfo.new(0.3), {Size = fillSize}):Play()
     end)
 end
 
 local SBtn = Instance.new("Frame", SF)
-SBtn.Size, SBtn.Position, SBtn.BackgroundColor3 = UDim2.new(0, 240, 0, 6), UDim2.new(0.5, -120, 0, 48), Color3.fromRGB(60, 60, 60)
+SBtn.Size = UDim2.new(0, 240, 0, 6)
+SBtn.Position = UDim2.new(0.5, -120, 0, 48)
+SBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 Instance.new("UICorner", SBtn).CornerRadius = UDim.new(1, 0)
+
 local SFill = Instance.new("Frame", SBtn)
-SFill.Name, SFill.Size, SFill.BackgroundColor3 = "Fill", UDim2.new(getgenv().Config.Accuracy/10, 0, 1, 0), Color3.fromRGB(0, 120, 255)
+SFill.Name = "Fill"
+SFill.Size = UDim2.new(0.7, 0, 1, 0)
+SFill.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
 Instance.new("UICorner", SFill).CornerRadius = UDim.new(1, 0)
 
 CreateArr("<", UDim2.new(0, 33, 0, 37), -1)
 CreateArr(">", UDim2.new(1, -61, 0, 37), 1)
 
 local dragToggle, dragStart, startPos
+
 OpenBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragToggle, dragStart, startPos = true, input.Position, OpenBtn.Position
+        dragToggle = true
+        dragStart = input.Position
+        startPos = OpenBtn.Position
     end
 end)
+
 UIS.InputChanged:Connect(function(input)
     if dragToggle and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
-        TS:Create(OpenBtn, TweenInfo.new(0.08, Enum.EasingStyle.Linear), {Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)}):Play()
+        OpenBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 end)
-UIS.InputEnded:Connect(function() dragToggle = false end)
+
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragToggle = false
+    end
+end)
 
 OpenBtn.MouseButton1Click:Connect(function() ToggleUI(true) end)
 CloseBtn.MouseButton1Click:Connect(function() ToggleUI(false) end)
+
+task.spawn(function()
+    local RS = game:GetService("ReplicatedStorage")
+    local Network = RS:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Networking")
+    local ActionRemote = Network:WaitForChild("RE/Minigame/MinigameGameAction")
+    
+    while task.wait() do
+        if getgenv().Config.AutoPop then
+            local acc = getgenv().Config.Accuracy
+            for i = 1, acc do
+                ActionRemote:FireServer("AttemptPop", tick())
+            end
+            task.wait(math.clamp(0.12 - (acc * 0.008), 0.05, 0.12))
+        end
+        
+        if getgenv().Config.ConnectFour then
+            local cols = {4, 3, 5, 2, 6, 1, 7}
+            for _, col in ipairs(cols) do
+                ActionRemote:FireServer("PlaceDisc", col)
+            end
+            task.wait(0.5)
+        end
+    end
+end)
 
