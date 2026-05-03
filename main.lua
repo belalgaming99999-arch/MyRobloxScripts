@@ -6,7 +6,7 @@ local TS, UIS, CG, RS = Services.TweenService, Services.UserInputService, Servic
 
 -- [[ إعدادات السكربت ]] --
 local Crystal = {
-    ID = "Crystal_Elite_Fixed_2026",
+    ID = "Crystal_Elite_TouchFix_2026",
     Config = {AutoPop = false, ConnectFour = false, Accuracy = 7},
     Theme = {
         MainBlue = Color3.fromRGB(0, 120, 255),
@@ -63,6 +63,7 @@ local BtnStroke = UI:Build("UIStroke", {Color = Crystal.Theme.MainBlue, Thicknes
 local function ToggleUI(state)
     local t = 0.4
     if state then
+        -- تحديد موقع القائمة تحت الأيقونة مباشرة
         Main.Position = UDim2.new(OpenBtn.Position.X.Scale, OpenBtn.Position.X.Offset - 135, OpenBtn.Position.Y.Scale, OpenBtn.Position.Y.Offset + 45)
         Main.Visible = true
         UI:Tween(Main, {GroupTransparency = 0}, t)
@@ -85,7 +86,9 @@ local Header = UI:Build("Frame", {Size = UDim2.new(1, 0, 0, 38), BackgroundColor
 UI:Build("UICorner", {CornerRadius = UDim.new(0, 18)}, Header)
 UI:Build("Frame", {Size = UDim2.new(1, 0, 0, 15), Position = UDim2.new(0, 0, 1, -15), BackgroundColor3 = Crystal.Theme.Gray, BorderSizePixel = 0}, Header)
 UI:Build("TextLabel", {Size = UDim2.new(1, 0, 0, 38), Text = "Crystal Hub", BackgroundTransparency = 1, TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = Crystal.Theme.Size, ZIndex = 6}, Main)
-UI:Build("TextButton", {Size = UDim2.new(0, 35, 0, 38), Position = UDim2.new(1, -38, 0, 0), Text = "X", BackgroundTransparency = 1, TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = Crystal.Theme.Size, AutoButtonColor = false, ZIndex = 7}, Main).Activated:Connect(function() ToggleUI(false) end)
+
+local CloseBtn = UI:Build("TextButton", {Size = UDim2.new(0, 35, 0, 38), Position = UDim2.new(1, -38, 0, 0), Text = "X", BackgroundTransparency = 1, TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = Crystal.Theme.Size, AutoButtonColor = false, ZIndex = 7}, Main)
+CloseBtn.MouseButton1Click:Connect(function() ToggleUI(false) end)
 
 local function AddToggle(name, pos, icon, var)
     local F = UI:Build("Frame", {Size = UDim2.new(0, 175, 0, 42), Position = pos, BackgroundColor3 = Crystal.Theme.Gray}, Main)
@@ -101,7 +104,7 @@ local function AddToggle(name, pos, icon, var)
         UI:Tween(B, {BackgroundColor3 = Crystal.Config[var] and Crystal.Theme.MainBlue or Crystal.Theme.Off}, 0.3)
         UI:Tween(D, {Position = Crystal.Config[var] and UDim2.new(0, 18, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)}, 0.3, Enum.EasingStyle.Back)
     end
-    B.Activated:Connect(function() Crystal.Config[var] = not Crystal.Config[var] Update() end)
+    B.MouseButton1Click:Connect(function() Crystal.Config[var] = not Crystal.Config[var] Update() end)
     Crystal.Toggles[var] = function() Crystal.Config[var] = not Crystal.Config[var] Update() end
 end
 
@@ -123,11 +126,12 @@ local function SetAccuracy(s)
     UI:Tween(SFill, {Size = UDim2.new(Crystal.Config.Accuracy/10, 0, 1, 0)}, 0.4)
 end
 
-UI:Build("TextButton", {Size = UDim2.new(0, 28, 0, 28), Position = UDim2.new(0, 33, 0, 37), BackgroundColor3 = Crystal.Theme.MainBlue, Text = "<", TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = 14, AutoButtonColor = false}, SArea).Activated:Connect(function() SetAccuracy(-1) end)
-UI:Build("TextButton", {Size = UDim2.new(0, 28, 0, 28), Position = UDim2.new(1, -61, 0, 37), BackgroundColor3 = Crystal.Theme.MainBlue, Text = ">", TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = 14, AutoButtonColor = false}, SArea).Activated:Connect(function() SetAccuracy(1) end)
+UI:Build("TextButton", {Size = UDim2.new(0, 28, 0, 28), Position = UDim2.new(0, 33, 0, 37), BackgroundColor3 = Crystal.Theme.MainBlue, Text = "<", TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = 14, AutoButtonColor = false}, SArea).MouseButton1Click:Connect(function() SetAccuracy(-1) end)
+UI:Build("TextButton", {Size = UDim2.new(0, 28, 0, 28), Position = UDim2.new(1, -61, 0, 37), BackgroundColor3 = Crystal.Theme.MainBlue, Text = ">", TextColor3 = Crystal.Theme.White, Font = Crystal.Theme.Font, TextSize = 14, AutoButtonColor = false}, SArea).MouseButton1Click:Connect(function() SetAccuracy(1) end)
 
 -- [[ معالجة المدخلات (موبايل + بيسي) ]] --
-OpenBtn.Activated:Connect(function() ToggleUI(true) end)
+-- استخدام MouseButton1Click يضمن العمل على التاتش والماوس معاً
+OpenBtn.MouseButton1Click:Connect(function() ToggleUI(true) end)
 
 local dT, dS, sP
 OpenBtn.InputBegan:Connect(function(i) 
@@ -143,6 +147,7 @@ UIS.InputChanged:Connect(function(i)
 end)
 UIS.InputEnded:Connect(function() dT = false end)
 
+-- اختصارات الكيبورد
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.C then Crystal.Toggles["ConnectFour"]()
