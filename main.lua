@@ -1,117 +1,182 @@
--- Crystal Elite 2026 [HYPER-SPEED EDITION]
 local TS = game:GetService("TweenService")
-local RS = game:GetService("ReplicatedStorage")
+local UIS = game:GetService("UserInputService")
 local CG = game:GetService("CoreGui")
 local LP = game:GetService("Players").LocalPlayer
 
--- المسارات اللي استخرجتها (تحديث 2026)
-local Network = RS:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Networking")
-local ActionRemote = Network:WaitForChild("RE/Minigame/MinigameGameAction")
-local VoteRemote = Network:WaitForChild("RE/Minigame/MinigameVote")
+local UI_ID = "Crystal_Elite_2026"
+local Existing = CG:FindFirstChild(UI_ID) or LP.PlayerGui:FindFirstChild(UI_ID)
+if Existing then Existing:Destroy() end
 
-getgenv().Config = {AutoPop = false, ConnectFour = false, Speed = 0.1}
+-- الـ Config بيبدأ بـ 7 للسلايدر
+getgenv().Config = {AutoPop = false, ConnectFour = false, Accuracy = 7}
 
--- [ منطق السرعة القصوى - Ultra Action ]
-task.spawn(function()
-    while task.wait() do
-        if getgenv().Config.AutoPop then
-            -- إرسال "AttemptPop" بسرعات خرافية تسبق الخصوم
-            for i = 1, 10 do
-                ActionRemote:FireServer("AttemptPop", tick() + (i * 0.005))
-            end
-        end
-        if getgenv().Config.ConnectFour then
-            -- استراتيجية السيطرة على الأعمدة (الذكاء الاصطناعي)
-            local cols = {4, 3, 5, 2, 6, 1, 7}
-            for _, c in ipairs(cols) do
-                ActionRemote:FireServer("PlaceDisc", c)
-            end
-        end
-    end
-end)
-
--- [ الواجهة الرسومية السريعة جداً ]
 local Screen = Instance.new("ScreenGui", CG)
-Screen.Name = "Crystal_Hyper_2026"
+Screen.Name = UI_ID
+Screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-local Main = Instance.new("Frame", Screen)
-Main.Size = UDim2.new(0, 220, 0, 160)
-Main.Position = UDim2.new(0.5, -110, 0.4, 0)
-Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-Main.ClipsDescendants = true
-Main.Visible = false
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
-local Stroke = Instance.new("UIStroke", Main)
-Stroke.Color = Color3.fromRGB(0, 120, 255)
-Stroke.Thickness = 2
-
--- زر الفتح (متحرك وسريع)
 local OpenBtn = Instance.new("TextButton", Screen)
-OpenBtn.Size = UDim2.new(0, 50, 0, 50)
-OpenBtn.Position = UDim2.new(0, 20, 0.5, -25)
+OpenBtn.Size = UDim2.new(0, 110, 0, 35)
+OpenBtn.Position = UDim2.new(0.5, -58, 0.16, 0)
 OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-OpenBtn.Text = "C"
-OpenBtn.TextColor3 = Color3.fromRGB(0, 120, 255)
+OpenBtn.Text = "Crystal Hub"
+OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 OpenBtn.Font = Enum.Font.GothamBold
-OpenBtn.TextSize = 20
-Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(1, 0)
-Instance.new("UIStroke", OpenBtn).Color = Color3.fromRGB(0, 120, 255)
+OpenBtn.TextSize = 12
+OpenBtn.AutoButtonColor = false
+OpenBtn.ZIndex = 10
+Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 18)
 
--- دالة التبديل (سريعة جداً 0.1 ثانية)
+local BtnStroke = Instance.new("UIStroke", OpenBtn)
+BtnStroke.Color = Color3.fromRGB(0, 120, 255)
+BtnStroke.Thickness = 1.5
+BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+local Main = Instance.new("CanvasGroup", Screen)
+Main.Size = UDim2.new(0, 380, 0, 190)
+Main.Position = UDim2.new(0.5, -190, 0.5, -95)
+Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+Main.Visible = false
+Main.GroupTransparency = 1 
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 18)
+
+local MainStroke = Instance.new("UIStroke", Main)
+MainStroke.Color = Color3.fromRGB(0, 120, 255)
+MainStroke.Thickness = 1.5
+MainStroke.Transparency = 1
+
 local function ToggleUI(state)
-    local speed = 0.1 -- السرعة اللي طلبتها
+    local info = TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
     if state then
         Main.Visible = true
-        Main:TweenSize(UDim2.new(0, 220, 0, 160), "Out", "Quart", speed, true)
+        TS:Create(Main, info, {GroupTransparency = 0, Size = UDim2.new(0, 380, 0, 190)}):Play()
+        TS:Create(MainStroke, info, {Transparency = 0}):Play()
+        TS:Create(OpenBtn, info, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
+        TS:Create(BtnStroke, info, {Transparency = 1}):Play()
+        task.delay(0.3, function() OpenBtn.Visible = false end)
     else
-        Main:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quart", speed, true, function()
+        TS:Create(MainStroke, info, {Transparency = 1}):Play()
+        local hide = TS:Create(Main, info, {GroupTransparency = 1, Size = UDim2.new(0, 360, 0, 170)})
+        hide:Play()
+        OpenBtn.Visible = true
+        TS:Create(OpenBtn, info, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
+        TS:Create(BtnStroke, info, {Transparency = 0}):Play()
+        hide.Completed:Connect(function()
             Main.Visible = false
         end)
     end
 end
 
--- صنع الأزرار التفاعلية
-local function CreateBtn(name, var, pos, isPop)
-    local b = Instance.new("TextButton", Main)
-    b.Size, b.Position = UDim2.new(0, 180, 0, 45), pos
-    b.Text = name
-    b.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    b.TextColor3, b.Font = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold
-    b.TextSize = 12
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
+local Header = Instance.new("Frame", Main)
+Header.Size = UDim2.new(1, 0, 0, 38)
+Header.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+Header.BorderSizePixel = 0
+Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 18)
+
+local HeaderSquare = Instance.new("Frame", Header)
+HeaderSquare.Size = UDim2.new(1, 0, 0, 15)
+HeaderSquare.Position = UDim2.new(0, 0, 1, -15)
+HeaderSquare.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+HeaderSquare.BorderSizePixel = 0
+
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, 0, 0, 38)
+Title.Text = "Crystal Hub - Mini Games"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 12
+Title.BackgroundTransparency = 1
+
+local CloseBtn = Instance.new("TextButton", Main)
+CloseBtn.Size = UDim2.new(0, 35, 0, 38)
+CloseBtn.Position = UDim2.new(1, -38, 0, 0)
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 12
+CloseBtn.BackgroundTransparency = 1
+
+local function CreateToggle(name, pos, icon, var)
+    local F = Instance.new("Frame", Main)
+    F.Size, F.Position, F.BackgroundColor3 = UDim2.new(0, 175, 0, 42), pos, Color3.fromRGB(35, 35, 35)
+    Instance.new("UICorner", F).CornerRadius = UDim.new(0, 18)
     
-    b.MouseButton1Click:Connect(function()
+    local I = Instance.new("TextLabel", F)
+    I.Size, I.Position, I.BackgroundColor3 = UDim2.new(0, 28, 0, 28), UDim2.new(0, 8, 0.5, -14), Color3.fromRGB(0, 120, 255)
+    I.Text, I.TextColor3, I.Font, I.TextSize = icon, Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
+    Instance.new("UICorner", I).CornerRadius = UDim.new(1, 0)
+    
+    local L = Instance.new("TextLabel", F)
+    L.Size, L.Position, L.Text = UDim2.new(0, 85, 1, 0), UDim2.new(0, 44, 0, 0), name
+    L.TextColor3, L.Font, L.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 11
+    L.BackgroundTransparency, L.TextXAlignment = 1, Enum.TextXAlignment.Left
+    
+    local B = Instance.new("TextButton", F)
+    B.Size, B.Position, B.BackgroundColor3 = UDim2.new(0, 32, 0, 16), UDim2.new(1, -40, 0.5, -8), Color3.fromRGB(50, 50, 50)
+    B.Text, B.AutoButtonColor = false, false
+    Instance.new("UICorner", B).CornerRadius = UDim.new(1, 0)
+    
+    local Dot = Instance.new("Frame", B)
+    Dot.Size, Dot.Position, Dot.BackgroundColor3 = UDim2.new(0, 12, 0, 12), UDim2.new(0, 2, 0.5, -6), Color3.fromRGB(255, 255, 255)
+    Instance.new("UICorner", Dot).CornerRadius = UDim.new(1, 0)
+    
+    B.MouseButton1Click:Connect(function()
         getgenv().Config[var] = not getgenv().Config[var]
-        TS:Create(b, TweenInfo.new(0.1), {BackgroundColor3 = getgenv().Config[var] and Color3.fromRGB(0, 120, 255) or Color3.fromRGB(25, 25, 25)}):Play()
-        if isPop and getgenv().Config[var] then
-            VoteRemote:FireServer("PopcornBurst")
-        end
+        TS:Create(B, TweenInfo.new(0.2), {BackgroundColor3 = getgenv().Config[var] and Color3.fromRGB(0, 120, 255) or Color3.fromRGB(50, 50, 50)}):Play()
+        TS:Create(Dot, TweenInfo.new(0.2, Enum.EasingStyle.Back), {Position = getgenv().Config[var] and UDim2.new(0, 18, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)}):Play()
     end)
 end
 
-CreateBtn("HYPER POPCORN", "AutoPop", UDim2.new(0, 20, 0, 45), true)
-CreateBtn("GOD CONNECT4", "ConnectFour", UDim2.new(0, 20, 0, 100), false)
+CreateToggle("Auto Popcorn", UDim2.new(0, 10, 0, 55), "P", "AutoPop")
+CreateToggle("Connect Four", UDim2.new(0, 195, 0, 55), "C", "ConnectFour")
 
--- التحكم في الفتح والقفل
-OpenBtn.MouseButton1Click:Connect(function()
-    ToggleUI(not Main.Visible)
-end)
+local SF = Instance.new("Frame", Main)
+SF.Size, SF.Position, SF.BackgroundColor3 = UDim2.new(1, 0, 0, 75), UDim2.new(0, 0, 1, -75), Color3.fromRGB(35, 35, 35)
+SF.BorderSizePixel = 0
+Instance.new("UICorner", SF).CornerRadius = UDim.new(0, 18)
+local SFSquare = Instance.new("Frame", SF)
+SFSquare.Size, SFSquare.BackgroundColor3, SFSquare.BorderSizePixel = UDim2.new(1, 0, 0, 15), Color3.fromRGB(35, 35, 35), 0
 
--- سحب الزر (Drag)
+local CombinedLabel = Instance.new("TextLabel", SF)
+CombinedLabel.Text = "Accuracy - 7"
+CombinedLabel.Size, CombinedLabel.Position = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 12)
+CombinedLabel.TextColor3, CombinedLabel.Font, CombinedLabel.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 12
+CombinedLabel.BackgroundTransparency = 1
+
+local function CreateArr(t, p, step)
+    local b = Instance.new("TextButton", SF)
+    b.Size, b.Position, b.BackgroundColor3, b.Text = UDim2.new(0, 28, 0, 28), p, Color3.fromRGB(0, 120, 255), t
+    b.TextColor3, b.Font, b.TextSize, b.AutoButtonColor = Color3.fromRGB(255, 255, 255), Enum.Font.GothamBold, 14, false
+    Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
+    b.MouseButton1Click:Connect(function()
+        getgenv().Config.Accuracy = math.clamp(getgenv().Config.Accuracy + step, 0, 10)
+        CombinedLabel.Text = "Accuracy - " .. tostring(getgenv().Config.Accuracy)
+        TS:Create(Main:FindFirstChild("Fill", true), TweenInfo.new(0.3), {Size = UDim2.new(getgenv().Config.Accuracy/10, 0, 1, 0)}):Play()
+    end)
+end
+
+local SBtn = Instance.new("Frame", SF)
+SBtn.Size, SBtn.Position, SBtn.BackgroundColor3 = UDim2.new(0, 240, 0, 6), UDim2.new(0.5, -120, 0, 48), Color3.fromRGB(60, 60, 60)
+Instance.new("UICorner", SBtn).CornerRadius = UDim.new(1, 0)
+local SFill = Instance.new("Frame", SBtn)
+SFill.Name, SFill.Size, SFill.BackgroundColor3 = "Fill", UDim2.new(0.7, 0, 1, 0), Color3.fromRGB(0, 120, 255)
+Instance.new("UICorner", SFill).CornerRadius = UDim.new(1, 0)
+
+CreateArr("<", UDim2.new(0, 33, 0, 37), -1)
+CreateArr(">", UDim2.new(1, -61, 0, 37), 1)
+
 local dragToggle, dragStart, startPos
 OpenBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragToggle = true dragStart = input.Position startPos = OpenBtn.Position
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragToggle, dragStart, startPos = true, input.Position, OpenBtn.Position
     end
 end)
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if dragToggle and input.UserInputType == Enum.UserInputType.MouseMovement then
+UIS.InputChanged:Connect(function(input)
+    if dragToggle and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
-        OpenBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        TS:Create(OpenBtn, TweenInfo.new(0.08, Enum.EasingStyle.Linear), {Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)}):Play()
     end
 end)
-game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then dragToggle = false end
-end)
+UIS.InputEnded:Connect(function() dragToggle = false end)
 
-print("Crystal Hyper 2026 - Maximum Speed Active!")
+OpenBtn.MouseButton1Click:Connect(function() ToggleUI(true) end)
+CloseBtn.MouseButton1Click:Connect(function() ToggleUI(false) end)
