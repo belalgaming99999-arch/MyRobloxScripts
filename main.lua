@@ -82,10 +82,11 @@ CreateBtn("Feature 3", "State3", 139)
 
 local SliderLabel = Instance.new("TextLabel", Main)
 SliderLabel.Size, SliderLabel.Position, SliderLabel.BackgroundTransparency = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 180), 1
-SliderLabel.Text, SliderLabel.TextColor3, SliderLabel.Font, SliderLabel.TextSize = "Accuracy: 7", Theme.White, Enum.Font.GothamBold, 12
+SliderLabel.Text, SliderLabel.TextColor3, SliderLabel.Font, SliderLabel.TextSize = "Accuracy: 7", Theme.White, Enum.Font.GothamBold, 16
+local SliderGrad = GlobalGrad:Clone(); SliderGrad.Parent = SliderLabel
 
 local SliderBg = Instance.new("Frame", Main)
-SliderBg.Size, SliderBg.Position, SliderBg.BackgroundColor3 = UDim2.new(0, 160, 0, 6), UDim2.new(0.5, -80, 0, 205), Theme.Slider
+SliderBg.Size, SliderBg.Position, SliderBg.BackgroundColor3 = UDim2.new(0, 160, 0, 6), UDim2.new(0.5, -80, 0, 208), Theme.Slider
 Instance.new("UICorner", SliderBg).CornerRadius = UDim.new(1, 0)
 
 local SliderFill = Instance.new("Frame", SliderBg)
@@ -114,7 +115,6 @@ local function UpdateSlider(input)
     local rawPos = math.clamp((input.Position.X - SliderBg.AbsolutePosition.X) / SliderBg.AbsoluteSize.X, 0, 1)
     Accuracy = math.floor(rawPos * 10)
     local steppedPos = Accuracy / 10
-    
     SliderLabel.Text = "Accuracy: " .. Accuracy
     SliderFill.Size = UDim2.new(steppedPos, 0, 1, 0)
 end
@@ -156,7 +156,7 @@ end)
 RunService.RenderStepped:Connect(function(dt)
     Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
     local rot = (GlobalGrad.Rotation + 150 * dt) % 360
-    GlobalGrad.Rotation = rot; TitleGrad.Rotation = rot; LineGrad.Rotation = rot; FillGrad.Rotation = rot
+    GlobalGrad.Rotation = rot; TitleGrad.Rotation = rot; LineGrad.Rotation = rot; FillGrad.Rotation = rot; SliderGrad.Rotation = rot
 end)
 
 task.spawn(function()
