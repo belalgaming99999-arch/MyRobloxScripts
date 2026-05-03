@@ -108,7 +108,7 @@ AddBtn("Auto Pop", "AutoPop", 55)
 AddBtn("Feature 2", "State2", 97)
 AddBtn("Feature 3", "State3", 139)
 
--- [[ السلايدر المطور مع الدائرة النابضة ]] --
+-- [[ السلايدر المطور مع تأثير الموجات ]] --
 local SliderLabel = Instance.new("TextLabel", Main)
 SliderLabel.Size = UDim2.new(1, 0, 0, 20)
 SliderLabel.Position = UDim2.new(0, 0, 0, 180)
@@ -139,27 +139,49 @@ SliderKnob.BackgroundColor3 = Theme.White
 SliderKnob.ZIndex = 5
 Instance.new("UICorner", SliderKnob).CornerRadius = UDim.new(1, 0)
 
--- الإطار الأبيض المتحرك (Pulsing Stroke)
-local KnobStroke = Instance.new("UIStroke", SliderKnob)
-KnobStroke.Color = Theme.White
-KnobStroke.Thickness = 2 -- سماكة أكبر كما طلبت
-KnobStroke.Transparency = 0.3
+-- تأثير الموجات/الحواف المنطلقة (Ripple/Wave Effect)
+local function CreateWave()
+    local Wave = Instance.new("Frame", SliderKnob)
+    Wave.Name = "Wave"
+    Wave.AnchorPoint = Vector2.new(0.5, 0.5)
+    Wave.Size = UDim2.new(1, 0, 1, 0) -- تبدأ بنفس حجم الدائرة
+    Wave.Position = UDim2.new(0.5, 0, 0.5, 0)
+    Wave.BackgroundColor3 = Theme.White
+    Wave.BackgroundTransparency = 0.4 -- تبدأ شبه شفافة
+    Wave.ZIndex = 4 -- تحت الدائرة الأساسية
+    Instance.new("UICorner", Wave).CornerRadius = UDim.new(1, 0)
+    
+    local WaveStroke = Instance.new("UIStroke", Wave)
+    WaveStroke.Color = Theme.White
+    WaveStroke.Thickness = 1
+    WaveStroke.Transparency = 0.4
 
--- تأثير النبض (Pulse Effect)
+    -- أنميشن الانطلاق والاختفاء
+    local info = TweenInfo.new(1.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(Wave, info, {
+        Size = UDim2.new(4, 0, 4, 0), -- تكبر 4 أضعاف
+        BackgroundTransparency = 1 -- وتختفي تماماً
+    })
+    local strokeTween = TweenService:Create(WaveStroke, info, {
+        Thickness = 0, -- الإطار يختفي أيضاً
+        Transparency = 1
+    })
+    
+    tween:Play()
+    strokeTween:Play()
+    
+    -- حذف العنصر بعد انتهاء الأنميشن
+    tween.Completed:Connect(function()
+        Wave:Destroy()
+    end)
+end
+
+-- إطلاق موجة جديدة كل فترة
 task.spawn(function()
-    while task.wait() do
-        local pulse = TweenService:Create(KnobStroke, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-            Thickness = 4.5,
-            Transparency = 0.6
-        })
-        pulse:Play()
-        pulse.Completed:Wait()
-        local shrink = TweenService:Create(KnobStroke, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-            Thickness = 1.5,
-            Transparency = 0.1
-        })
-        shrink:Play()
-        shrink.Completed:Wait()
+    while task.wait(0.8) do -- كل 0.8 ثانية تطلع موجة
+        if Border.Visible then -- فقط إذا كانت القائمة مفتوحة
+            CreateWave()
+        end
     end
 end)
 
@@ -245,3 +267,4 @@ task.spawn(function()
         end
     end
 end)
+
