@@ -25,7 +25,8 @@ local Theme = {
 }
 
 local Toggles = {AutoPop = false, AutoFour = false, Feature3 = false}
-local Accuracy = 7
+-- // 1. ضبط القيمة الافتراضية لتبدأ من 7
+local Accuracy = 7 
 local UI_Open, Dragging = false, false
 
 local MenuBtn = Instance.new("TextButton", CrystalGui)
@@ -82,6 +83,7 @@ CreateBtn("Feature 3", "Feature3", 139)
 
 local SliderLabel = Instance.new("TextLabel", Main)
 SliderLabel.Size, SliderLabel.Position, SliderLabel.BackgroundTransparency = UDim2.new(1, 0, 0, 20), UDim2.new(0, 0, 0, 180), 1
+-- // 2. عرض رقم 7 فوراً عند الفتح
 SliderLabel.Text, SliderLabel.TextColor3, SliderLabel.Font, SliderLabel.TextSize = "Accuracy: 7", Theme.White, Enum.Font.GothamBold, 16
 local SliderGrad = GlobalGrad:Clone(); SliderGrad.Parent = SliderLabel
 
@@ -90,53 +92,40 @@ SliderBg.Size, SliderBg.Position, SliderBg.BackgroundColor3 = UDim2.new(0, 120, 
 Instance.new("UICorner", SliderBg).CornerRadius = UDim.new(1, 0)
 
 local SliderFill = Instance.new("Frame", SliderBg)
+-- // 3. ضبط حجم الشريط ليكون على مستوى رقم 7 (0.7) عند الفتح
 SliderFill.Size, SliderFill.BackgroundColor3 = UDim2.new(0.7, 0, 1, 0), Theme.White
 Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
 local FillGrad = GlobalGrad:Clone(); FillGrad.Parent = SliderFill
 
 local Knob = Instance.new("Frame", SliderFill)
--- // تصغير الدائرة لـ 10x10 وتضبيط مكانها في النص
-Knob.Size, Knob.Position, Knob.BackgroundColor3 = UDim2.new(0, 10, 0, 10), UDim2.new(1, -5, 0.5, -5), Theme.White
+Knob.Size, Knob.Position, Knob.BackgroundColor3 = UDim2.new(0, 13, 0, 13), UDim2.new(1, -6, 0.5, -6), Theme.White
 Knob.ZIndex = 5
 Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
--- // إضافة الموجات جوه الدائرة
 local KnobGrad = GlobalGrad:Clone(); KnobGrad.Parent = Knob
 
+-- // وظيفة التحديث بنظام الخطوات (Snap Logic)
 local function UpdateSlider(input)
     local xPos = input.Position.X - SliderBg.AbsolutePosition.X
     local rawPos = math.clamp(xPos / SliderBg.AbsoluteSize.X, 0, 1)
     
-    Accuracy = math.max(1, math.floor(rawPos * 10))
+    -- تحويل السحبة لرقم صحيح من 1 لـ 10
+    local steppedAccuracy = math.floor(rawPos * 10)
+    if steppedAccuracy < 1 then steppedAccuracy = 1 end
+    
+    Accuracy = steppedAccuracy
     SliderLabel.Text = "Accuracy: " .. Accuracy
-    SliderFill.Size = UDim2.new(rawPos, 0, 1, 0)
+    
+    -- السلايدر دلوقتي "بينط" للرقم الصحيح عشان ميبقاش فيه لغبطة
+    SliderFill.Size = UDim2.new(Accuracy / 10, 0, 1, 0)
 end
 
 local Sliding = false
-SliderBg.InputBegan:Connect(function(i) 
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then 
-        Sliding = true; UpdateSlider(i) 
-    end 
-end)
-
-UserInputService.InputChanged:Connect(function(i) 
-    if Sliding and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then 
-        UpdateSlider(i) 
-    end 
-end)
-
-UserInputService.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-        Sliding = false
-    end
-end)
+SliderBg.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Sliding = true; UpdateSlider(i) end end)
+UserInputService.InputChanged:Connect(function(i) if Sliding and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then UpdateSlider(i) end end)
+UserInputService.InputEnded:Connect(function() Sliding = false end)
 
 local dStart, sPos, isDragged
-MenuBtn.InputBegan:Connect(function(i)
-    if i.UserInputType.Name:find("MouseButton1") or i.UserInputType.Name:find("Touch") then
-        Dragging, isDragged, dStart, sPos = true, false, i.Position, MenuBtn.Position
-    end
-end)
-
+MenuBtn.InputBegan:Connect(function(i) if i.UserInputType.Name:find("MouseButton1") or i.UserInputType.Name:find("Touch") then Dragging, isDragged, dStart, sPos = true, false, i.Position, MenuBtn.Position end end)
 UserInputService.InputChanged:Connect(function(i)
     if Dragging and (i.UserInputType.Name:find("MouseMovement") or i.UserInputType.Name:find("Touch")) then
         local delta = i.Position - dStart
@@ -144,7 +133,6 @@ UserInputService.InputChanged:Connect(function(i)
         MenuBtn.Position = UDim2.new(sPos.X.Scale, sPos.X.Offset + delta.X, sPos.Y.Scale, sPos.Y.Offset + delta.Y)
     end
 end)
-
 UserInputService.InputEnded:Connect(function() Dragging = false end)
 
 MenuBtn.MouseButton1Click:Connect(function()
@@ -162,13 +150,11 @@ end)
 RunService.RenderStepped:Connect(function(dt)
     Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
     local rot = (GlobalGrad.Rotation + 150 * dt) % 360
-    -- // إضافة KnobGrad للقائمة عشان يلف مع الباقي
     GlobalGrad.Rotation = rot; TitleGrad.Rotation = rot; LineGrad.Rotation = rot; FillGrad.Rotation = rot; SliderGrad.Rotation = rot; KnobGrad.Rotation = rot
 end)
 
 task.spawn(function()
     local PopRemote = ReplicatedStorage:FindFirstChild("MinigameGameAction", true)
-    
     while true do
         if Toggles.AutoPop and PopRemote then
             local Board = workspace:FindFirstChild("PopcornBurstBoard", true)
