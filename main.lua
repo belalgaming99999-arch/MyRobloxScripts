@@ -15,7 +15,7 @@ Screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local OpenBtn = Instance.new("TextButton", Screen)
 OpenBtn.Size = UDim2.new(0, 110, 0, 35)
-OpenBtn.Position = UDim2.new(0.5, -58, 0.16, 0)
+OpenBtn.Position = UDim2.new(0.5, -55, 0.12, 0)
 OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 OpenBtn.Text = "Crystal Hub"
 OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -44,15 +44,16 @@ MainStroke.Thickness = 1.5
 MainStroke.Transparency = 1
 
 local function ToggleUI(state)
-    local info = TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+    local info = TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
     
     if state then
+        Main.Position = UDim2.new(OpenBtn.Position.X.Scale, OpenBtn.Position.X.Offset - 135, OpenBtn.Position.Y.Scale, OpenBtn.Position.Y.Offset + 50)
         Main.Visible = true
         TS:Create(Main, info, {GroupTransparency = 0, Size = UDim2.new(0, 380, 0, 190)}):Play()
         TS:Create(MainStroke, info, {Transparency = 0}):Play()
         TS:Create(OpenBtn, info, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
         TS:Create(BtnStroke, info, {Transparency = 1}):Play()
-        task.delay(0.3, function() OpenBtn.Visible = false end)
+        task.delay(0.4, function() OpenBtn.Visible = false end)
     else
         TS:Create(MainStroke, info, {Transparency = 1}):Play()
         local hide = TS:Create(Main, info, {GroupTransparency = 1, Size = UDim2.new(0, 360, 0, 170)})
@@ -138,12 +139,10 @@ local function CreateToggle(name, pos, icon, var)
     
     B.MouseButton1Click:Connect(function()
         getgenv().Config[var] = not getgenv().Config[var]
-        
         local targetColor = getgenv().Config[var] and Color3.fromRGB(0, 120, 255) or Color3.fromRGB(50, 50, 50)
         local targetPos = getgenv().Config[var] and UDim2.new(0, 18, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
-        
-        TS:Create(B, TweenInfo.new(0.2), {BackgroundColor3 = targetColor}):Play()
-        TS:Create(Dot, TweenInfo.new(0.2, Enum.EasingStyle.Back), {Position = targetPos}):Play()
+        TS:Create(B, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {BackgroundColor3 = targetColor}):Play()
+        TS:Create(Dot, TweenInfo.new(0.25, Enum.EasingStyle.Back), {Position = targetPos}):Play()
     end)
 end
 
@@ -186,9 +185,8 @@ local function CreateArr(t, p, step)
     b.MouseButton1Click:Connect(function()
         getgenv().Config.Accuracy = math.clamp(getgenv().Config.Accuracy + step, 0, 10)
         CombinedLabel.Text = "Accuracy - " .. tostring(getgenv().Config.Accuracy)
-        
         local fillSize = UDim2.new(getgenv().Config.Accuracy / 10, 0, 1, 0)
-        TS:Create(Main:FindFirstChild("Fill", true), TweenInfo.new(0.3), {Size = fillSize}):Play()
+        TS:Create(Main:FindFirstChild("Fill", true), TweenInfo.new(0.4, Enum.EasingStyle.Quart), {Size = fillSize}):Play()
     end)
 end
 
@@ -208,7 +206,6 @@ CreateArr("<", UDim2.new(0, 33, 0, 37), -1)
 CreateArr(">", UDim2.new(1, -61, 0, 37), 1)
 
 local dragToggle, dragStart, startPos
-
 OpenBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragToggle = true
@@ -216,14 +213,12 @@ OpenBtn.InputBegan:Connect(function(input)
         startPos = OpenBtn.Position
     end
 end)
-
 UIS.InputChanged:Connect(function(input)
     if dragToggle and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
         OpenBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 end)
-
 UIS.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragToggle = false
@@ -237,7 +232,6 @@ task.spawn(function()
     local RS = game:GetService("ReplicatedStorage")
     local Network = RS:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Networking")
     local ActionRemote = Network:WaitForChild("RE/Minigame/MinigameGameAction")
-    
     while task.wait() do
         if getgenv().Config.AutoPop then
             local acc = getgenv().Config.Accuracy
@@ -246,7 +240,6 @@ task.spawn(function()
             end
             task.wait(math.clamp(0.12 - (acc * 0.008), 0.05, 0.12))
         end
-        
         if getgenv().Config.ConnectFour then
             local cols = {4, 3, 5, 2, 6, 1, 7}
             for _, col in ipairs(cols) do
@@ -256,4 +249,3 @@ task.spawn(function()
         end
     end
 end)
-
