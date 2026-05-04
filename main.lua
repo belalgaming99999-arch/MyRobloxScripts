@@ -27,7 +27,6 @@ local Toggles = {AutoPop = false, AutoFour = false, Extra = false}
 local AccuracyVal = 7 
 local UI_Open, Dragging = false, false
 
--- [ أيقونة الفتح ]
 local MenuBtn = Instance.new("TextButton", CrystalGui)
 MenuBtn.Size = UDim2.new(0, 52, 0, 52)
 MenuBtn.Position = UDim2.new(0.05, 0, 0.15, 0)
@@ -44,7 +43,6 @@ for i = -1, 1 do
     Instance.new("UICorner", L).CornerRadius = UDim.new(1, 0)
 end
 
--- [ القائمة الرئيسية ]
 local Border = Instance.new("Frame", CrystalGui)
 Border.Size = UDim2.new(0, 0, 0, 0)
 Border.Visible = false
@@ -65,7 +63,6 @@ GlobalGrad.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(1, Theme.Main)
 })
 
--- العنوان العلوي (حجم 13 بولد)
 local Title = Instance.new("TextLabel", Main)
 Title.Size = UDim2.new(0, 130, 0, 25)
 Title.Position = UDim2.new(0.5, -65, 0, 12)
@@ -85,7 +82,6 @@ Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 local LineGrad = GlobalGrad:Clone()
 LineGrad.Parent = UnderLine
 
--- [ إنشاء الأزرار ]
 local function CreateBtn(key, y, label)
     local B = Instance.new("TextButton", Main)
     B.Size = UDim2.new(0, 180, 0, 38)
@@ -111,10 +107,9 @@ CreateBtn("AutoPop", 55, "Auto Pop-B")
 CreateBtn("AutoFour", 101, "Auto 4-Four")
 CreateBtn("Extra", 147, "Extra Feature")
 
--- [ السلايدر ]
 local SliderContainer = Instance.new("Frame", Main)
-SliderContainer.Size = UDim2.new(0, 130, 0, 30)
-SliderContainer.Position = UDim2.new(0.5, -65, 0, 195)
+SliderContainer.Size = UDim2.new(0, 120, 0, 30)
+SliderContainer.Position = UDim2.new(0.5, -60, 0, 195)
 SliderContainer.BackgroundTransparency = 1
 
 local SliderLabel = Instance.new("TextLabel", SliderContainer)
@@ -168,7 +163,6 @@ UserInputService.InputEnded:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Sliding = false end 
 end)
 
--- [ منطق السحب والفتح ]
 local dragStart, startPos, isDragged
 MenuBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -209,9 +203,6 @@ RunService.RenderStepped:Connect(function(dt)
     GlobalGrad.Rotation = rot; TitleGrad.Rotation = rot; LineGrad.Rotation = rot; LabelGrad.Rotation = rot; FillGrad.Rotation = rot; KnobGrad.Rotation = rot
 end)
 
------------------------------------------------------------
--- [ المحرك الذكي - التفعيلات الكاملة ]
------------------------------------------------------------
 local function GetBestMove(grid, myIndex)
     local opp = (myIndex == 1) and 2 or 1
     local g = {}
@@ -239,11 +230,8 @@ task.spawn(function()
         local Remote = ReplicatedStorage:FindFirstChild("CombineMinigameAction", true)
         local ClientGlobals
         pcall(function() ClientGlobals = require(ReplicatedStorage:WaitForChild("Client"):WaitForChild("Modules"):WaitForChild("ClientGlobals")) end)
-
         if Remote and ClientGlobals and ClientGlobals.ActiveMinigame then
             local session = ClientGlobals.ActiveMinigame.session
-            
-            -- Auto Popcorn
             if Toggles.AutoPop then
                 local PopBoard = workspace:FindFirstChild("PopcornBurstBoard", true) or workspace:FindFirstChild("SoloPopcornBurstBoard", true)
                 if PopBoard then
@@ -258,19 +246,14 @@ task.spawn(function()
                     end
                 end
             end
-
-            -- Auto Connect Four
             if Toggles.AutoFour and session and session.public and session.private then
                 local pub, priv = session.public, session.private
                 if pub.phase == "Playing" and pub.currentTurn == priv.seatIndex then
                     local move = GetBestMove(pub.grid, priv.seatIndex)
-                    if move then
-                        task.wait(0.5); Remote:FireServer("DropChip", move); task.wait(1.5)
-                    end
+                    if move then task.wait(0.5); Remote:FireServer("DropChip", move); task.wait(1.5) end
                 end
             end
         end
         RunService.Heartbeat:Wait()
     end
 end)
-
