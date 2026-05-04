@@ -101,7 +101,7 @@ local function CreateBtn(txt, key, y)
     end)
 end
 
-CreateBtn("Auto Pop", "AutoPop", 55)
+CreateBtn("Pop-B", "AutoPop", 55)
 CreateBtn("Auto 4-Row", "AutoFour", 97)
 CreateBtn("Feature 3", "Feature3", 139)
 
@@ -109,7 +109,7 @@ local SliderLabel = Instance.new("TextLabel", Main)
 SliderLabel.Size = UDim2.new(1, 0, 0, 20)
 SliderLabel.Position = UDim2.new(0, 0, 0, 180)
 SliderLabel.BackgroundTransparency = 1
-SliderLabel.Text = "Accuracy: 7"
+SliderLabel.Text = "Accuracy: " .. Accuracy
 SliderLabel.TextColor3 = Theme.White
 SliderLabel.Font = Enum.Font.GothamBold
 SliderLabel.TextSize = 16
@@ -123,7 +123,7 @@ SliderBg.BackgroundColor3 = Theme.Slider
 Instance.new("UICorner", SliderBg).CornerRadius = UDim.new(1, 0)
 
 local SliderFill = Instance.new("Frame", SliderBg)
-SliderFill.Size = UDim2.new(0.7, 0, 1, 0)
+SliderFill.Size = UDim2.new(Accuracy / 10, 0, 1, 0)
 SliderFill.BackgroundColor3 = Theme.White
 Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
 local FillGrad = GlobalGrad:Clone()
@@ -141,9 +141,7 @@ KnobGrad.Parent = Knob
 local function UpdateSlider(input)
     local xPos = input.Position.X - SliderBg.AbsolutePosition.X
     local rawPos = math.clamp(xPos / SliderBg.AbsoluteSize.X, 0, 1)
-    local stepped = math.floor(rawPos * 10)
-    if stepped < 1 then stepped = 1 end
-    Accuracy = stepped
+    Accuracy = math.floor(rawPos * 10) -- يسمح بالوصول لـ 0
     SliderLabel.Text = "Accuracy: " .. Accuracy
     SliderFill.Size = UDim2.new(Accuracy / 10, 0, 1, 0)
 end
