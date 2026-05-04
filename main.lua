@@ -103,9 +103,9 @@ local function CreateBtn(key, y, label)
     end)
 end
 
-CreateBtn("AutoPop", 52, "Auto Pop-B")
-CreateBtn("AutoFour", 98, "Auto 4-Four")
-CreateBtn("Extra", 144, "Extra Feature")
+CreateBtn("AutoPop", 55, "Auto Pop-B")
+CreateBtn("AutoFour", 101, "Auto 4-Four")
+CreateBtn("Extra", 147, "Extra Feature")
 
 local SliderContainer = Instance.new("Frame", Main)
 SliderContainer.Size = UDim2.new(0, 120, 0, 40)
@@ -185,7 +185,7 @@ end)
 
 RunService.RenderStepped:Connect(function(dt)
     if goalPos then
-        MenuBtn.Position = MenuBtn.Position:Lerp(goalPos, 0.25)
+        MenuBtn.Position = MenuBtn.Position:Lerp(goalPos, 0.2)
         if Border.Visible then
             Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
         end
@@ -260,3 +260,4 @@ task.spawn(function()
         RunService.Heartbeat:Wait()
     end
 end)
+
