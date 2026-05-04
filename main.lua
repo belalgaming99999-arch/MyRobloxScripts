@@ -103,17 +103,18 @@ local function CreateBtn(key, y, label)
     end)
 end
 
-CreateBtn("AutoPop", 55, "Auto Pop-B")
-CreateBtn("AutoFour", 101, "Auto 4-Four")
-CreateBtn("Extra", 147, "Extra Feature")
+CreateBtn("AutoPop", 57, "Auto Pop-B")
+CreateBtn("AutoFour", 103, "Auto 4-Four")
+CreateBtn("Extra", 149, "Extra Feature")
 
 local SliderContainer = Instance.new("Frame", Main)
-SliderContainer.Size = UDim2.new(0, 120, 0, 30)
+SliderContainer.Size = UDim2.new(0, 120, 0, 40)
 SliderContainer.Position = UDim2.new(0.5, -60, 0, 195)
 SliderContainer.BackgroundTransparency = 1
 
 local SliderLabel = Instance.new("TextLabel", SliderContainer)
-SliderLabel.Size = UDim2.new(1, 0, 0, 20)
+SliderLabel.Size = UDim2.new(1, 0, 0, 25)
+SliderLabel.Position = UDim2.new(0, 0, 0, 0)
 SliderLabel.BackgroundTransparency = 1
 SliderLabel.Text = "Accessory: " .. AccuracyVal
 SliderLabel.TextColor3 = Theme.White
@@ -124,7 +125,7 @@ LabelGrad.Parent = SliderLabel
 
 local SliderBg = Instance.new("Frame", SliderContainer)
 SliderBg.Size = UDim2.new(1, 0, 0, 4)
-SliderBg.Position = UDim2.new(0, 0, 0, 25)
+SliderBg.Position = UDim2.new(0, 0, 0, 28)
 SliderBg.BackgroundColor3 = Theme.Slider
 Instance.new("UICorner", SliderBg).CornerRadius = UDim.new(1, 0)
 
