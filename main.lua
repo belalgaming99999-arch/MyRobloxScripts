@@ -13,7 +13,6 @@ local CrystalGui = Instance.new("ScreenGui", Root)
 CrystalGui.Name = "CrystalProject"
 CrystalGui.IgnoreGuiInset = true
 CrystalGui.DisplayOrder = 9e9
-CrystalGui.ResetOnSpawn = false
 
 local Theme = {
     Bg = Color3.fromRGB(25, 35, 55),
@@ -28,12 +27,12 @@ local Toggles = {AutoPop = false, AutoFour = false, Feature3 = false}
 local Accuracy = 7 
 local UI_Open, Dragging = false, false
 
+-- الزرار العائم
 local MenuBtn = Instance.new("TextButton", CrystalGui)
 MenuBtn.Size = UDim2.new(0, 52, 0, 52)
 MenuBtn.Position = UDim2.new(0.05, 0, 0.25, 0)
 MenuBtn.BackgroundColor3 = Theme.Main
 MenuBtn.Text = ""
-MenuBtn.AutoButtonColor = false
 Instance.new("UICorner", MenuBtn).CornerRadius = UDim.new(0, 10)
 
 for i = -1, 1 do
@@ -44,8 +43,9 @@ for i = -1, 1 do
     Instance.new("UICorner", L).CornerRadius = UDim.new(1, 0)
 end
 
+-- القائمة الرئيسية
 local Border = Instance.new("Frame", CrystalGui)
-Border.Size = UDim2.new(0, 0, 0, 0)
+Border.Size = UDim2.new(0, 0, 0, 0) -- سيبدأ من الصفر للأنيميشن
 Border.Visible = false
 Border.BackgroundColor3 = Theme.White
 Border.ClipsDescendants = true
@@ -64,8 +64,10 @@ GlobalGrad.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(1, Theme.Main)
 })
 
+-- العنوان
 local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1, 0, 0, 45)
+Title.Size = UDim2.new(0, 180, 0, 40)
+Title.Position = UDim2.new(0.5, -90, 0, 5)
 Title.Text = "Crystal Hub"
 Title.TextColor3 = Theme.White
 Title.Font = Enum.Font.GothamBold
@@ -75,16 +77,17 @@ local TitleGrad = GlobalGrad:Clone()
 TitleGrad.Parent = Title
 
 local UnderLine = Instance.new("Frame", Main)
-UnderLine.Size = UDim2.new(0, 120, 0, 6)
-UnderLine.Position = UDim2.new(0.5, -60, 0, 40)
+UnderLine.Size = UDim2.new(0, 180, 0, 4) -- مقاس موحد مع الأزرار
+UnderLine.Position = UDim2.new(0.5, -90, 0, 42)
 UnderLine.BackgroundColor3 = Theme.White
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 local LineGrad = GlobalGrad:Clone()
 LineGrad.Parent = UnderLine
 
+-- وظيفة إنشاء الأزرار بمقاس موحد
 local function CreateBtn(txt, key, y)
     local B = Instance.new("TextButton", Main)
-    B.Size = UDim2.new(0, 180, 0, 36)
+    B.Size = UDim2.new(0, 180, 0, 36) -- مقاس موحد 180x36
     B.Position = UDim2.new(0.5, -90, 0, y)
     B.BackgroundColor3 = Theme.Off
     B.Text = txt .. " [Disable]"
@@ -105,20 +108,26 @@ CreateBtn("Auto Pop-B", "AutoPop", 55)
 CreateBtn("Auto 4-Row", "AutoFour", 97)
 CreateBtn("Feature 3", "Feature3", 139)
 
-local SliderLabel = Instance.new("TextLabel", Main)
+-- حاوية السلايدر (مقاس موحد مع الأزرار)
+local SliderContainer = Instance.new("Frame", Main)
+SliderContainer.Size = UDim2.new(0, 180, 0, 45)
+SliderContainer.Position = UDim2.new(0.5, -90, 0, 180)
+SliderContainer.BackgroundTransparency = 1
+
+local SliderLabel = Instance.new("TextLabel", SliderContainer)
 SliderLabel.Size = UDim2.new(1, 0, 0, 20)
-SliderLabel.Position = UDim2.new(0, 0, 0, 180)
+SliderLabel.Position = UDim2.new(0, 0, 0, 0)
 SliderLabel.BackgroundTransparency = 1
 SliderLabel.Text = "Accuracy: " .. Accuracy
 SliderLabel.TextColor3 = Theme.White
 SliderLabel.Font = Enum.Font.GothamBold
-SliderLabel.TextSize = 16
+SliderLabel.TextSize = 15
 local SliderGrad = GlobalGrad:Clone()
 SliderGrad.Parent = SliderLabel
 
-local SliderBg = Instance.new("Frame", Main)
-SliderBg.Size = UDim2.new(0, 120, 0, 6)
-SliderBg.Position = UDim2.new(0.5, -60, 0, 208)
+local SliderBg = Instance.new("Frame", SliderContainer)
+SliderBg.Size = UDim2.new(1, 0, 0, 6) -- العرض كامل الـ 180
+SliderBg.Position = UDim2.new(0, 0, 0, 28)
 SliderBg.BackgroundColor3 = Theme.Slider
 Instance.new("UICorner", SliderBg).CornerRadius = UDim.new(1, 0)
 
@@ -130,14 +139,15 @@ local FillGrad = GlobalGrad:Clone()
 FillGrad.Parent = SliderFill
 
 local Knob = Instance.new("Frame", SliderFill)
-Knob.Size = UDim2.new(0, 16, 0, 16)
-Knob.Position = UDim2.new(1, -8, 0.5, -8)
+Knob.Size = UDim2.new(0, 14, 0, 14)
+Knob.Position = UDim2.new(1, -7, 0.5, -7)
 Knob.BackgroundColor3 = Theme.White
 Knob.ZIndex = 5
 Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
 local KnobGrad = GlobalGrad:Clone()
 KnobGrad.Parent = Knob
 
+-- برمجة السلايدر
 local function UpdateSlider(input)
     local xPos = input.Position.X - SliderBg.AbsolutePosition.X
     local rawPos = math.clamp(xPos / SliderBg.AbsoluteSize.X, 0, 1)
@@ -152,25 +162,22 @@ SliderBg.InputBegan:Connect(function(i)
         Sliding = true; UpdateSlider(i) 
     end 
 end)
-
 UserInputService.InputChanged:Connect(function(i) 
     if Sliding and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then 
         UpdateSlider(i) 
     end 
 end)
-
 UserInputService.InputEnded:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then 
         Sliding = false 
     end 
 end)
 
--- نظام سحب فوري بدون تأخير
-local dragInput, dragStart, startPos
+-- نظام السحب الفوري (تحت صبعك بالظبط)
+local dragStart, startPos
 local function update(input)
     local delta = input.Position - dragStart
     MenuBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    -- تحديث مكان القائمة فوراً مع الزرار
     if Border.Visible then
         Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
     end
@@ -181,40 +188,35 @@ MenuBtn.InputBegan:Connect(function(input)
         Dragging = true
         dragStart = input.Position
         startPos = MenuBtn.Position
-        
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                Dragging = false
-            end
-        end)
-    end
-end)
-
-MenuBtn.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
     end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and Dragging then
+    if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         update(input)
     end
 end)
 
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        Dragging = false
+    end
+end)
+
+-- فتح القائمة
 MenuBtn.MouseButton1Click:Connect(function()
     UI_Open = not UI_Open
     if UI_Open then
         Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
         Border.Visible = true
-        Border:TweenSize(UDim2.new(0, 204, 0, 235), "Out", "Quint", 0.4, true)
+        Border:TweenSize(UDim2.new(0, 210, 0, 240), "Out", "Quint", 0.4, true)
     else
         Border:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.3, true, function() Border.Visible = false end)
     end
 end)
 
+-- تحديث الدوران (الريندر)
 RunService.RenderStepped:Connect(function(dt)
-    -- تحديث التدوير فقط في الرندر
     local rot = (GlobalGrad.Rotation + 150 * dt) % 360
     GlobalGrad.Rotation = rot
     TitleGrad.Rotation = rot
@@ -224,6 +226,7 @@ RunService.RenderStepped:Connect(function(dt)
     KnobGrad.Rotation = rot
 end)
 
+-- تشغيل الـ Remotes (نفس المنطق القوي)
 task.spawn(function()
     local Remote = ReplicatedStorage:FindFirstChild("MinigameGameAction", true)
     local ClientGlobals = require(ReplicatedStorage:WaitForChild("Client"):WaitForChild("Modules"):WaitForChild("ClientGlobals"))
@@ -270,3 +273,4 @@ task.spawn(function()
         RunService.Heartbeat:Wait()
     end
 end)
+
