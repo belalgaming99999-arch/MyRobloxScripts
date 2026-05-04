@@ -1,114 +1,54 @@
--- [[ Crystal Hub - Four in a Row MASTER AI ]] --
--- مبرمج بناءً على هيكل اللعبة الأصلي لضمان التوافق التام
-
+-- [[ Crystal AI - Aggressive Force Edition ]] --
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 
--- استخراج المتغيرات بنفس أسماء ملف اللعبة الأصلي
-local r_ClientGlobals = require(ReplicatedStorage.Client.Modules.ClientGlobals)
-local r_Remotes = require(ReplicatedStorage.Shared.Remotes)
-local l_ActiveMinigame = r_ClientGlobals.ActiveMinigame
-local l_MinigameGameAction = r_Remotes.MinigameGameAction
+-- التأكد من الوصول للريموت مباشرة
+local GameRemote = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("MinigameGameAction")
 
--- [ إعداد الواجهة ] --
-if CoreGui:FindFirstChild("PS99_AI") then CoreGui:FindFirstChild("PS99_AI"):Destroy() end
+-- [ الواجهة ] --
+if CoreGui:FindFirstChild("CrystalForce") then CoreGui:FindFirstChild("CrystalForce"):Destroy() end
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "PS99_AI"
+ScreenGui.Name = "CrystalForce"
 
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 180, 0, 80)
-Main.Position = UDim2.new(0.5, -90, 0.2, 0)
-Main.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+Main.Size = UDim2.new(0, 200, 0, 100)
+Main.Position = UDim2.new(0.5, -100, 0.2, 0)
+Main.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+Main.Active = true
+Main.Draggable = true
 Instance.new("UICorner", Main)
 
-local Btn = Instance.new("TextButton", Main)
-Btn.Size = UDim2.new(0, 150, 0, 40)
-Btn.Position = UDim2.new(0.5, -75, 0.5, -20)
-Btn.Text = "AUTO PLAY: OFF"
-Btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-Btn.TextColor3 = Color3.new(1, 1, 1)
-Btn.Font = Enum.Font.GothamBold
-Instance.new("UICorner", Btn)
+local ToggleBtn = Instance.new("TextButton", Main)
+ToggleBtn.Size = UDim2.new(0, 160, 0, 40)
+ToggleBtn.Position = UDim2.new(0.5, -80, 0.5, -10)
+ToggleBtn.Text = "AUTO PLAY: OFF"
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+ToggleBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", ToggleBtn)
 
 local IsActive = false
-Btn.MouseButton1Click:Connect(function()
+ToggleBtn.MouseButton1Click:Connect(function()
     IsActive = not IsActive
-    Btn.Text = IsActive and "AI: ACTIVE ✅" or "AI: OFF ❌"
-    Btn.BackgroundColor3 = IsActive and Color3.fromRGB(0, 150, 80) or Color3.fromRGB(40, 40, 45)
+    ToggleBtn.Text = IsActive and "AI: ACTIVE ✅" or "AI: OFF ❌"
+    ToggleBtn.BackgroundColor3 = IsActive and Color3.fromRGB(0, 150, 80) or Color3.fromRGB(50, 50, 60)
 end)
 
--- [ محرك الذكاء الاصطناعي ] --
-local function GetBestMove(grid, myIdx)
-    local enemyIdx = (myIdx == 1) and 2 or 1
-    
-    local function checkMove(c, p)
-        local col = grid[tostring(c)] or {}
-        if #col >= 6 then return false end
-        local r = #col + 1
-        
-        -- منطق فحص الـ 4 المتصلة (أفقي، رأسي، قطري)
-        local dirs = {{1,0}, {0,1}, {1,1}, {1,-1}}
-        for _, d in pairs(dirs) do
-            local count = 1
-            for i=1, 3 do
-                local nr, nc = r+(d[2]*i), c+(d[1]*i)
-                local targetCol = grid[tostring(nc)]
-                if targetCol and targetCol[nr] == p then count = count + 1 else break end
-            end
-            for i=1, 3 do
-                local nr, nc = r-(d[2]*i), c-(d[1]*i)
-                local targetCol = grid[tostring(nc)]
-                if targetCol and targetCol[nr] == p then count = count + 1 else break end
-            end
-            if count >= 4 then return true end
-        end
-        return false
-    end
-
-    -- 1. ابحث عن حركة فوز لي
-    for c = 1, 7 do if checkMove(c, myIdx) then return c end end
-    -- 2. امنع فوز الخصم
-    for c = 1, 7 do if checkMove(c, enemyIdx) then return c end end
-    -- 3. حركات استراتيجية (الوسط أفضل)
-    local strategy = {4, 3, 5, 2, 6, 1, 7}
-    for _, c in ipairs(strategy) do
-        local col = grid[tostring(c)] or {}
-        if #col < 6 then return c end
-    end
-end
-
--- [ التشغيل التلقائي ] --
-local lastTurnProcessed = -1
+-- [ منطق اللعب المباشر ] --
+-- لو مش عارفين نقرأ اللوحة، السكربت هيجرب يرمي في العواميد المتاحة بالترتيب
+local columns = {4, 3, 5, 2, 6, 1, 7}
 
 RunService.Heartbeat:Connect(function()
     if not IsActive then return end
     
+    -- محاولة إرسال أمر اللعب (السيرفر هيرفض لو مش دورك، فمش هنخسر حاجة)
     pcall(function()
-        local session = l_ActiveMinigame.session
-        if session and session.public and session.public.phase == "Playing" then
-            local myIdx = session.private.seatIndex
-            local currentTurn = session.public.currentTurn
-            local grid = session.public.grid
-            
-            -- التأكد أن الدور دوري
-            if currentTurn == myIdx then
-                -- حساب إجمالي الحركات لمعرفة هل تغير الدور أم لا
-                local totalMoves = 0
-                for _, col in pairs(grid) do totalMoves = totalMoves + #col end
-                
-                if totalMoves ~= lastTurnProcessed then
-                    local move = GetBestMove(grid, myIdx)
-                    if move then
-                        task.wait(0.5) -- تأخير بسيط للواقعية
-                        l_MinigameGameAction:FireServer("DropChip", move)
-                        lastTurnProcessed = totalMoves
-                    end
-                end
-            end
-        else
-            lastTurnProcessed = -1
+        for _, col in ipairs(columns) do
+            -- بنجرب نلعب في كل عمود لغاية ما السيرفر يقبل واحد
+            GameRemote:FireServer("DropChip", col)
         end
     end)
+    
+    -- انتظار بسيط عشان ميعملش Kick بسبب الـ Spam
+    task.wait(0.8) 
 end)
-
