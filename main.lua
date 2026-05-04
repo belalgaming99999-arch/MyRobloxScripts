@@ -27,7 +27,7 @@ local Toggles = {AutoPop = false, AutoFour = false, Feature3 = false}
 local Accuracy = 7 
 local UI_Open, Dragging = false, false
 
--- الزرار العائم (تم رفعه للأعلى قليلاً 0.15 بدل 0.25)
+-- الزرار العائم (مكان مرتفع 0.15)
 local MenuBtn = Instance.new("TextButton", CrystalGui)
 MenuBtn.Size = UDim2.new(0, 52, 0, 52)
 MenuBtn.Position = UDim2.new(0.05, 0, 0.15, 0)
@@ -43,7 +43,7 @@ for i = -1, 1 do
     Instance.new("UICorner", L).CornerRadius = UDim.new(1, 0)
 end
 
--- القائمة الرئيسية
+-- القائمة
 local Border = Instance.new("Frame", CrystalGui)
 Border.Size = UDim2.new(0, 0, 0, 0)
 Border.Visible = false
@@ -64,7 +64,7 @@ GlobalGrad.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(1, Theme.Main)
 })
 
--- العنوان
+-- العنوان والخط (عرض 130 بكسل)
 local Title = Instance.new("TextLabel", Main)
 Title.Size = UDim2.new(0, 180, 0, 40)
 Title.Position = UDim2.new(0.5, -90, 0, 5)
@@ -77,14 +77,14 @@ local TitleGrad = GlobalGrad:Clone()
 TitleGrad.Parent = Title
 
 local UnderLine = Instance.new("Frame", Main)
-UnderLine.Size = UDim2.new(0, 150, 0, 4) -- تم تصغير العرض لـ 150
-UnderLine.Position = UDim2.new(0.5, -75, 0, 42)
+UnderLine.Size = UDim2.new(0, 130, 0, 4) -- عرض 130 وسمك 4
+UnderLine.Position = UDim2.new(0.5, -65, 0, 42)
 UnderLine.BackgroundColor3 = Theme.White
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 local LineGrad = GlobalGrad:Clone()
 LineGrad.Parent = UnderLine
 
--- وظيفة إنشاء الأزرار
+-- إنشاء الأزرار
 local function CreateBtn(txt, key, y)
     local B = Instance.new("TextButton", Main)
     B.Size = UDim2.new(0, 180, 0, 36)
@@ -108,10 +108,10 @@ CreateBtn("Auto Pop-B", "AutoPop", 55)
 CreateBtn("Auto 4-Row", "AutoFour", 97)
 CreateBtn("Feature 3", "Feature3", 139)
 
--- حاوية السلايدر (تم تصغير العرض لـ 150)
+-- السلايدر (مطابق تماماً للخط السفلي: عرض 130 وارتفاع 4)
 local SliderContainer = Instance.new("Frame", Main)
-SliderContainer.Size = UDim2.new(0, 150, 0, 45)
-SliderContainer.Position = UDim2.new(0.5, -75, 0, 180)
+SliderContainer.Size = UDim2.new(0, 130, 0, 45)
+SliderContainer.Position = UDim2.new(0.5, -65, 0, 180)
 SliderContainer.BackgroundTransparency = 1
 
 local SliderLabel = Instance.new("TextLabel", SliderContainer)
@@ -126,8 +126,8 @@ local SliderGrad = GlobalGrad:Clone()
 SliderGrad.Parent = SliderLabel
 
 local SliderBg = Instance.new("Frame", SliderContainer)
-SliderBg.Size = UDim2.new(1, 0, 0, 6)
-SliderBg.Position = UDim2.new(0, 0, 0, 28)
+SliderBg.Size = UDim2.new(1, 0, 0, 4) -- سمك 4 بكسل مطابق للخط
+SliderBg.Position = UDim2.new(0, 0, 0, 30)
 SliderBg.BackgroundColor3 = Theme.Slider
 Instance.new("UICorner", SliderBg).CornerRadius = UDim.new(1, 0)
 
@@ -139,8 +139,8 @@ local FillGrad = GlobalGrad:Clone()
 FillGrad.Parent = SliderFill
 
 local Knob = Instance.new("Frame", SliderFill)
-Knob.Size = UDim2.new(0, 14, 0, 14)
-Knob.Position = UDim2.new(1, -7, 0.5, -7)
+Knob.Size = UDim2.new(0, 12, 0, 12) -- مقبض أصغر قليلاً ليتناسب مع النحافة
+Knob.Position = UDim2.new(1, -6, 0.5, -6)
 Knob.BackgroundColor3 = Theme.White
 Knob.ZIndex = 5
 Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
@@ -167,7 +167,7 @@ UserInputService.InputEnded:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Sliding = false end 
 end)
 
--- نظام السحب الفوري
+-- نظام سحب فوري
 local dragStart, startPos
 local function update(input)
     local delta = input.Position - dragStart
@@ -191,7 +191,6 @@ UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then Dragging = false end
 end)
 
--- فتح القائمة
 MenuBtn.MouseButton1Click:Connect(function()
     UI_Open = not UI_Open
     if UI_Open then
@@ -203,7 +202,6 @@ MenuBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- تحديث الدوران
 RunService.RenderStepped:Connect(function(dt)
     local rot = (GlobalGrad.Rotation + 150 * dt) % 360
     GlobalGrad.Rotation = rot
@@ -214,7 +212,7 @@ RunService.RenderStepped:Connect(function(dt)
     KnobGrad.Rotation = rot
 end)
 
--- منطق الفوز التلقائي
+-- محرك الأوتو
 task.spawn(function()
     local Remote = ReplicatedStorage:FindFirstChild("MinigameGameAction", true)
     local ClientGlobals = require(ReplicatedStorage:WaitForChild("Client"):WaitForChild("Modules"):WaitForChild("ClientGlobals"))
@@ -253,4 +251,3 @@ task.spawn(function()
         RunService.Heartbeat:Wait()
     end
 end)
-
