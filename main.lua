@@ -23,7 +23,7 @@ local Theme = {
     Slider = Color3.fromRGB(40, 50, 75)
 }
 
-local Toggles = {AutoPop = false, AutoFour = false, Feature3 = false}
+local Toggles = {AutoPop = false, AutoFour = false, Extra = false}
 local AccuracyVal = 7 
 local UI_Open, Dragging = false, false
 
@@ -65,58 +65,56 @@ GlobalGrad.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(1, Theme.Main)
 })
 
--- اسم Crystal Hub (يلون مع الحواف)
+-- العنوان العلوي (حجم 13 بولد)
 local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Size = UDim2.new(0, 130, 0, 25)
+Title.Position = UDim2.new(0.5, -65, 0, 12)
 Title.BackgroundTransparency = 1
 Title.Text = "Crystal Hub"
 Title.TextColor3 = Theme.White
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 16
+Title.TextSize = 13
 local TitleGrad = GlobalGrad:Clone()
 TitleGrad.Parent = Title
 
 local UnderLine = Instance.new("Frame", Main)
-UnderLine.Size = UDim2.new(0, 130, 0, 4)
-UnderLine.Position = UDim2.new(0.5, -65, 0, 42)
+UnderLine.Size = UDim2.new(0, 120, 0, 4)
+UnderLine.Position = UDim2.new(0.5, -60, 0, 40)
 UnderLine.BackgroundColor3 = Theme.White
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 local LineGrad = GlobalGrad:Clone()
 LineGrad.Parent = UnderLine
 
--- [ إنشاء الأزرار مع ميزة التغيير (Active/Disconnect) ]
+-- [ إنشاء الأزرار ]
 local function CreateBtn(key, y, label)
     local B = Instance.new("TextButton", Main)
-    B.Size = UDim2.new(0, 180, 0, 36)
+    B.Size = UDim2.new(0, 180, 0, 38)
     B.Position = UDim2.new(0.5, -90, 0, y)
     B.BackgroundColor3 = Theme.Off
-    B.Text = label .. " [Disconnect]" -- الحالة الافتراضية
+    B.Text = label .. " [Deactive]"
     B.TextColor3 = Theme.White
     B.Font = Enum.Font.GothamBold
-    B.TextSize = 12
+    B.TextSize = 13
     B.AutoButtonColor = false
     Instance.new("UICorner", B).CornerRadius = UDim.new(0, 8)
 
     B.MouseButton1Click:Connect(function()
         Toggles[key] = not Toggles[key]
-        if Toggles[key] then
-            B.Text = label .. " [Active]"
-            TweenService:Create(B, TweenInfo.new(0.3), {BackgroundColor3 = Theme.On}):Play()
-        else
-            B.Text = label .. " [Disconnect]"
-            TweenService:Create(B, TweenInfo.new(0.3), {BackgroundColor3 = Theme.Off}):Play()
-        end
+        B.Text = label .. (Toggles[key] and " [Active]" or " [Deactive]")
+        TweenService:Create(B, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+            BackgroundColor3 = Toggles[key] and Theme.On or Theme.Off
+        }):Play()
     end)
 end
 
 CreateBtn("AutoPop", 55, "Auto Pop-B")
-CreateBtn("AutoFour", 97, "Auto 4-Four")
-CreateBtn("Feature3", 139, "Extra")
+CreateBtn("AutoFour", 101, "Auto 4-Four")
+CreateBtn("Extra", 147, "Extra Feature")
 
--- [ السلايدر مع تلوين Accessory والرقم ]
+-- [ السلايدر ]
 local SliderContainer = Instance.new("Frame", Main)
-SliderContainer.Size = UDim2.new(0, 130, 0, 45)
-SliderContainer.Position = UDim2.new(0.5, -65, 0, 180)
+SliderContainer.Size = UDim2.new(0, 130, 0, 30)
+SliderContainer.Position = UDim2.new(0.5, -65, 0, 195)
 SliderContainer.BackgroundTransparency = 1
 
 local SliderLabel = Instance.new("TextLabel", SliderContainer)
@@ -125,13 +123,13 @@ SliderLabel.BackgroundTransparency = 1
 SliderLabel.Text = "Accessory: " .. AccuracyVal
 SliderLabel.TextColor3 = Theme.White
 SliderLabel.Font = Enum.Font.GothamBold
-SliderLabel.TextSize = 12
+SliderLabel.TextSize = 13
 local LabelGrad = GlobalGrad:Clone()
 LabelGrad.Parent = SliderLabel
 
 local SliderBg = Instance.new("Frame", SliderContainer)
 SliderBg.Size = UDim2.new(1, 0, 0, 4)
-SliderBg.Position = UDim2.new(0, 0, 0, 30)
+SliderBg.Position = UDim2.new(0, 0, 0, 25)
 SliderBg.BackgroundColor3 = Theme.Slider
 Instance.new("UICorner", SliderBg).CornerRadius = UDim.new(1, 0)
 
@@ -170,52 +168,49 @@ UserInputService.InputEnded:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Sliding = false end 
 end)
 
--- [ سحب وفتح القائمة ]
-local dragStart, startPos
-local function update(input)
-    local delta = input.Position - dragStart
-    MenuBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    if Border.Visible then
-        Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
-    end
-end
-
+-- [ منطق السحب والفتح ]
+local dragStart, startPos, isDragged
 MenuBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        Dragging = true; dragStart = input.Position; startPos = MenuBtn.Position
+        Dragging = true; isDragged = false; dragStart = input.Position; startPos = MenuBtn.Position
     end
 end)
+
 UserInputService.InputChanged:Connect(function(input)
-    if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then update(input) end
+    if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        if delta.Magnitude > 2 then isDragged = true end
+        MenuBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        if Border.Visible then
+            Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
+        end
+    end
 end)
+
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then Dragging = false end
 end)
 
 MenuBtn.MouseButton1Click:Connect(function()
-    UI_Open = not UI_Open
-    if UI_Open then
-        Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
-        Border.Visible = true
-        Border:TweenSize(UDim2.new(0, 210, 0, 240), "Out", "Quint", 0.4, true)
-    else
-        Border:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.3, true, function() Border.Visible = false end)
+    if not isDragged then
+        UI_Open = not UI_Open
+        if UI_Open then
+            Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
+            Border.Visible = true
+            Border:TweenSize(UDim2.new(0, 210, 0, 250), "Out", "Quint", 0.4, true)
+        else
+            Border:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.3, true, function() Border.Visible = false end)
+        end
     end
 end)
 
--- تحريك الألوان (Gradient Rotation) لجميع العناصر
 RunService.RenderStepped:Connect(function(dt)
     local rot = (GlobalGrad.Rotation + 150 * dt) % 360
-    GlobalGrad.Rotation = rot
-    TitleGrad.Rotation = rot
-    LineGrad.Rotation = rot
-    LabelGrad.Rotation = rot
-    FillGrad.Rotation = rot
-    KnobGrad.Rotation = rot
+    GlobalGrad.Rotation = rot; TitleGrad.Rotation = rot; LineGrad.Rotation = rot; LabelGrad.Rotation = rot; FillGrad.Rotation = rot; KnobGrad.Rotation = rot
 end)
 
 -----------------------------------------------------------
--- المحرك الذكي
+-- [ المحرك الذكي - التفعيلات الكاملة ]
 -----------------------------------------------------------
 local function GetBestMove(grid, myIndex)
     local opp = (myIndex == 1) and 2 or 1
@@ -247,23 +242,24 @@ task.spawn(function()
 
         if Remote and ClientGlobals and ClientGlobals.ActiveMinigame then
             local session = ClientGlobals.ActiveMinigame.session
+            
+            -- Auto Popcorn
             if Toggles.AutoPop then
                 local PopBoard = workspace:FindFirstChild("PopcornBurstBoard", true) or workspace:FindFirstChild("SoloPopcornBurstBoard", true)
                 if PopBoard then
                     for _, obj in pairs(PopBoard:GetDescendants()) do
                         if obj:IsA("MeshPart") and obj.Name == "Popcorn" then
                             local targetScale = obj:GetAttribute("TargetScale")
-                            if targetScale then
-                                local threshold = 0.88 + (AccuracyVal * 0.011) 
-                                if obj.Size.X >= (targetScale * threshold) then
-                                    Remote:FireServer("AttemptPop", workspace:GetServerTimeNow())
-                                    task.wait(0.05)
-                                end
+                            if targetScale and obj.Size.X >= (targetScale * (0.88 + (AccuracyVal * 0.011))) then
+                                Remote:FireServer("AttemptPop", workspace:GetServerTimeNow())
+                                task.wait(0.05)
                             end
                         end
                     end
                 end
             end
+
+            -- Auto Connect Four
             if Toggles.AutoFour and session and session.public and session.private then
                 local pub, priv = session.public, session.private
                 if pub.phase == "Playing" and pub.currentTurn == priv.seatIndex then
