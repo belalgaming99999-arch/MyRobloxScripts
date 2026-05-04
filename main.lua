@@ -25,7 +25,6 @@ local Theme = {
 
 local Toggles = {AutoPop = false, AutoFour = false, Feature3 = false}
 local AccuracyVal = 7 
-local ScriptEnabled = true -- متغير للتحكم في Activity/Disconnect
 local UI_Open, Dragging = false, false
 
 -- [ أيقونة الفتح ]
@@ -66,7 +65,7 @@ GlobalGrad.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(1, Theme.Main)
 })
 
--- الاسم المطلوب فوق الخط
+-- اسم Crystal Hub (يلون مع الحواف)
 local Title = Instance.new("TextLabel", Main)
 Title.Size = UDim2.new(1, 0, 0, 35)
 Title.BackgroundTransparency = 1
@@ -74,6 +73,8 @@ Title.Text = "Crystal Hub"
 Title.TextColor3 = Theme.White
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
+local TitleGrad = GlobalGrad:Clone()
+TitleGrad.Parent = Title
 
 local UnderLine = Instance.new("Frame", Main)
 UnderLine.Size = UDim2.new(0, 130, 0, 4)
@@ -83,30 +84,36 @@ Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 local LineGrad = GlobalGrad:Clone()
 LineGrad.Parent = UnderLine
 
--- [ إنشاء الأزرار ]
+-- [ إنشاء الأزرار مع ميزة التغيير (Active/Disconnect) ]
 local function CreateBtn(key, y, label)
     local B = Instance.new("TextButton", Main)
     B.Size = UDim2.new(0, 180, 0, 36)
     B.Position = UDim2.new(0.5, -90, 0, y)
     B.BackgroundColor3 = Theme.Off
-    B.Text = label
+    B.Text = label .. " [Disconnect]" -- الحالة الافتراضية
     B.TextColor3 = Theme.White
     B.Font = Enum.Font.GothamBold
-    B.TextSize = 13
+    B.TextSize = 12
     B.AutoButtonColor = false
     Instance.new("UICorner", B).CornerRadius = UDim.new(0, 8)
 
     B.MouseButton1Click:Connect(function()
         Toggles[key] = not Toggles[key]
-        TweenService:Create(B, TweenInfo.new(0.3), {BackgroundColor3 = Toggles[key] and Theme.On or Theme.Off}):Play()
+        if Toggles[key] then
+            B.Text = label .. " [Active]"
+            TweenService:Create(B, TweenInfo.new(0.3), {BackgroundColor3 = Theme.On}):Play()
+        else
+            B.Text = label .. " [Disconnect]"
+            TweenService:Create(B, TweenInfo.new(0.3), {BackgroundColor3 = Theme.Off}):Play()
+        end
     end)
 end
 
 CreateBtn("AutoPop", 55, "Auto Pop-B")
 CreateBtn("AutoFour", 97, "Auto 4-Four")
-CreateBtn("Feature3", 139, "")
+CreateBtn("Feature3", 139, "Extra")
 
--- [ السلايدر مع كلمة Accessory ]
+-- [ السلايدر مع تلوين Accessory والرقم ]
 local SliderContainer = Instance.new("Frame", Main)
 SliderContainer.Size = UDim2.new(0, 130, 0, 45)
 SliderContainer.Position = UDim2.new(0.5, -65, 0, 180)
@@ -119,6 +126,8 @@ SliderLabel.Text = "Accessory: " .. AccuracyVal
 SliderLabel.TextColor3 = Theme.White
 SliderLabel.Font = Enum.Font.GothamBold
 SliderLabel.TextSize = 12
+local LabelGrad = GlobalGrad:Clone()
+LabelGrad.Parent = SliderLabel
 
 local SliderBg = Instance.new("Frame", SliderContainer)
 SliderBg.Size = UDim2.new(1, 0, 0, 4)
@@ -161,40 +170,7 @@ UserInputService.InputEnded:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Sliding = false end 
 end)
 
--- [ أزرار Activity و Disconnect ]
-local ActivityBtn = Instance.new("TextButton", Main)
-ActivityBtn.Size = UDim2.new(0, 85, 0, 30)
-ActivityBtn.Position = UDim2.new(0.5, -90, 1, -40)
-ActivityBtn.BackgroundColor3 = Theme.On
-ActivityBtn.Text = "Activity"
-ActivityBtn.TextColor3 = Theme.White
-ActivityBtn.Font = Enum.Font.GothamBold
-ActivityBtn.TextSize = 11
-Instance.new("UICorner", ActivityBtn).CornerRadius = UDim.new(0, 6)
-
-local DisconnectBtn = Instance.new("TextButton", Main)
-DisconnectBtn.Size = UDim2.new(0, 85, 0, 30)
-DisconnectBtn.Position = UDim2.new(0.5, 5, 1, -40)
-DisconnectBtn.BackgroundColor3 = Theme.Off
-DisconnectBtn.Text = "Disconnect"
-DisconnectBtn.TextColor3 = Theme.White
-DisconnectBtn.Font = Enum.Font.GothamBold
-DisconnectBtn.TextSize = 11
-Instance.new("UICorner", DisconnectBtn).CornerRadius = UDim.new(0, 6)
-
-ActivityBtn.MouseButton1Click:Connect(function()
-    ScriptEnabled = true
-    TweenService:Create(ActivityBtn, TweenInfo.new(0.3), {BackgroundColor3 = Theme.On}):Play()
-    TweenService:Create(DisconnectBtn, TweenInfo.new(0.3), {BackgroundColor3 = Theme.Off}):Play()
-end)
-
-DisconnectBtn.MouseButton1Click:Connect(function()
-    ScriptEnabled = false
-    TweenService:Create(ActivityBtn, TweenInfo.new(0.3), {BackgroundColor3 = Theme.Off}):Play()
-    TweenService:Create(DisconnectBtn, TweenInfo.new(0.3), {BackgroundColor3 = Theme.On}):Play()
-end)
-
--- [ منطق السحب والفتح ]
+-- [ سحب وفتح القائمة ]
 local dragStart, startPos
 local function update(input)
     local delta = input.Position - dragStart
@@ -221,19 +197,25 @@ MenuBtn.MouseButton1Click:Connect(function()
     if UI_Open then
         Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
         Border.Visible = true
-        Border:TweenSize(UDim2.new(0, 210, 0, 280), "Out", "Quint", 0.4, true)
+        Border:TweenSize(UDim2.new(0, 210, 0, 240), "Out", "Quint", 0.4, true)
     else
         Border:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.3, true, function() Border.Visible = false end)
     end
 end)
 
+-- تحريك الألوان (Gradient Rotation) لجميع العناصر
 RunService.RenderStepped:Connect(function(dt)
     local rot = (GlobalGrad.Rotation + 150 * dt) % 360
-    GlobalGrad.Rotation = rot; LineGrad.Rotation = rot; FillGrad.Rotation = rot; KnobGrad.Rotation = rot
+    GlobalGrad.Rotation = rot
+    TitleGrad.Rotation = rot
+    LineGrad.Rotation = rot
+    LabelGrad.Rotation = rot
+    FillGrad.Rotation = rot
+    KnobGrad.Rotation = rot
 end)
 
 -----------------------------------------------------------
--- المحرك المحدث مع التحكم عن طريق الأزرار
+-- المحرك الذكي
 -----------------------------------------------------------
 local function GetBestMove(grid, myIndex)
     local opp = (myIndex == 1) and 2 or 1
@@ -259,37 +241,35 @@ end
 
 task.spawn(function()
     while true do
-        if ScriptEnabled then -- التأكد من أن Activity مفعل
-            local Remote = ReplicatedStorage:FindFirstChild("CombineMinigameAction", true)
-            local ClientGlobals
-            pcall(function() ClientGlobals = require(ReplicatedStorage:WaitForChild("Client"):WaitForChild("Modules"):WaitForChild("ClientGlobals")) end)
+        local Remote = ReplicatedStorage:FindFirstChild("CombineMinigameAction", true)
+        local ClientGlobals
+        pcall(function() ClientGlobals = require(ReplicatedStorage:WaitForChild("Client"):WaitForChild("Modules"):WaitForChild("ClientGlobals")) end)
 
-            if Remote and ClientGlobals and ClientGlobals.ActiveMinigame then
-                local session = ClientGlobals.ActiveMinigame.session
-                if Toggles.AutoPop then
-                    local PopBoard = workspace:FindFirstChild("PopcornBurstBoard", true) or workspace:FindFirstChild("SoloPopcornBurstBoard", true)
-                    if PopBoard then
-                        for _, obj in pairs(PopBoard:GetDescendants()) do
-                            if obj:IsA("MeshPart") and obj.Name == "Popcorn" then
-                                local targetScale = obj:GetAttribute("TargetScale")
-                                if targetScale then
-                                    local threshold = 0.88 + (AccuracyVal * 0.011) 
-                                    if obj.Size.X >= (targetScale * threshold) then
-                                        Remote:FireServer("AttemptPop", workspace:GetServerTimeNow())
-                                        task.wait(0.05)
-                                    end
+        if Remote and ClientGlobals and ClientGlobals.ActiveMinigame then
+            local session = ClientGlobals.ActiveMinigame.session
+            if Toggles.AutoPop then
+                local PopBoard = workspace:FindFirstChild("PopcornBurstBoard", true) or workspace:FindFirstChild("SoloPopcornBurstBoard", true)
+                if PopBoard then
+                    for _, obj in pairs(PopBoard:GetDescendants()) do
+                        if obj:IsA("MeshPart") and obj.Name == "Popcorn" then
+                            local targetScale = obj:GetAttribute("TargetScale")
+                            if targetScale then
+                                local threshold = 0.88 + (AccuracyVal * 0.011) 
+                                if obj.Size.X >= (targetScale * threshold) then
+                                    Remote:FireServer("AttemptPop", workspace:GetServerTimeNow())
+                                    task.wait(0.05)
                                 end
                             end
                         end
                     end
                 end
-                if Toggles.AutoFour and session and session.public and session.private then
-                    local pub, priv = session.public, session.private
-                    if pub.phase == "Playing" and pub.currentTurn == priv.seatIndex then
-                        local move = GetBestMove(pub.grid, priv.seatIndex)
-                        if move then
-                            task.wait(0.5); Remote:FireServer("DropChip", move); task.wait(1.5)
-                        end
+            end
+            if Toggles.AutoFour and session and session.public and session.private then
+                local pub, priv = session.public, session.private
+                if pub.phase == "Playing" and pub.currentTurn == priv.seatIndex then
+                    local move = GetBestMove(pub.grid, priv.seatIndex)
+                    if move then
+                        task.wait(0.5); Remote:FireServer("DropChip", move); task.wait(1.5)
                     end
                 end
             end
