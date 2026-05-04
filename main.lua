@@ -27,6 +27,7 @@ local Toggles = {AutoPop = false, AutoFour = false, Extra = false}
 local AccuracyVal = 7 
 local UI_Open, Dragging = false, false
 
+-- [ إنشاء أيقونة المنيو ]
 local MenuBtn = Instance.new("TextButton", CrystalGui)
 MenuBtn.Size = UDim2.new(0, 52, 0, 52)
 MenuBtn.Position = UDim2.new(0.05, 0, 0.15, 0)
@@ -43,6 +44,7 @@ for i = -1, 1 do
     Instance.new("UICorner", L).CornerRadius = UDim.new(1, 0)
 end
 
+-- [ الواجهة الرئيسية ]
 local Border = Instance.new("Frame", CrystalGui)
 Border.Size = UDim2.new(0, 0, 0, 0)
 Border.Visible = false
@@ -87,7 +89,7 @@ local function CreateBtn(key, y, label)
     B.Size = UDim2.new(0, 180, 0, 38)
     B.Position = UDim2.new(0.5, -90, 0, y)
     B.BackgroundColor3 = Theme.Off
-    B.Text = label .. " [Deactive]"
+    B.Text = label .. " [OFF]"
     B.TextColor3 = Theme.White
     B.Font = Enum.Font.GothamBold
     B.TextSize = 13
@@ -96,17 +98,18 @@ local function CreateBtn(key, y, label)
 
     B.MouseButton1Click:Connect(function()
         Toggles[key] = not Toggles[key]
-        B.Text = label .. (Toggles[key] and " [Active]" or " [Deactive]")
+        B.Text = label .. (Toggles[key] and " [ON]" or " [OFF]")
         TweenService:Create(B, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
             BackgroundColor3 = Toggles[key] and Theme.On or Theme.Off
         }):Play()
     end)
 end
 
-CreateBtn("AutoPop", 55, "Auto Pop-B")
-CreateBtn("AutoFour", 101, "Auto 4-Four")
-CreateBtn("Extra", 147, "Extra Feature")
+CreateBtn("AutoPop", 55, "Auto Popcorn")
+CreateBtn("AutoFour", 101, "Auto Connect 4")
+CreateBtn("Extra", 147, "Extra Features")
 
+-- [ السلايدر بمسافات مطابقة ]
 local SliderContainer = Instance.new("Frame", Main)
 SliderContainer.Size = UDim2.new(0, 120, 0, 40)
 SliderContainer.Position = UDim2.new(0.5, -60, 0, 194)
@@ -145,6 +148,7 @@ Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
 local KnobGrad = GlobalGrad:Clone()
 KnobGrad.Parent = Knob
 
+-- [ منطق السلايدر ]
 local function UpdateSlider(input)
     local xPos = input.Position.X - SliderBg.AbsolutePosition.X
     local rawPos = math.clamp(xPos / SliderBg.AbsoluteSize.X, 0, 1)
@@ -154,16 +158,11 @@ local function UpdateSlider(input)
 end
 
 local Sliding = false
-SliderBg.InputBegan:Connect(function(i) 
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Sliding = true; UpdateSlider(i) end 
-end)
-UserInputService.InputChanged:Connect(function(i) 
-    if Sliding and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then UpdateSlider(i) end 
-end)
-UserInputService.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Sliding = false end 
-end)
+SliderBg.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Sliding = true; UpdateSlider(i) end end)
+UserInputService.InputChanged:Connect(function(i) if Sliding and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then UpdateSlider(i) end end)
+UserInputService.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Sliding = false end end)
 
+-- [ سحب القائمة بسلاسة ]
 local dragStart, startPos, isDragged, goalPos
 MenuBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -174,14 +173,12 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
-        if delta.Magnitude > 2 then isDragged = true end
+        if delta.Magnitude > 3 then isDragged = true end
         goalPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 end)
 
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then Dragging = false end
-end)
+UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then Dragging = false end end)
 
 RunService.RenderStepped:Connect(function(dt)
     if goalPos then
@@ -206,58 +203,84 @@ MenuBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-local function GetBestMove(grid, myIndex)
-    local opp = (myIndex == 1) and 2 or 1
-    local g = {}
-    for c=1,7 do g[c]={} local d=grid[tostring(c)] or {} for r=1,6 do g[c][r]=d[r] end end
-    local function win(b, p)
-        for r=1,6 do for c=1,4 do if b[c][r]==p and b[c+1][r]==p and b[c+2][r]==p and b[c+3][r]==p then return true end end end
-        for c=1,7 do for r=1,3 do if b[c][r]==p and b[c][r+1]==p and b[c][r+2]==p and b[c][r+3]==p then return true end end end
-        for c=1,4 do for r=1,3 do if b[c][r]==p and b[c+1][r+1]==p and b[c+2][r+2]==p and b[c+3][r+3]==p then return true end end end
-        for c=1,4 do for r=4,6 do if b[c][r]==p and b[c+1][r-1]==p and b[c+2][r-2]==p and b[c+3][r-3]==p then return true end end end
-        return false
+-- [ ذكاء اصطناعي فائق لـ Connect 4 ]
+local function CalculateWinningMove(grid, player)
+    for c = 1, 7 do
+        local col = grid[tostring(c)]
+        if #col < 6 then
+            local r = #col + 1
+            col[r] = player
+            -- فحص الفوز (أفقي، عمودي، قطري)
+            local won = false
+            local function check(p)
+                for row=1,6 do for colm=1,4 do if grid[tostring(colm)][row]==p and grid[tostring(colm+1)][row]==p and grid[tostring(colm+2)][row]==p and grid[tostring(colm+3)][row]==p then return true end end end
+                for colm=1,7 do for row=1,3 do if grid[tostring(colm)][row]==p and grid[tostring(colm)][row+1]==p and grid[tostring(colm)][row+2]==p and grid[tostring(colm)][row+3]==p then return true end end end
+                for colm=1,4 do for row=1,3 do if grid[tostring(colm)][row]==p and grid[tostring(colm+1)][row+1]==p and grid[tostring(colm+2)][row+2]==p and grid[tostring(colm+3)][row+3]==p then return true end end end
+                for colm=1,4 do for row=4,6 do if grid[tostring(colm)][row]==p and grid[tostring(colm+1)][row-1]==p and grid[tostring(colm+2)][row-2]==p and grid[tostring(colm+3)][row-3]==p then return true end end end
+                return false
+            end
+            if check(player) then won = true end
+            col[r] = nil
+            if won then return c end
+        end
     end
-    for c=1,7 do
-        local r; for row=1,6 do if not g[c][row] then r=row break end end
-        if r then g[c][r]=myIndex if win(g, myIndex) then return c end g[c][r]=nil end
-    end
-    for c=1,7 do
-        local r; for row=1,6 do if not g[c][row] then r=row break end end
-        if r then g[c][r]=opp if win(g, opp) then return c end g[c][r]=nil end
-    end
-    for _, c in ipairs({4,3,5,2,6,1,7}) do if #grid[tostring(c)] < 6 then return c end end
+    return nil
 end
 
+-- [ المحرك الرئيسي - يعمل تلقائياً ]
 task.spawn(function()
     while true do
-        local Remote = ReplicatedStorage:FindFirstChild("CombineMinigameAction", true)
-        local ClientGlobals
-        pcall(function() ClientGlobals = require(ReplicatedStorage:WaitForChild("Client"):WaitForChild("Modules"):WaitForChild("ClientGlobals")) end)
-        if Remote and ClientGlobals and ClientGlobals.ActiveMinigame then
-            local session = ClientGlobals.ActiveMinigame.session
-            if Toggles.AutoPop then
-                local PopBoard = workspace:FindFirstChild("PopcornBurstBoard", true) or workspace:FindFirstChild("SoloPopcornBurstBoard", true)
-                if PopBoard then
-                    for _, obj in pairs(PopBoard:GetDescendants()) do
-                        if obj:IsA("MeshPart") and obj.Name == "Popcorn" then
-                            local targetScale = obj:GetAttribute("TargetScale")
-                            if targetScale and obj.Size.X >= (targetScale * (0.88 + (AccuracyVal * 0.011))) then
-                                Remote:FireServer("AttemptPop", workspace:GetServerTimeNow())
-                                task.wait(0.05)
+        local success, err = pcall(function()
+            local Remote = ReplicatedStorage:FindFirstChild("CombineMinigameAction", true)
+            local ClientGlobals = require(ReplicatedStorage:WaitForChild("Client"):WaitForChild("Modules"):WaitForChild("ClientGlobals"))
+            
+            if Remote and ClientGlobals and ClientGlobals.ActiveMinigame then
+                local session = ClientGlobals.ActiveMinigame.session
+                
+                -- التلغيم التلقائي للفشار
+                if Toggles.AutoPop then
+                    local PopBoard = workspace:FindFirstChild("PopcornBurstBoard", true) or workspace:FindFirstChild("SoloPopcornBurstBoard", true)
+                    if PopBoard then
+                        for _, obj in pairs(PopBoard:GetDescendants()) do
+                            if obj:IsA("MeshPart") and obj.Name == "Popcorn" and obj.Transparency < 0.1 then
+                                local targetScale = obj:GetAttribute("TargetScale")
+                                if targetScale and obj.Size.X >= (targetScale * (0.85 + (AccuracyVal * 0.012))) then
+                                    Remote:FireServer("AttemptPop", workspace:GetServerTimeNow())
+                                    task.wait(0.1)
+                                end
                             end
                         end
                     end
                 end
-            end
-            if Toggles.AutoFour and session and session.public and session.private then
-                local pub, priv = session.public, session.private
-                if pub.phase == "Playing" and pub.currentTurn == priv.seatIndex then
-                    local move = GetBestMove(pub.grid, priv.seatIndex)
-                    if move then task.wait(0.5); Remote:FireServer("DropChip", move); task.wait(1.5) end
+
+                -- اللعب التلقائي الذكي لـ Connect 4
+                if Toggles.AutoFour and session and session.public and session.private then
+                    local pub = session.public
+                    if pub.phase == "Playing" and pub.currentTurn == session.private.seatIndex then
+                        -- 1. حركة فوز لي؟
+                        local move = CalculateWinningMove(pub.grid, session.private.seatIndex)
+                        -- 2. حركة منع للخصم؟
+                        if not move then
+                            local enemyIndex = (session.private.seatIndex == 1) and 2 or 1
+                            move = CalculateWinningMove(pub.grid, enemyIndex)
+                        end
+                        -- 3. حركة عشوائية ذكية؟
+                        if not move then
+                            local available = {}
+                            for i=1,7 do if #pub.grid[tostring(i)] < 6 then table.insert(available, i) end end
+                            if #available > 0 then move = available[math.random(1, #available)] end
+                        end
+
+                        if move then
+                            task.wait(0.4) -- تأخير بسيط للواقعية
+                            Remote:FireServer("DropChip", move)
+                            task.wait(1.5) -- انتظار تنفيذ الحركة
+                        end
+                    end
                 end
             end
-        end
-        RunService.Heartbeat:Wait()
+        end)
+        task.wait(0.1)
     end
 end)
 
