@@ -4,18 +4,17 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CoreGui = game:GetService("CoreGui")
 
--- الوصول للريموت والموديلات
+-- الحصول على ريموتات اللعبة والموديلات من ملفات الماب
 local RemotesModule = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Remotes"))
 local GameRemote = RemotesModule.CombineMinigameAction
 local ClientGlobals = require(ReplicatedStorage:WaitForChild("Client"):WaitForChild("Modules"):WaitForChild("ClientGlobals"))
 
 local Root = (gethui and gethui()) or (get_hidden_gui and get_hidden_gui()) or CoreGui
-if Root:FindFirstChild("CrystalProjectV4") then Root:FindFirstChild("CrystalProjectV4"):Destroy() end
+if Root:FindFirstChild("CrystalFinalProject") then Root:FindFirstChild("CrystalFinalProject"):Destroy() end
 
 local CrystalGui = Instance.new("ScreenGui", Root)
-CrystalGui.Name = "CrystalProjectV4"
+CrystalGui.Name = "CrystalFinalProject"
 CrystalGui.IgnoreGuiInset = true
-CrystalGui.DisplayOrder = 9e9
 
 local Theme = {
     Bg = Color3.fromRGB(15, 15, 25),
@@ -26,10 +25,11 @@ local Theme = {
     Slider = Color3.fromRGB(45, 45, 55)
 }
 
-local Toggles = {AutoPop = false, AutoFour = false, ExtraBtn = false}
+local Toggles = {AutoPop = false, AutoFour = false, Extra = false}
 local AccuracyVal = 0.988 
+local UI_Open = false 
 
--- [ أيقونة الفتح ]
+-- [ أيقونة الفتح - نفس التصميم ]
 local MenuBtn = Instance.new("TextButton", CrystalGui)
 MenuBtn.Size = UDim2.new(0, 52, 0, 52)
 MenuBtn.Position = UDim2.new(0.05, 0, 0.15, 0)
@@ -39,6 +39,7 @@ Instance.new("UICorner", MenuBtn).CornerRadius = UDim.new(0, 12)
 
 local Border = Instance.new("Frame", CrystalGui)
 Border.Size = UDim2.new(0, 0, 0, 0)
+Border.Position = UDim2.new(0.05, 0, 0.15, 62)
 Border.Visible = false
 Border.BackgroundColor3 = Theme.White
 Border.ClipsDescendants = true
@@ -53,28 +54,30 @@ Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 local GlobalGrad = Instance.new("UIGradient", Border)
 GlobalGrad.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Theme.Main), ColorSequenceKeypoint.new(0.5, Theme.White), ColorSequenceKeypoint.new(1, Theme.Main)})
 
+-- [ وظيفة إنشاء الأزرار بنفس الحواف والخطوط ]
 local function CreateBtn(key, y, label)
     local B = Instance.new("TextButton", Main)
     B.Size = UDim2.new(0, 180, 0, 38)
     B.Position = UDim2.new(0.5, -90, 0, y)
     B.BackgroundColor3 = Theme.Off
-    B.Text = label or "" -- إذا لم يوجد اسم يظل فارغاً
+    B.Text = label or ""
     B.TextColor3 = Theme.White
     B.Font = Enum.Font.GothamBold
     B.TextSize = 13
     Instance.new("UICorner", B).CornerRadius = UDim.new(0, 8)
+    
     B.MouseButton1Click:Connect(function()
         Toggles[key] = not Toggles[key]
         TweenService:Create(B, TweenInfo.new(0.3), {BackgroundColor3 = Toggles[key] and Theme.On or Theme.Off}):Play()
     end)
 end
 
--- الأزرار الثلاثة بالترتيب المطلوب
+-- الأزرار بالترتيب والأسماء المطلوبة بالملّي
 CreateBtn("AutoPop", 45, "Auto Pop-B")
 CreateBtn("AutoFour", 90, "Auto 4-Four")
-CreateBtn("ExtraBtn", 135, "") -- الزر الثالث بدون اسم
+CreateBtn("Extra", 135, "") -- الزر الثالث بدون اسم
 
--- [ السلايدر ]
+-- [ السلايدر بنفس الشكل ]
 local SliderContainer = Instance.new("Frame", Main)
 SliderContainer.Size = UDim2.new(0, 140, 0, 4)
 SliderContainer.Position = UDim2.new(0.5, -70, 0, 195)
@@ -86,16 +89,17 @@ SliderFill.Size = UDim2.new(0.9, 0, 1, 0)
 SliderFill.BackgroundColor3 = Theme.White
 Instance.new("UICorner", SliderFill)
 
--- [ منطق الفتح والأنيميشن ]
-local UI_Open = false
+-- [ منطق الفتح والإغلاق وإصلاح الظهور ]
 MenuBtn.MouseButton1Click:Connect(function()
     UI_Open = not UI_Open
     if UI_Open then
         Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
         Border.Visible = true
-        Border:TweenSize(UDim2.new(0, 210, 0, 230), "Out", "Quint", 0.4, true)
+        Border:TweenSize(UDim2.new(0, 210, 0, 235), "Out", "Quint", 0.4, true)
     else
-        Border:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.3, true, function() Border.Visible = false end)
+        Border:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.3, true, function() 
+            if not UI_Open then Border.Visible = false end 
+        end)
     end
 end)
 
@@ -104,9 +108,8 @@ RunService.RenderStepped:Connect(function(dt)
 end)
 
 -----------------------------------------------------------
--- المحرك العبقري (Connect Four AI + Popcorn Perfect)
+-- محرك الفوز الحتمي (Connect Four AI + Popcorn Perfect)
 -----------------------------------------------------------
-
 local function GetBestMove(grid, myIndex)
     local opp = (myIndex == 1) and 2 or 1
     local g = {}
@@ -151,7 +154,7 @@ task.spawn(function()
                 local pub, priv = Active.session.public, Active.session.private
                 if pub and pub.phase == "Playing" and pub.currentTurn == priv.seatIndex then
                     local m = GetBestMove(pub.grid, priv.seatIndex)
-                    if m then task.wait(0.5) GameRemote:FireServer("DropChip", m) task.wait(1.5) end
+                    if m then task.wait(0.4) GameRemote:FireServer("DropChip", m) task.wait(1.5) end
                 end
             end
         end
