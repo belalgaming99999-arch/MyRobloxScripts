@@ -101,7 +101,7 @@ local function CreateBtn(txt, key, y)
     end)
 end
 
-CreateBtn("Pop-B", "AutoPop", 55)
+CreateBtn("Auto Pop-B", "AutoPop", 55)
 CreateBtn("Auto 4-Row", "AutoFour", 97)
 CreateBtn("Feature 3", "Feature3", 139)
 
@@ -141,7 +141,7 @@ KnobGrad.Parent = Knob
 local function UpdateSlider(input)
     local xPos = input.Position.X - SliderBg.AbsolutePosition.X
     local rawPos = math.clamp(xPos / SliderBg.AbsoluteSize.X, 0, 1)
-    Accuracy = math.floor(rawPos * 10) -- يسمح بالوصول لـ 0
+    Accuracy = math.floor(rawPos * 10)
     SliderLabel.Text = "Accuracy: " .. Accuracy
     SliderFill.Size = UDim2.new(Accuracy / 10, 0, 1, 0)
 end
@@ -165,37 +165,56 @@ UserInputService.InputEnded:Connect(function(i)
     end 
 end)
 
-local dStart, sPos, isDragged
-MenuBtn.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-        Dragging, isDragged, dStart, sPos = true, false, i.Position, MenuBtn.Position
+-- نظام سحب فوري بدون تأخير
+local dragInput, dragStart, startPos
+local function update(input)
+    local delta = input.Position - dragStart
+    MenuBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    -- تحديث مكان القائمة فوراً مع الزرار
+    if Border.Visible then
+        Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
+    end
+end
+
+MenuBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        Dragging = true
+        dragStart = input.Position
+        startPos = MenuBtn.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                Dragging = false
+            end
+        end)
     end
 end)
 
-UserInputService.InputChanged:Connect(function(i)
-    if Dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-        local delta = i.Position - dStart
-        if delta.Magnitude > 3 then isDragged = true end
-        MenuBtn.Position = UDim2.new(sPos.X.Scale, sPos.X.Offset + delta.X, sPos.Y.Scale, sPos.Y.Offset + delta.Y)
+MenuBtn.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
     end
 end)
 
-UserInputService.InputEnded:Connect(function() Dragging = false end)
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and Dragging then
+        update(input)
+    end
+end)
 
 MenuBtn.MouseButton1Click:Connect(function()
-    if not isDragged then
-        UI_Open = not UI_Open
-        if UI_Open then
-            Border.Visible = true
-            Border:TweenSize(UDim2.new(0, 204, 0, 235), "Out", "Quint", 0.4, true)
-        else
-            Border:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.3, true, function() Border.Visible = false end)
-        end
+    UI_Open = not UI_Open
+    if UI_Open then
+        Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
+        Border.Visible = true
+        Border:TweenSize(UDim2.new(0, 204, 0, 235), "Out", "Quint", 0.4, true)
+    else
+        Border:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.3, true, function() Border.Visible = false end)
     end
 end)
 
 RunService.RenderStepped:Connect(function(dt)
-    Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
+    -- تحديث التدوير فقط في الرندر
     local rot = (GlobalGrad.Rotation + 150 * dt) % 360
     GlobalGrad.Rotation = rot
     TitleGrad.Rotation = rot
@@ -251,4 +270,3 @@ task.spawn(function()
         RunService.Heartbeat:Wait()
     end
 end)
-
