@@ -27,10 +27,10 @@ local Toggles = {AutoPop = false, AutoFour = false, Feature3 = false}
 local Accuracy = 7 
 local UI_Open, Dragging = false, false
 
--- الزرار العائم
+-- الزرار العائم (تم رفعه للأعلى قليلاً 0.15 بدل 0.25)
 local MenuBtn = Instance.new("TextButton", CrystalGui)
 MenuBtn.Size = UDim2.new(0, 52, 0, 52)
-MenuBtn.Position = UDim2.new(0.05, 0, 0.25, 0)
+MenuBtn.Position = UDim2.new(0.05, 0, 0.15, 0)
 MenuBtn.BackgroundColor3 = Theme.Main
 MenuBtn.Text = ""
 Instance.new("UICorner", MenuBtn).CornerRadius = UDim.new(0, 10)
@@ -45,7 +45,7 @@ end
 
 -- القائمة الرئيسية
 local Border = Instance.new("Frame", CrystalGui)
-Border.Size = UDim2.new(0, 0, 0, 0) -- سيبدأ من الصفر للأنيميشن
+Border.Size = UDim2.new(0, 0, 0, 0)
 Border.Visible = false
 Border.BackgroundColor3 = Theme.White
 Border.ClipsDescendants = true
@@ -77,17 +77,17 @@ local TitleGrad = GlobalGrad:Clone()
 TitleGrad.Parent = Title
 
 local UnderLine = Instance.new("Frame", Main)
-UnderLine.Size = UDim2.new(0, 180, 0, 4) -- مقاس موحد مع الأزرار
-UnderLine.Position = UDim2.new(0.5, -90, 0, 42)
+UnderLine.Size = UDim2.new(0, 150, 0, 4) -- تم تصغير العرض لـ 150
+UnderLine.Position = UDim2.new(0.5, -75, 0, 42)
 UnderLine.BackgroundColor3 = Theme.White
 Instance.new("UICorner", UnderLine).CornerRadius = UDim.new(1, 0)
 local LineGrad = GlobalGrad:Clone()
 LineGrad.Parent = UnderLine
 
--- وظيفة إنشاء الأزرار بمقاس موحد
+-- وظيفة إنشاء الأزرار
 local function CreateBtn(txt, key, y)
     local B = Instance.new("TextButton", Main)
-    B.Size = UDim2.new(0, 180, 0, 36) -- مقاس موحد 180x36
+    B.Size = UDim2.new(0, 180, 0, 36)
     B.Position = UDim2.new(0.5, -90, 0, y)
     B.BackgroundColor3 = Theme.Off
     B.Text = txt .. " [Disable]"
@@ -108,10 +108,10 @@ CreateBtn("Auto Pop-B", "AutoPop", 55)
 CreateBtn("Auto 4-Row", "AutoFour", 97)
 CreateBtn("Feature 3", "Feature3", 139)
 
--- حاوية السلايدر (مقاس موحد مع الأزرار)
+-- حاوية السلايدر (تم تصغير العرض لـ 150)
 local SliderContainer = Instance.new("Frame", Main)
-SliderContainer.Size = UDim2.new(0, 180, 0, 45)
-SliderContainer.Position = UDim2.new(0.5, -90, 0, 180)
+SliderContainer.Size = UDim2.new(0, 150, 0, 45)
+SliderContainer.Position = UDim2.new(0.5, -75, 0, 180)
 SliderContainer.BackgroundTransparency = 1
 
 local SliderLabel = Instance.new("TextLabel", SliderContainer)
@@ -126,7 +126,7 @@ local SliderGrad = GlobalGrad:Clone()
 SliderGrad.Parent = SliderLabel
 
 local SliderBg = Instance.new("Frame", SliderContainer)
-SliderBg.Size = UDim2.new(1, 0, 0, 6) -- العرض كامل الـ 180
+SliderBg.Size = UDim2.new(1, 0, 0, 6)
 SliderBg.Position = UDim2.new(0, 0, 0, 28)
 SliderBg.BackgroundColor3 = Theme.Slider
 Instance.new("UICorner", SliderBg).CornerRadius = UDim.new(1, 0)
@@ -158,22 +158,16 @@ end
 
 local Sliding = false
 SliderBg.InputBegan:Connect(function(i) 
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then 
-        Sliding = true; UpdateSlider(i) 
-    end 
+    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Sliding = true; UpdateSlider(i) end 
 end)
 UserInputService.InputChanged:Connect(function(i) 
-    if Sliding and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then 
-        UpdateSlider(i) 
-    end 
+    if Sliding and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then UpdateSlider(i) end 
 end)
 UserInputService.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then 
-        Sliding = false 
-    end 
+    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Sliding = false end 
 end)
 
--- نظام السحب الفوري (تحت صبعك بالظبط)
+-- نظام السحب الفوري
 local dragStart, startPos
 local function update(input)
     local delta = input.Position - dragStart
@@ -190,17 +184,11 @@ MenuBtn.InputBegan:Connect(function(input)
         startPos = MenuBtn.Position
     end
 end)
-
 UserInputService.InputChanged:Connect(function(input)
-    if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        update(input)
-    end
+    if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then update(input) end
 end)
-
 UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        Dragging = false
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then Dragging = false end
 end)
 
 -- فتح القائمة
@@ -215,7 +203,7 @@ MenuBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- تحديث الدوران (الريندر)
+-- تحديث الدوران
 RunService.RenderStepped:Connect(function(dt)
     local rot = (GlobalGrad.Rotation + 150 * dt) % 360
     GlobalGrad.Rotation = rot
@@ -226,7 +214,7 @@ RunService.RenderStepped:Connect(function(dt)
     KnobGrad.Rotation = rot
 end)
 
--- تشغيل الـ Remotes (نفس المنطق القوي)
+-- منطق الفوز التلقائي
 task.spawn(function()
     local Remote = ReplicatedStorage:FindFirstChild("MinigameGameAction", true)
     local ClientGlobals = require(ReplicatedStorage:WaitForChild("Client"):WaitForChild("Modules"):WaitForChild("ClientGlobals"))
@@ -240,15 +228,12 @@ task.spawn(function()
                         local target = obj:GetAttribute("TargetScale")
                         if target then
                             local threshold = 0.9 + (Accuracy * 0.008)
-                            if obj.Size.X >= (target * threshold) then
-                                task.defer(function() Remote:FireServer("AttemptPop", workspace:GetServerTimeNow()) end)
-                            end
+                            if obj.Size.X >= (target * threshold) then task.defer(function() Remote:FireServer("AttemptPop", workspace:GetServerTimeNow()) end) end
                         end
                     end
                 end
             end
         end
-
         if Toggles.AutoFour and Remote then
             local activeGame = ClientGlobals.ActiveMinigame
             if activeGame and activeGame.session and activeGame.session.public then
@@ -257,15 +242,10 @@ task.spawn(function()
                 local currentTurn = session.public.currentTurn
                 local phase = session.public.phase
                 local grid = session.public.grid
-
                 if phase == "Playing" and currentTurn == myIndex then
                     for col = 1, 7 do
                         local columnData = grid and grid[tostring(col)] or {}
-                        if #columnData < 6 then
-                            task.wait(0.5)
-                            Remote:FireServer("DropChip", col)
-                            break
-                        end
+                        if #columnData < 6 then task.wait(0.5) Remote:FireServer("DropChip", col) break end
                     end
                 end
             end
