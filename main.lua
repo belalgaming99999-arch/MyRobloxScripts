@@ -103,17 +103,17 @@ local function CreateBtn(key, y, label)
     end)
 end
 
-CreateBtn("AutoPop", 57, "Auto Pop-B")
-CreateBtn("AutoFour", 103, "Auto 4-Four")
-CreateBtn("Extra", 149, "Extra Feature")
+CreateBtn("AutoPop", 52, "Auto Pop-B")
+CreateBtn("AutoFour", 98, "Auto 4-Four")
+CreateBtn("Extra", 144, "Extra Feature")
 
 local SliderContainer = Instance.new("Frame", Main)
 SliderContainer.Size = UDim2.new(0, 120, 0, 40)
-SliderContainer.Position = UDim2.new(0.5, -60, 0, 195)
+SliderContainer.Position = UDim2.new(0.5, -60, 0, 194)
 SliderContainer.BackgroundTransparency = 1
 
 local SliderLabel = Instance.new("TextLabel", SliderContainer)
-SliderLabel.Size = UDim2.new(1, 0, 0, 25)
+SliderLabel.Size = UDim2.new(1, 0, 0, 20)
 SliderLabel.Position = UDim2.new(0, 0, 0, 0)
 SliderLabel.BackgroundTransparency = 1
 SliderLabel.Text = "Accessory: " .. AccuracyVal
@@ -125,7 +125,7 @@ LabelGrad.Parent = SliderLabel
 
 local SliderBg = Instance.new("Frame", SliderContainer)
 SliderBg.Size = UDim2.new(1, 0, 0, 4)
-SliderBg.Position = UDim2.new(0, 0, 0, 28)
+SliderBg.Position = UDim2.new(0, 0, 0, 25)
 SliderBg.BackgroundColor3 = Theme.Slider
 Instance.new("UICorner", SliderBg).CornerRadius = UDim.new(1, 0)
 
@@ -164,10 +164,10 @@ UserInputService.InputEnded:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Sliding = false end 
 end)
 
-local dragStart, startPos, isDragged
+local dragStart, startPos, isDragged, goalPos
 MenuBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        Dragging = true; isDragged = false; dragStart = input.Position; startPos = MenuBtn.Position
+        Dragging = true; isDragged = false; dragStart = input.Position; startPos = MenuBtn.Position; goalPos = MenuBtn.Position
     end
 end)
 
@@ -175,10 +175,7 @@ UserInputService.InputChanged:Connect(function(input)
     if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
         if delta.Magnitude > 2 then isDragged = true end
-        MenuBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        if Border.Visible then
-            Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
-        end
+        goalPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 end)
 
@@ -186,22 +183,27 @@ UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then Dragging = false end
 end)
 
+RunService.RenderStepped:Connect(function(dt)
+    if goalPos then
+        MenuBtn.Position = MenuBtn.Position:Lerp(goalPos, 0.25)
+        if Border.Visible then
+            Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
+        end
+    end
+    local rot = (GlobalGrad.Rotation + 150 * dt) % 360
+    GlobalGrad.Rotation = rot; TitleGrad.Rotation = rot; LineGrad.Rotation = rot; LabelGrad.Rotation = rot; FillGrad.Rotation = rot; KnobGrad.Rotation = rot
+end)
+
 MenuBtn.MouseButton1Click:Connect(function()
     if not isDragged then
         UI_Open = not UI_Open
         if UI_Open then
-            Border.Position = UDim2.new(MenuBtn.Position.X.Scale, MenuBtn.Position.X.Offset, MenuBtn.Position.Y.Scale, MenuBtn.Position.Y.Offset + 62)
             Border.Visible = true
             Border:TweenSize(UDim2.new(0, 210, 0, 250), "Out", "Quint", 0.4, true)
         else
             Border:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.3, true, function() Border.Visible = false end)
         end
     end
-end)
-
-RunService.RenderStepped:Connect(function(dt)
-    local rot = (GlobalGrad.Rotation + 150 * dt) % 360
-    GlobalGrad.Rotation = rot; TitleGrad.Rotation = rot; LineGrad.Rotation = rot; LabelGrad.Rotation = rot; FillGrad.Rotation = rot; KnobGrad.Rotation = rot
 end)
 
 local function GetBestMove(grid, myIndex)
