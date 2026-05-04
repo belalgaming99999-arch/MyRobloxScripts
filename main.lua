@@ -1,135 +1,114 @@
--- [[ GEMINI ELITE - REAL TIME TOGGLE ]] --
+-- [[ Crystal Hub - Four in a Row MASTER AI ]] --
+-- مبرمج بناءً على هيكل اللعبة الأصلي لضمان التوافق التام
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 
--- تنظيف أي نسخ قديمة
-if CoreGui:FindFirstChild("GeminiPro") then CoreGui:FindFirstChild("GeminiPro"):Destroy() end
+-- استخراج المتغيرات بنفس أسماء ملف اللعبة الأصلي
+local r_ClientGlobals = require(ReplicatedStorage.Client.Modules.ClientGlobals)
+local r_Remotes = require(ReplicatedStorage.Shared.Remotes)
+local l_ActiveMinigame = r_ClientGlobals.ActiveMinigame
+local l_MinigameGameAction = r_Remotes.MinigameGameAction
 
+-- [ إعداد الواجهة ] --
+if CoreGui:FindFirstChild("PS99_AI") then CoreGui:FindFirstChild("PS99_AI"):Destroy() end
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "GeminiPro"
+ScreenGui.Name = "PS99_AI"
 
--- تصميم الواجهة الاحترافية
-local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 200, 0, 100)
-MainFrame.Position = UDim2.new(0.5, -100, 0.1, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-Instance.new("UICorner", MainFrame)
+local Main = Instance.new("Frame", ScreenGui)
+Main.Size = UDim2.new(0, 180, 0, 80)
+Main.Position = UDim2.new(0.5, -90, 0.2, 0)
+Main.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+Instance.new("UICorner", Main)
 
-local Stroke = Instance.new("UIStroke", MainFrame)
-Stroke.Color = Color3.fromRGB(0, 170, 255)
-Stroke.Thickness = 2
+local Btn = Instance.new("TextButton", Main)
+Btn.Size = UDim2.new(0, 150, 0, 40)
+Btn.Position = UDim2.new(0.5, -75, 0.5, -20)
+Btn.Text = "AUTO PLAY: OFF"
+Btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+Btn.TextColor3 = Color3.new(1, 1, 1)
+Btn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", Btn)
 
--- زر الإغلاق النهائي (X)
-local CloseBtn = Instance.new("TextButton", MainFrame)
-CloseBtn.Size = UDim2.new(0, 24, 0, 24)
-CloseBtn.Position = UDim2.new(1, -28, 0, 4)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
-CloseBtn.Text = "X"
-CloseBtn.TextColor3 = Color3.new(1, 1, 1)
-CloseBtn.Font = Enum.Font.GothamBold
-Instance.new("UICorner", CloseBtn)
-
--- زر التشغيل/الإيقاف المباشر
-local ToggleBtn = Instance.new("TextButton", MainFrame)
-ToggleBtn.Size = UDim2.new(0, 170, 0, 45)
-ToggleBtn.Position = UDim2.new(0.5, -85, 0, 40)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-ToggleBtn.Text = "AUTO PLAY: OFF"
-ToggleBtn.TextColor3 = Color3.new(1, 1, 1)
-ToggleBtn.Font = Enum.Font.GothamBold
-ToggleBtn.TextSize = 13
-Instance.new("UICorner", ToggleBtn)
-
--- متغيرات التحكم
 local IsActive = false
-local ScriptRunning = true
-local lastTurnId = -1
+Btn.MouseButton1Click:Connect(function()
+    IsActive = not IsActive
+    Btn.Text = IsActive and "AI: ACTIVE ✅" or "AI: OFF ❌"
+    Btn.BackgroundColor3 = IsActive and Color3.fromRGB(0, 150, 80) or Color3.fromRGB(40, 40, 45)
+end)
 
--- [ محرك الذكاء الاصطناعي الخبير ]
-local function AnalyzeBoard(session)
-    local grid = session.public.grid
-    local myIdx = session.private.seatIndex
+-- [ محرك الذكاء الاصطناعي ] --
+local function GetBestMove(grid, myIdx)
     local enemyIdx = (myIdx == 1) and 2 or 1
     
-    local function checkWin(c, r, p)
+    local function checkMove(c, p)
+        local col = grid[tostring(c)] or {}
+        if #col >= 6 then return false end
+        local r = #col + 1
+        
+        -- منطق فحص الـ 4 المتصلة (أفقي، رأسي، قطري)
         local dirs = {{1,0}, {0,1}, {1,1}, {1,-1}}
         for _, d in pairs(dirs) do
             local count = 1
-            for i=1,3 do
+            for i=1, 3 do
                 local nr, nc = r+(d[2]*i), c+(d[1]*i)
-                if grid[tostring(nc)] and grid[tostring(nc)][nr] == p then count = count+1 else break end
+                local targetCol = grid[tostring(nc)]
+                if targetCol and targetCol[nr] == p then count = count + 1 else break end
             end
-            for i=1,3 do
+            for i=1, 3 do
                 local nr, nc = r-(d[2]*i), c-(d[1]*i)
-                if grid[tostring(nc)] and grid[tostring(nc)][nr] == p then count = count+1 else break end
+                local targetCol = grid[tostring(nc)]
+                if targetCol and targetCol[nr] == p then count = count + 1 else break end
             end
             if count >= 4 then return true end
         end
         return false
     end
 
-    local defense, setup = nil, nil
-    for c = 1, 7 do
-        local col = grid[tostring(c)]
-        if #col < 6 then
-            local r = #col + 1
-            if checkWin(c, r, myIdx) then return c end -- أولوية الفوز
-            if not defense and checkWin(c, r, enemyIdx) then defense = c end -- أولوية المنع
-            if not setup and checkWin(c, r, myIdx) then setup = c end
-        end
+    -- 1. ابحث عن حركة فوز لي
+    for c = 1, 7 do if checkMove(c, myIdx) then return c end end
+    -- 2. امنع فوز الخصم
+    for c = 1, 7 do if checkMove(c, enemyIdx) then return c end end
+    -- 3. حركات استراتيجية (الوسط أفضل)
+    local strategy = {4, 3, 5, 2, 6, 1, 7}
+    for _, c in ipairs(strategy) do
+        local col = grid[tostring(c)] or {}
+        if #col < 6 then return c end
     end
-    return defense or setup or 4
 end
 
--- التحكم بالزر
-ToggleBtn.MouseButton1Click:Connect(function()
-    IsActive = not IsActive
-    ToggleBtn.Text = IsActive and "AUTO PLAY: ON ✅" or "AUTO PLAY: OFF ❌"
-    ToggleBtn.BackgroundColor3 = IsActive and Color3.fromRGB(0, 180, 100) or Color3.fromRGB(40, 40, 50)
-    print("AI State: " .. (IsActive and "Active" or "Paused"))
-end)
+-- [ التشغيل التلقائي ] --
+local lastTurnProcessed = -1
 
--- الإغلاق النهائي
-CloseBtn.MouseButton1Click:Connect(function()
-    ScriptRunning = false
-    ScreenGui:Destroy()
-end)
-
--- حلقة المراقبة والتشغيل (متوافقة مع Delta)
-task.spawn(function()
-    while ScriptRunning do
-        if IsActive then
-            pcall(function()
-                local Globals = require(ReplicatedStorage:FindFirstChild("ClientGlobals", true))
-                local s = Globals.ActiveMinigame and Globals.ActiveMinigame.session
+RunService.Heartbeat:Connect(function()
+    if not IsActive then return end
+    
+    pcall(function()
+        local session = l_ActiveMinigame.session
+        if session and session.public and session.public.phase == "Playing" then
+            local myIdx = session.private.seatIndex
+            local currentTurn = session.public.currentTurn
+            local grid = session.public.grid
+            
+            -- التأكد أن الدور دوري
+            if currentTurn == myIdx then
+                -- حساب إجمالي الحركات لمعرفة هل تغير الدور أم لا
+                local totalMoves = 0
+                for _, col in pairs(grid) do totalMoves = totalMoves + #col end
                 
-                if s and s.public and s.public.phase == "Playing" then
-                    if s.public.currentTurn == s.private.seatIndex then
-                        -- حساب إجمالي الحركات للتأكد من الدور الجديد
-                        local currentMoves = 0
-                        for _, col in pairs(s.public.grid) do currentMoves = currentMoves + #col end
-                        
-                        if currentMoves ~= lastTurnId then
-                            local move = AnalyzeBoard(s)
-                            local remote = ReplicatedStorage:FindFirstChild("CombineMinigameAction", true)
-                            
-                            if move and remote then
-                                task.wait(0.25) -- وقت تفكير سريع
-                                remote:FireServer("DropChip", move)
-                                lastTurnId = currentMoves
-                            end
-                        end
+                if totalMoves ~= lastTurnProcessed then
+                    local move = GetBestMove(grid, myIdx)
+                    if move then
+                        task.wait(0.5) -- تأخير بسيط للواقعية
+                        l_MinigameGameAction:FireServer("DropChip", move)
+                        lastTurnProcessed = totalMoves
                     end
-                else
-                    lastTurnId = -1
                 end
-            end)
+            end
+        else
+            lastTurnProcessed = -1
         end
-        task.wait(0.3)
-    end
+    end)
 end)
+
